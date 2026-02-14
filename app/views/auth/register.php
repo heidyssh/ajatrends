@@ -17,7 +17,7 @@ $ok  = $viewData['success'] ?? '';
         <?php if ($err): ?><div class="alert alert-danger"><?= htmlspecialchars($err) ?></div><?php endif; ?>
         <?php if ($ok): ?><div class="alert alert-success"><?= htmlspecialchars($ok) ?></div><?php endif; ?>
 
-        <form method="post" action="index.php?page=register">
+        <form method="post" action="/ajatrends/public/index.php?page=register">
           <div class="mb-3">
             <label class="form-label">Nombre</label>
             <input name="nombre" class="form-control" placeholder="Dueña" required>
@@ -36,7 +36,7 @@ $ok  = $viewData['success'] ?? '';
           </div>
           <button class="btn btn-brand w-100 text-white">Crear cuenta ✨</button>
           <div class="text-center mt-3">
-            <a class="text-decoration-none" href="index.php?page=login">Volver a login</a>
+            <a class="text-decoration-none" href="/ajatrends/public/index.php?page=login">Volver a login</a>
           </div>
         </form>
       </div>

@@ -14,7 +14,7 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 <body>
 <nav class="navbar navbar-expand-lg border-bottom">
   <div class="container py-2">
-    <a class="navbar-brand fw-bold" href="index.php?page=dashboard">
+    <a class="navbar-brand fw-bold" href="/ajatrends/public/index.php?page=dashboard">
       <span class="brand-dot"></span>AJA TRENDS
       <span class="text-muted fw-semibold ms-1" style="font-size:.9rem;">Admin</span>
     </a>
@@ -22,7 +22,7 @@ if (session_status() === PHP_SESSION_NONE) session_start();
     <div class="ms-auto d-flex align-items-center gap-2">
       <?php if (isset($_SESSION['user'])): ?>
         <span class="text-muted small me-2">✨ <?= htmlspecialchars($_SESSION['user']['nombre']) ?></span>
-        <a class="btn btn-outline-dark btn-sm rounded-pill px-3" href="index.php?page=logout">Salir</a>
+        <a class="btn btn-outline-dark btn-sm rounded-pill px-3" href="/ajatrends/public/index.php?page=logout">Salir</a>
       <?php endif; ?>
     </div>
   </div>

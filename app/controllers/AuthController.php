@@ -25,8 +25,8 @@ final class AuthController {
       'email' => $user['email']
     ];
 
-    header('Location: /index.php?page=dashboard');
-    exit;
+    header('Location: /ajatrends/public/index.php?page=dashboard');
+      exit;
   }
 
   public static function register(array $post): array {
@@ -55,7 +55,7 @@ final class AuthController {
   public static function logout(): void {
     start_session();
     session_destroy();
-    header('Location: /index.php?page=login');
-    exit;
+    header('Location: /ajatrends/public/index.php?page=login');
+      exit;
   }
 }

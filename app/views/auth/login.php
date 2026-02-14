@@ -49,7 +49,7 @@
           <div class="alert alert-danger"><?= htmlspecialchars($err) ?></div>
         <?php endif; ?>
 
-        <form method="post" action="index.php?page=login" class="mt-2">
+        <form method="post" action="/ajatrends/public/index.php?page=login" class="mt-2">
           <div class="mb-3">
             <label class="form-label">Correo</label>
             <input type="email" name="email" class="form-control" placeholder="admin@ajatrends.com" required>
@@ -63,7 +63,7 @@
           <button class="btn btn-brand w-100 text-white">Entrar ✨</button>
 
           <div class="text-center mt-3">
-            <a class="link-soft" href="index.php?page=register">Crear cuenta (solo dueña)</a>
+            <a class="link-soft" href="/ajatrends/public/index.php?page=register">Crear cuenta (solo dueña)</a>
           </div>
         </form>
       </div>
