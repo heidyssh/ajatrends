@@ -14,15 +14,22 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 <body>
 <nav class="navbar navbar-expand-lg border-bottom">
   <div class="container py-2">
-    <a class="navbar-brand fw-bold" href="/ajatrends/public/index.php?page=dashboard">
-      <span class="brand-dot"></span>AJA TRENDS
-      <span class="text-muted fw-semibold ms-1" style="font-size:.9rem;">Admin</span>
-    </a>
+  <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="index.php?page=dashboard">
+  <img src="assets/img/logo.jpeg" alt="AJA TRENDS" style="width:38px;height:38px;border-radius:12px;object-fit:cover;border:1px solid rgba(0,0,0,.08);">
+  <div class="lh-1">
+    <div class="d-flex align-items-center gap-2">
+      <span>AJA TRENDS</span>
+      <span class="text-muted fw-semibold" style="font-size:.9rem;">Admin</span>
+    </div>
+    <small class="text-muted" style="font-size:.78rem;">Inventario • Ventas • Reportes</small>
+  </div>
+</a>
 
     <div class="ms-auto d-flex align-items-center gap-2">
       <?php if (isset($_SESSION['user'])): ?>
         <span class="text-muted small me-2">✨ <?= htmlspecialchars($_SESSION['user']['nombre']) ?></span>
-        <a class="btn btn-outline-dark btn-sm rounded-pill px-3" href="/ajatrends/public/index.php?page=logout">Salir</a>
+        <a class="btn btn-outline-dark btn-sm rounded-pill px-3" href="index.php?page=logout">Salir</a>
+
       <?php endif; ?>
     </div>
   </div>
