@@ -407,3 +407,52 @@ small{ color: var(--muted); }
   font-weight: 800;
   font-size: .85rem;
 }
+.topbar .right .dropdown { display:flex; align-items:center; }
+
+.user-dd{
+  display:flex !important;
+  align-items:center !important;
+  gap:10px !important;
+
+  padding: 6px 10px !important;
+  border-radius: 999px !important;
+
+  border: 1px solid rgba(12,20,32,.10) !important;
+  background: rgba(255,255,255,.70) !important;
+
+  height: 44px !important;              /* <- tamaño fijo */
+  max-width: 240px !important;          /* <- evita que crezca */
+  white-space: nowrap !important;
+}
+
+.user-dd-avatar{
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 12px !important;
+  object-fit: cover !important;
+  display:block !important;
+}
+
+.user-dd .text-start{
+  line-height: 1.05 !important;
+}
+
+.user-dd small{
+  display:block !important;
+  margin-top: 2px !important;
+}
+
+/* Quitar caret enorme del dropdown */
+.user-dd.dropdown-toggle::after{
+  margin-left: 8px !important;
+  transform: translateY(1px) !important;
+  opacity: .7;
+}
+
+/* Dropdown menu más fino */
+.user-dd-menu{
+  min-width: 240px !important;
+  border-radius: 18px !important;
+  border:1px solid rgba(12,20,32,.08) !important;
+  overflow:hidden;
+}

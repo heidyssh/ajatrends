@@ -16,4 +16,14 @@ final class User {
     $stmt->execute([$idRol, $nombre, $email, $passHash]);
     return (int)db()->lastInsertId();
   }
+  public static function findById(int $id): ?array {
+    $st = db()->prepare("SELECT * FROM usuarios WHERE id_usuario=?");
+    $st->execute([$id]);
+    return $st->fetch() ?: null;
+}
+
+public static function updatePassword(int $id, string $hash): void {
+    $st = db()->prepare("UPDATE usuarios SET pass_hash=? WHERE id_usuario=?");
+    $st->execute([$hash, $id]);
+}
 }

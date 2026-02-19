@@ -99,27 +99,5 @@ $nombre = $_SESSION['user']['nombre'] ?? 'Admin';
           </div>
         </div>
       </div>
-
-      <div class="col-lg-4">
-        <div class="cardx">
-          <div class="hd">
-            <div class="fw-bold">Perfil</div>
-            <small>Dueña / Admin</small>
-          </div>
-          <div class="bd text-center">
-            <img src="assets/img/dueña.jpeg" alt="Dueña" class="owner-big mb-3">
-            <div class="fw-bold">AJA TRENDS</div>
-            <small class="text-muted">Administración interna</small>
-
-            <div class="divider my-3"></div>
-
-            <div class="d-grid gap-2">
-              <a class="btn btn-outline-dark rounded-pill" href="index.php?page=logout">Cerrar sesión</a>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
   </div>
 </div>
