@@ -2,44 +2,62 @@
 $err = $viewData['error'] ?? '';
 $ok  = $viewData['success'] ?? '';
 ?>
-<div class="auth-wrap">
-  <div class="card auth-card">
-    <div class="row g-0">
-      <div class="col-lg-5 auth-side">
-        <span class="badge rounded-pill">Setup</span>
-        <h2 class="mt-3 fw-bold">Crear cuenta admin</h2>
-        <p class="mt-3 text-white-50">Usá esto solo para la dueña o usuarios autorizados.</p>
-      </div>
-      <div class="col-lg-7 bg-white auth-form">
-        <h3 class="fw-bold mb-1">Registro</h3>
-        <p class="text-muted mb-4">Creá tu usuario para administrar el sistema.</p>
 
-        <?php if ($err): ?><div class="alert alert-danger"><?= htmlspecialchars($err) ?></div><?php endif; ?>
-        <?php if ($ok): ?><div class="alert alert-success"><?= htmlspecialchars($ok) ?></div><?php endif; ?>
-
-        <form method="post" action="/ajatrends/public/index.php?page=register">
-          <div class="mb-3">
-            <label class="form-label">Nombre</label>
-            <input name="nombre" class="form-control" placeholder="Dueña" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Correo</label>
-            <input type="email" name="email" class="form-control" placeholder="admin@aja.com" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Contraseña</label>
-            <input type="password" name="password" class="form-control" placeholder="mínimo 8 caracteres" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Confirmar contraseña</label>
-            <input type="password" name="password2" class="form-control" required>
-          </div>
-          <button class="btn btn-brand w-100 text-white">Crear cuenta ✨</button>
-          <div class="text-center mt-3">
-            <a class="text-decoration-none" href="/ajatrends/public/index.php?page=login">Volver a login</a>
-          </div>
-        </form>
-      </div>
+<div class="auth-center">
+  <div class="auth-panel">
+    <div class="auth-head text-center">
+      <img class="auth-logo" src="assets/img/logo.jpeg" alt="Logo">
+      <h2 class="auth-title">Crear cuenta</h2>
+      <p class="auth-sub">Solo usuarios autorizados</p>
     </div>
+
+    <?php if ($err): ?><div class="alert alert-danger mb-3"><?= htmlspecialchars($err) ?></div><?php endif; ?>
+    <?php if ($ok): ?><div class="alert alert-success mb-3"><?= htmlspecialchars($ok) ?></div><?php endif; ?>
+
+    <form method="post" action="index.php?page=register" class="auth-form2">
+      <div class="field">
+        <label class="form-label">Nombre</label>
+        <div class="input-ic">
+          <i class="bi bi-person"></i>
+          <input name="nombre" class="form-control" placeholder="Nombre completo" required>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="form-label">Correo</label>
+        <div class="input-ic">
+          <i class="bi bi-envelope"></i>
+          <input type="email" name="email" class="form-control" placeholder="correo@ejemplo.com" required>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="form-label">Contraseña</label>
+        <div class="input-ic">
+          <i class="bi bi-lock"></i>
+          <input id="regPass1" type="password" name="password" class="form-control" placeholder="mínimo 8 caracteres" required>
+          <button class="pw-toggle" type="button" data-toggle-pass="#regPass1" aria-label="Mostrar contraseña">
+            <i class="bi bi-eye"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="form-label">Confirmar contraseña</label>
+        <div class="input-ic">
+          <i class="bi bi-shield-lock"></i>
+          <input id="regPass2" type="password" name="password2" class="form-control" placeholder="repetir contraseña" required>
+          <button class="pw-toggle" type="button" data-toggle-pass="#regPass2" aria-label="Mostrar contraseña">
+            <i class="bi bi-eye"></i>
+          </button>
+        </div>
+      </div>
+
+      <button class="btn btn-brand w-100 mt-2">Crear cuenta</button>
+
+      <div class="text-center mt-3">
+        <a class="link-soft" href="index.php?page=login">Volver</a>
+      </div>
+    </form>
   </div>
 </div>
