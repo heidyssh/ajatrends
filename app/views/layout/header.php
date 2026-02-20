@@ -64,10 +64,10 @@ $userName = $_SESSION['user']['nombre'] ?? 'Admin';
 
             <div class="side-sep"></div>
 
-            <a class="nav-item disabled-link" href="#">
-              <div class="ic"><i class="bi bi-bag-heart"></i></div>
-              <span class="lbl">Productos</span>
-            </a>
+            <a class="nav-item <?= $page === 'products' ? 'active' : '' ?>" href="index.php?page=products">
+                <div class="ic"><i class="bi bi-bag-heart"></i></div>
+                <span class="lbl">Productos</span>
+              </a>
             <a class="nav-item disabled-link" href="#">
               <div class="ic"><i class="bi bi-truck"></i></div>
               <span class="lbl">Compras</span>
@@ -138,15 +138,9 @@ $userName = $_SESSION['user']['nombre'] ?? 'Admin';
                     </a>
                   </li>
                   <li>
-                    <a class="dropdown-item" href="index.php?page=profile#security">
-                      <i class="bi bi-shield-lock me-2"></i> Cambiar contraseña
-                    </a>
-                  </li>
-
                   <li>
                     <hr class="dropdown-divider">
                   </li>
-
                   <li>
                     <a class="dropdown-item text-danger" href="index.php?page=logout">
                       <i class="bi bi-box-arrow-right me-2"></i> Salir

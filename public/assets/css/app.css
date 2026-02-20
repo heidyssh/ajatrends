@@ -537,3 +537,369 @@ small{ color: var(--muted); }
   opacity: 1;
   transform: scale(1);
 }
+/* ==========================
+   PRODUCTS (AdminLTE-like)
+   ========================== */
+.products-page .cardx{ overflow: visible; }
+.products-page .hd{
+  background: linear-gradient(135deg, rgba(70,129,137,.20), rgba(119,172,162,.10));
+  border-bottom: 1px solid rgba(12,20,32,.06);
+}
+.products-page .bd{ padding-top: 16px; }
+
+.products-page .chip{
+  display:inline-flex; align-items:center; gap:8px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(12,20,32,.10);
+  background: rgba(255,255,255,.65);
+  color: rgba(12,20,32,.78);
+  font-weight: 800;
+  font-size: .88rem;
+  transition: transform .14s ease, background .14s ease, box-shadow .14s ease, border .14s ease;
+  white-space: nowrap;
+}
+.products-page .chip:hover{
+  transform: translateY(-1px);
+  background: rgba(255,255,255,.82);
+  box-shadow: 0 16px 45px rgba(0,0,0,.08);
+  border-color: rgba(70,129,137,.25);
+}
+.products-page .chip.active{
+  background: linear-gradient(135deg, rgba(70,129,137,.95), rgba(119,172,162,.95));
+  color:#fff;
+  border-color: rgba(255,255,255,.20);
+  box-shadow: 0 18px 45px rgba(70,129,137,.25);
+}
+.products-page .chips{
+  display:flex; gap:10px;
+  overflow:auto;
+  padding-bottom: 8px;
+  scrollbar-width: thin;
+}
+.products-page .chips::-webkit-scrollbar{ height: 7px; }
+.products-page .chips::-webkit-scrollbar-thumb{ background: rgba(255,255,255,.25); border-radius: 99px; }
+
+.products-page .chip-muted{
+  display:inline-flex; align-items:center; gap:8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(12,20,32,.10);
+  background: rgba(255,255,255,.55);
+  color: rgba(12,20,32,.70);
+  font-weight: 800;
+  font-size: .85rem;
+}
+
+.products-page .product-card{
+  border-radius: 18px;
+  border: 1px solid rgba(12,20,32,.08);
+  background: rgba(255,255,255,.70);
+  box-shadow: 0 18px 55px rgba(0,0,0,.08);
+  overflow:hidden;
+  transform: translateY(0);
+  transition: transform .18s ease, box-shadow .18s ease, border .18s ease, background .18s ease;
+  position: relative;
+}
+.products-page .product-card:hover{
+  transform: translateY(-3px);
+  box-shadow: 0 24px 70px rgba(0,0,0,.12);
+  border-color: rgba(70,129,137,.22);
+  background: rgba(255,255,255,.82);
+}
+.products-page .product-card.off{
+  opacity: .85;
+  filter: grayscale(.12);
+}
+
+.products-page .product-card .img{
+  height: 200px;
+  background: rgba(12,20,32,.04);
+  position: relative;
+}
+.products-page .product-card .img img{
+  width:100%; height:100%;
+  object-fit: cover;
+  display:block;
+  transform: scale(1);
+  transition: transform .28s ease;
+}
+.products-page .product-card:hover .img img{ transform: scale(1.03); }
+
+.products-page .badge-cat{
+  position:absolute;
+  left: 12px; top: 12px;
+  background: rgba(255,255,255,.86);
+  border: 1px solid rgba(12,20,32,.10);
+  padding: 7px 10px;
+  border-radius: 999px;
+  font-size: .78rem;
+  font-weight: 900;
+  color: rgba(12,20,32,.78);
+  backdrop-filter: blur(10px);
+}
+.products-page .badge-off{
+  position:absolute;
+  right: 12px; top: 12px;
+  background: rgba(220,53,69,.12);
+  border: 1px solid rgba(220,53,69,.28);
+  color: rgba(220,53,69,.95);
+  padding: 7px 10px;
+  border-radius: 999px;
+  font-size: .78rem;
+  font-weight: 900;
+  backdrop-filter: blur(10px);
+}
+
+.products-page .product-card .info{
+  padding: 14px 14px 14px;
+}
+.products-page .product-card .name{
+  font-weight: 950;
+  font-size: 1.02rem;
+  line-height: 1.15;
+  color: rgba(12,20,32,.92);
+  margin-bottom: 6px;
+}
+.products-page .product-card .meta{
+  display:flex; align-items:center; gap:8px;
+  color: rgba(12,20,32,.55);
+  font-weight: 700;
+  font-size: .82rem;
+}
+.products-page .product-card .meta .dot{ opacity:.45; }
+.products-page .price-row{
+  display:flex; align-items:center;
+  gap:10px;
+  margin-top: 10px;
+}
+.products-page .price{
+  font-weight: 950;
+  font-size: 1.18rem;
+  color: rgba(3,25,38,.95);
+}
+.products-page .btn-mini{
+  border-radius: 14px;
+  border: 1px solid rgba(12,20,32,.10);
+  background: rgba(255,255,255,.75);
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.products-page .btn-mini:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 16px 40px rgba(0,0,0,.10);
+}
+
+.products-page .desc{
+  margin-top: 10px;
+  color: rgba(12,20,32,.62);
+  font-size: .90rem;
+  line-height: 1.25;
+  min-height: 2.5em;
+}
+
+.products-page .empty-state{
+  border-radius: 18px;
+  border: 1px dashed rgba(12,20,32,.18);
+  background: rgba(255,255,255,.55);
+  padding: 26px;
+  text-align: center;
+}
+.products-page .empty-state .ic{
+  width: 62px; height: 62px;
+  border-radius: 20px;
+  display:grid; place-items:center;
+  margin: 0 auto 10px;
+  background: linear-gradient(135deg, rgba(70,129,137,.18), rgba(119,172,162,.10));
+  border: 1px solid rgba(70,129,137,.22);
+  font-size: 1.4rem;
+}
+
+.products-page .fab{
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  width: 56px; height:56px;
+  border-radius: 18px;
+  border: 0;
+  background: linear-gradient(135deg, var(--c2), var(--c3));
+  color:#fff;
+  box-shadow: 0 22px 60px rgba(70,129,137,.30);
+  display:grid; place-items:center;
+  font-size: 1.2rem;
+  z-index: 1050;
+  transition: transform .14s ease, filter .14s ease;
+}
+.products-page .fab:hover{ transform: translateY(-2px); filter: brightness(1.03); }
+
+/* Modal Pro */
+.product-modal{
+  border-radius: 22px;
+  border: 1px solid rgba(255,255,255,.35);
+  background: rgba(255,255,255,.86);
+  overflow:hidden;
+}
+.product-modal .modal-header{
+  background: linear-gradient(135deg, rgba(70,129,137,.18), rgba(119,172,162,.10));
+  border-bottom: 1px solid rgba(12,20,32,.06);
+}
+.pm-price{
+  font-size: 1.65rem;
+  font-weight: 950;
+}
+.pm-pill{
+  display:inline-flex; align-items:center; gap:8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(12,20,32,.10);
+  background: rgba(255,255,255,.65);
+  font-weight: 900;
+  color: rgba(12,20,32,.72);
+}
+.pm-desc{
+  background: rgba(255,255,255,.60);
+  border: 1px solid rgba(12,20,32,.08);
+  border-radius: 16px;
+  padding: 12px;
+  color: rgba(12,20,32,.70);
+}
+.pm-img{
+  border-radius: 18px;
+  height: 360px;
+  object-fit: cover;
+  background: rgba(12,20,32,.04);
+}
+.pm-skel{
+  height: 360px;
+  border-radius: 18px;
+  background: linear-gradient(90deg,
+    rgba(12,20,32,.06),
+    rgba(12,20,32,.03),
+    rgba(12,20,32,.06));
+  background-size: 200% 100%;
+  animation: sk 1.2s infinite linear;
+}
+@keyframes sk{
+  0%{ background-position: 0% 0; }
+  100%{ background-position: 200% 0; }
+}
+
+/* Entrada suave tipo AdminLTE */
+.page-fade{
+  animation: fadeUp .22s ease both;
+}
+@keyframes fadeUp{
+  from{ opacity:0; transform: translateY(6px); }
+  to{ opacity:1; transform: translateY(0); }
+}
+.quick-link,
+.quick-link:visited,
+.quick-link:hover,
+.quick-link:active,
+.quick-link:focus{
+  text-decoration: none !important;
+  color: inherit !important;
+}
+
+/* IMPORTANTE: fuerza color en los hijos (por eso ya no sale azul) */
+.quick-link *{
+  color: inherit !important;
+}
+/* ====== PROFILE / AVATAR click fix + estilo pro ====== */
+.avatar-grid{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+  gap: 12px;
+}
+
+.avatar-item{
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(12,20,32,.10);
+  background: rgba(255,255,255,.72);
+  cursor: pointer;
+  transition: transform .14s ease, box-shadow .14s ease, border .14s ease;
+  user-select: none;
+}
+
+/* OCULTAR radio pero que siga funcionando */
+.avatar-item input{
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.avatar-item img{
+  width: 100%;
+  height: 92px;
+  object-fit: cover;
+  display: block;
+  pointer-events: none; /* ✅ clave: la imagen NO roba el click */
+}
+
+.avatar-item:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 18px 55px rgba(0,0,0,.10);
+  border-color: rgba(70,129,137,.30);
+}
+
+.avatar-item .check{
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: rgba(255,255,255,.88);
+  border: 1px solid rgba(12,20,32,.12);
+  color: rgba(12,20,32,.75);
+  opacity: 0;
+  transform: scale(.92);
+  transition: opacity .14s ease, transform .14s ease;
+  pointer-events: none; /* ✅ clave: el icono tampoco roba el click */
+}
+
+.avatar-item.active{
+  border-color: rgba(70,129,137,.45);
+  box-shadow: 0 20px 60px rgba(70,129,137,.16);
+}
+
+.avatar-item.active .check{
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ====== Mejor legibilidad: tabs y labels ====== */
+.profile-tabs .nav-link{
+  color: rgba(12,20,32,.75);
+  font-weight: 900;
+  border-radius: 999px;
+  background: rgba(255,255,255,.55);
+  border: 1px solid rgba(12,20,32,.10);
+}
+.profile-tabs .nav-link.active{
+  color: #fff;
+  background: linear-gradient(135deg, rgba(70,129,137,.95), rgba(119,172,162,.95));
+  border-color: rgba(255,255,255,.18);
+}
+.form-label{ color: rgba(12,20,32,.85); font-weight: 900; }
+/* Ojo de contraseña (sin fondo negro) */
+.pw-eye{
+  width: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  border: 1px solid rgba(12,20,32,.12);
+  background: rgba(255,255,255,.70);
+  color: rgba(12,20,32,.70);
+  transition: transform .12s ease, box-shadow .12s ease, border .12s ease, background .12s ease;
+}
+.pw-eye:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 14px 40px rgba(0,0,0,.10);
+  border-color: rgba(70,129,137,.28);
+  background: rgba(255,255,255,.85);
+}
+.pw-eye:active{ transform: translateY(0); }

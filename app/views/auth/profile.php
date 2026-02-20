@@ -125,12 +125,82 @@ $idAvatar = (int)($perfil['id_avatar'] ?? 0);
               </form>
             </div>
 
-            <!-- SEGURIDAD (placeholder pro) -->
-            <div class="tab-pane fade" id="tab-seguridad" role="tabpanel">
-              <div class="alert alert-warning mb-0">
-                <b>Seguridad</b>: aquí conectamos el cambio de contraseña (te lo dejo listo cuando me confirmés).
-              </div>
+            <!-- SEGURIDAD -->
+<div class="tab-pane fade" id="tab-seguridad" role="tabpanel">
+
+  <!-- Cambiar correo -->
+  <form method="post" action="index.php?page=profile" class="mb-3">
+    <input type="hidden" name="action" value="change_email">
+
+    <div class="cardx" style="border-radius:18px;">
+      <div class="hd">
+        <div class="fw-bold"><i class="bi bi-envelope me-1"></i> Cambiar correo</div>
+        <small>Mantené tu cuenta actualizada.</small>
+      </div>
+      <div class="bd">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Correo actual</label>
+            <input class="form-control" value="<?= htmlspecialchars($_SESSION['user']['email'] ?? '') ?>" disabled>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Nuevo correo</label>
+            <input class="form-control" type="email" name="new_email" placeholder="nuevo@correo.com" required>
+          </div>
+        </div>
+
+        <div class="mt-3">
+          <button class="btn btn-brand w-100">Guardar nuevo correo</button>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <!-- Cambiar contraseña -->
+  <form method="post" action="index.php?page=profile">
+    <input type="hidden" name="action" value="change_password">
+
+    <div class="cardx" style="border-radius:18px;">
+      <div class="hd">
+        <div class="fw-bold"><i class="bi bi-shield-lock me-1"></i> Cambiar contraseña</div>
+        <small>Ingresá una contraseña nueva.</small>
+      </div>
+      <div class="bd">
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Nueva contraseña</label>
+            <div class="input-group">
+              <input class="form-control" type="password" id="pw_new" name="new_password" minlength="6" required>
+              <button class="btn btn-outline-dark" type="button" data-toggle-pw="#pw_new" aria-label="Mostrar contraseña" >
+                <i class="bi bi-eye"></i>
+              </button>
             </div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Confirmar contraseña</label>
+            <div class="input-group">
+              <input class="form-control" type="password" id="pw_new2" name="new_password2" minlength="6" required>
+              <button class="btn btn-outline-dark" type="button" data-toggle-pw="#pw_new2" aria-label="Mostrar contraseña">
+                <i class="bi bi-eye"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-3">
+          <button class="btn btn-brand w-100">Guardar nueva contraseña</button>
+          <small class="text-muted d-block mt-2">
+            Tip: usá al menos 6 caracteres (mejor si mezclás letras y números).
+          </small>
+        </div>
+
+      </div>
+    </div>
+  </form>
+
+</div>
 
           </div>
         </div>

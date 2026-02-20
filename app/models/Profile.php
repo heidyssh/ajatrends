@@ -45,12 +45,48 @@ final class Profile
   }
 
   public static function listAvatars(): array {
+  // 1) Intentar solo activos
+  try {
     $sql = "SELECT id_avatar, codigo, archivo
             FROM avatars
             WHERE estado = 1
             ORDER BY id_avatar ASC";
-    return db()->query($sql)->fetchAll();
+    $rows = db()->query($sql)->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    if (!empty($rows)) return $rows;
+  } catch (Throwable $e) {
+    // seguimos con fallback
   }
+
+  // 2) Fallback: traer todos (por si 'estado' está en 0 o no se usa)
+  try {
+    $sql2 = "SELECT id_avatar, codigo, archivo
+             FROM avatars
+             ORDER BY id_avatar ASC";
+    $rows2 = db()->query($sql2)->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    if (!empty($rows2)) return $rows2;
+  } catch (Throwable $e) {
+    // seguimos con fallback
+  }
+
+  // 3) Último fallback: leer la carpeta de avatares del proyecto
+  $dir = __DIR__ . '/../../public/assets/img/avatars/';
+  $out = [];
+  if (is_dir($dir)) {
+    $files = scandir($dir) ?: [];
+    $id = 1;
+    foreach ($files as $f) {
+      if ($f === '.' || $f === '..') continue;
+      $ext = strtolower(pathinfo($f, PATHINFO_EXTENSION));
+      if (!in_array($ext, ['jpg','jpeg','png','webp'], true)) continue;
+      $out[] = [
+        'id_avatar' => $id++,
+        'codigo'    => pathinfo($f, PATHINFO_FILENAME),
+        'archivo'   => 'assets/img/avatars/' . $f
+      ];
+    }
+  }
+  return $out;
+}
 
   public static function updateBasic(int $idUsuario, int $idAvatar, string $telefono, string $bio): void
   {

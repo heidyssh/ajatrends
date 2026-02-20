@@ -16,3 +16,15 @@ function require_auth(): void {
     exit;
   }
 }
+function is_admin(): bool {
+  start_session();
+  $rol = $_SESSION['user']['rol'] ?? '';
+  return $rol === 'admin';
+}
+
+function require_admin(): void {
+  if (!is_admin()) {
+    header('Location: /index.php?page=dashboard');
+    exit;
+  }
+}

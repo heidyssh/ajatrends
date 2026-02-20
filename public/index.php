@@ -4,27 +4,54 @@ declare(strict_types=1);
 require_once __DIR__ . '/../app/helpers/auth.php';
 require_once __DIR__ . '/../app/controllers/AuthController.php';
 require_once __DIR__ . '/../app/controllers/ProfileController.php';
-
+require_once __DIR__ . '/../app/controllers/ProductController.php';
 start_session();
 
 $page = $_GET['page'] ?? 'login';
+$viewData = [];
 
 if ($page === 'logout') {
   AuthController::logout();
 }
-if ($page === 'profile')   $viewData = ProfileController::update($_POST, $_FILES);
-$viewData = [];
+
+/* GET: mostrar pantallas */
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+  if ($page === 'profile') {
+    $viewData = ProfileController::show();   // ✅ aquí carga avatars y perfil
+  }
+}
+
+/* POST: acciones */
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  if ($page === 'login')     $viewData = AuthController::login($_POST);
+  if ($page === 'register')  $viewData = AuthController::register($_POST);
+  if ($page === 'profile')   $viewData = ProfileController::update($_POST, $_FILES); // ✅ aquí guarda cambios
+}
+if ($page === 'logout') {
+  AuthController::logout();
+}
+
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   if ($page === 'login')   $viewData = AuthController::login($_POST);
   if ($page === 'register') $viewData = AuthController::register($_POST);
   if ($page === 'profile')   $viewData = ProfileController::update($_POST, $_FILES);
   }
-
-$allowed = ['login', 'register', 'dashboard','profile','change_password'];
+if ($page === 'products' && isset($_GET['ajax']) && $_GET['ajax'] == '1') {
+  require_auth();
+  header('Content-Type: application/json; charset=utf-8');
+  echo json_encode(ProductController::ajax($_GET));
+  exit;
+}
+$allowed = ['login', 'register', 'dashboard','profile','change_password','products'];
 if (!in_array($page, $allowed, true)) $page = 'login';
 
 if ($page === 'dashboard') require_auth();
+if ($page === 'profile') require_auth();
+if ($page === 'products') {
+  require_auth();
+  $viewData = ProductController::handle($_POST, $_FILES, $_GET);
+}
 if ($page === 'change_password') {
     $viewData = ProfileController::changePassword($_POST);
 }

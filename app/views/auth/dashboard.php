@@ -53,13 +53,15 @@ $nombre = $_SESSION['user']['nombre'] ?? 'Admin';
           <div class="bd">
             <div class="row g-3">
               <div class="col-md-6">
-                <div class="quick-card">
-                  <div class="ic"><i class="bi bi-bag-heart"></i></div>
-                  <div>
-                    <div class="fw-bold">Productos</div>
-                    <small>Catálogo · precios · variantes</small>
+                <a href="index.php?page=products" class="quick-link">
+                  <div class="quick-card">
+                    <div class="ic"><i class="bi bi-bag-heart"></i></div>
+                    <div>
+                      <div class="fw-bold">Productos</div>
+                      <small>Catálogo · precios · variantes</small>
+                    </div>
                   </div>
-                </div>
+                </a>
               </div>
 
               <div class="col-md-6">
