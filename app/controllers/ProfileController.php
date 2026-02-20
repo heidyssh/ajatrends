@@ -1,74 +1,70 @@
 <?php
 declare(strict_types=1);
-require_once __DIR__ . '/../config/database.php';
 
-final class Profile {
+require_once __DIR__ . '/../helpers/auth.php';
+require_once __DIR__ . '/../models/Profile.php';
 
-  public static function get(int $idUsuario): array {
-    $sql = "SELECT p.*, a.archivo AS avatar_archivo
-            FROM usuarios_perfil p
-            JOIN avatars a ON a.id_avatar = p.id_avatar
-            WHERE p.id_usuario = ?";
-    $st = db()->prepare($sql);
-    $st->execute([$idUsuario]);
-    $row = $st->fetch();
-    return $row ?: [
-      'id_usuario' => $idUsuario,
-      'id_avatar' => 1,
-      'foto_archivo' => '',
-      'telefono' => '',
-      'bio' => '',
-      'avatar_archivo' => 'assets/img/avatars/avatar1.jpg'
+final class ProfileController {
+
+  public static function show(): array {
+    start_session();
+    require_auth();
+     $avatars = Profile::listAvatars();
+    $id = (int)($_SESSION['user']['id'] ?? 0);
+
+    return [
+      'perfil' => Profile::get($id),
+      'avatars' => $avatars
     ];
   }
 
-  public static function listAvatars(): array {
-    $st = db()->query("SELECT id_avatar, codigo, archivo FROM avatars WHERE estado=1 ORDER BY id_avatar ASC");
-    return $st->fetchAll();
-  }
-
-  public static function updateBasic(int $idUsuario, int $idAvatar, string $telefono, string $bio): void {
-    $sql = "UPDATE usuarios_perfil
-            SET id_avatar=?, telefono=?, bio=?, actualizado_en=CURRENT_TIMESTAMP
-            WHERE id_usuario=?";
-    $st = db()->prepare($sql);
-    $st->execute([$idAvatar, $telefono, $bio, $idUsuario]);
-  }
-
-  public static function setPhoto(int $idUsuario, string $fotoArchivo): void {
-    $sql = "UPDATE usuarios_perfil
-            SET foto_archivo=?, actualizado_en=CURRENT_TIMESTAMP
-            WHERE id_usuario=?";
-    $st = db()->prepare($sql);
-    $st->execute([$fotoArchivo, $idUsuario]);
-  }
-  public static function changePassword(array $post): array {
+  public static function update(array $post, array $files): array {
     start_session();
     require_auth();
 
-    $id = (int)$_SESSION['user']['id'];
-    $actual = $post['actual'] ?? '';
-    $nueva  = $post['nueva'] ?? '';
-    $confirm = $post['confirm'] ?? '';
+    $id = (int)($_SESSION['user']['id'] ?? 0);
 
-    require_once __DIR__ . '/../models/User.php';
-    $user = User::findById($id);
+    $idAvatar = (int)($post['id_avatar'] ?? 0);
+    $telefono = trim($post['telefono'] ?? '');
+    $bio      = trim($post['bio'] ?? '');
 
-    if (!$user || !password_verify($actual, $user['pass_hash'])) {
-        return ['error' => 'Contraseña actual incorrecta.'] + self::show();
+    if ($idAvatar <= 0) {
+      $idAvatar = (int)Profile::get($id)['id_avatar'];
     }
 
-    if ($nueva !== $confirm) {
-        return ['error' => 'Las contraseñas no coinciden.'] + self::show();
+    Profile::updateBasic($id, $idAvatar, $telefono, $bio);
+
+    // Subir foto (opcional)
+    if (isset($files['foto']) && $files['foto']['error'] === UPLOAD_ERR_OK) {
+      $tmp  = $files['foto']['tmp_name'];
+      $name = $files['foto']['name'];
+
+      $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+      $allowed = ['jpg','jpeg','png','webp'];
+
+      if (!in_array($ext, $allowed, true)) {
+        return ['error' => 'Formato inválido. Usá JPG, PNG o WEBP.'] + self::show();
+      }
+
+      $dir = __DIR__ . '/../../public/uploads/avatars/';
+      if (!is_dir($dir)) mkdir($dir, 0777, true);
+
+      $fileName = 'u' . $id . '_' . time() . '.' . $ext;
+      $dest = $dir . $fileName;
+
+      if (!move_uploaded_file($tmp, $dest)) {
+        return ['error' => 'No se pudo subir la imagen.'] + self::show();
+      }
+
+      Profile::setPhoto($id, 'uploads/avatars/' . $fileName);
     }
 
-    if (strlen($nueva) < 8) {
-        return ['error' => 'Mínimo 8 caracteres.'] + self::show();
-    }
+    // Refrescar avatar en sesión para el header
+    $perfil = Profile::get($id);
+    $_SESSION['user']['avatar'] = ($perfil['foto_archivo'] !== '')
+      ? $perfil['foto_archivo']
+      : ($perfil['avatar_archivo'] ?? 'assets/img/avatars/avatar1.jpg');
 
-    $hash = password_hash($nueva, PASSWORD_BCRYPT);
-    User::updatePassword($id, $hash);
-
-    return ['success' => 'Contraseña actualizada correctamente.'] + self::show();
-}
+    return ['success' => 'Perfil actualizado ✅'] + self::show();
+  }
 }
