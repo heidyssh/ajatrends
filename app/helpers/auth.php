@@ -18,8 +18,9 @@ function require_auth(): void {
 }
 function is_admin(): bool {
   start_session();
-  $rol = $_SESSION['user']['rol'] ?? '';
-  return $rol === 'admin';
+  // En tu sesión 'rol' es id_rol (número). ADMIN normalmente = 1
+  $rol = (int)($_SESSION['user']['rol'] ?? 0);
+  return $rol === 1;
 }
 
 function require_admin(): void {
