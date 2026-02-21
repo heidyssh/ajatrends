@@ -97,12 +97,35 @@ final class Profile
     $st->execute([$idAvatar, $telefono, $bio, $idUsuario]);
   }
 
-  public static function setPhoto(int $idUsuario, string $fotoArchivo): void
-  {
-    $sql = "UPDATE usuarios_perfil
-            SET foto_archivo=?, actualizado_en=CURRENT_TIMESTAMP
-            WHERE id_usuario=?";
-    $st = db()->prepare($sql);
-    $st->execute([$fotoArchivo, $idUsuario]);
-  }
+  public static function setAvatar(int $idUsuario, int $idAvatar): void {
+  $pdo = db();
+  // importante: si selecciona avatar, quitamos foto_archivo para que se vea el avatar
+  $sql = "UPDATE usuarios_perfil
+          SET id_avatar = :a, foto_archivo = '', actualizado_en = NOW()
+          WHERE id_usuario = :u";
+  $st = $pdo->prepare($sql);
+  $st->execute([':a' => $idAvatar, ':u' => $idUsuario]);
+}
+
+public static function setPhoto(int $idUsuario, string $archivo): void {
+  $pdo = db();
+  $sql = "UPDATE usuarios_perfil
+          SET foto_archivo = :f, actualizado_en = NOW()
+          WHERE id_usuario = :u";
+  $st = $pdo->prepare($sql);
+  $st->execute([':f' => $archivo, ':u' => $idUsuario]);
+}
+
+public static function updateEmail(int $idUsuario, string $email): void {
+  $pdo = db();
+  $st = $pdo->prepare("UPDATE usuarios SET email = :e WHERE id_usuario = :u");
+  $st->execute([':e' => $email, ':u' => $idUsuario]);
+}
+
+public static function updatePasswordHash(int $idUsuario, string $hash): void {
+  $pdo = db();
+  $st = $pdo->prepare("UPDATE usuarios SET pass_hash = :h WHERE id_usuario = :u");
+  $st->execute([':h' => $hash, ':u' => $idUsuario]);
+}
+
 }
