@@ -13,7 +13,7 @@ $min = $filters['min'] ?? '';
 $max = $filters['max'] ?? '';
 $estado = $filters['estado'] ?? '';
 ?>
-
+<div class="products-page page-fade">
 <div class="cardx mb-4">
 <div class="hd d-flex align-items-start justify-content-between flex-wrap gap-3">
 <div>
@@ -367,6 +367,7 @@ data-product-id="<?= $id ?>" data-bs-toggle="modal" data-bs-target="#productModa
 <button class="btn btn-brand" type="submit"><i class="bi bi-save me-1"></i> Guardar</button>
 </div>
 </form>
+</div>
 </div>
 </div>
 </div>
