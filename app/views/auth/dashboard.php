@@ -64,15 +64,17 @@ $nombre = $_SESSION['user']['nombre'] ?? 'Admin';
                 </a>
               </div>
 
-              <div class="col-md-6">
-                <div class="quick-card">
-                  <div class="ic"><i class="bi bi-truck"></i></div>
-                  <div>
-                    <div class="fw-bold">Compras</div>
-                    <small>Órdenes a proveedor</small>
-                  </div>
-                </div>
-              </div>
+             <div class="col-md-6">
+  <a href="index.php?page=purchases" class="quick-link">
+    <div class="quick-card">
+      <div class="ic"><i class="bi bi-truck"></i></div>
+      <div>
+        <div class="fw-bold">Compras</div>
+        <small>Pedidos · stock automático</small>
+      </div>
+    </div>
+  </a>
+</div>
 
               <div class="col-md-6">
                 <div class="quick-card">

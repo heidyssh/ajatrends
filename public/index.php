@@ -5,6 +5,7 @@ require_once __DIR__ . '/../app/helpers/auth.php';
 require_once __DIR__ . '/../app/controllers/AuthController.php';
 require_once __DIR__ . '/../app/controllers/ProfileController.php';
 require_once __DIR__ . '/../app/controllers/ProductController.php';
+require_once __DIR__ . '/../app/controllers/PurchaseController.php';
 start_session();
 
 $page = $_GET['page'] ?? 'login';
@@ -38,7 +39,11 @@ if ($page === 'products' && isset($_GET['ajax']) && $_GET['ajax'] == '1') {
   echo json_encode(ProductController::ajax($_GET));
   exit;
 }
-$allowed = ['login', 'register', 'dashboard','profile','change_password','products'];
+if ($page === 'purchases') {
+  require_auth();
+  $viewData = PurchaseController::handle($_POST, $_GET);
+}
+$allowed = ['login', 'register', 'dashboard','profile','change_password','products','purchases'];
 if (!in_array($page, $allowed, true)) $page = 'login';
 
 if ($page === 'dashboard') require_auth();

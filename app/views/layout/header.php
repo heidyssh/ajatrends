@@ -68,10 +68,10 @@ $userName = $_SESSION['user']['nombre'] ?? 'Admin';
                 <div class="ic"><i class="bi bi-bag-heart"></i></div>
                 <span class="lbl">Productos</span>
               </a>
-            <a class="nav-item disabled-link" href="#">
-              <div class="ic"><i class="bi bi-truck"></i></div>
-              <span class="lbl">Compras</span>
-            </a>
+  <a class="nav-item <?= $page === 'purchases' ? 'active' : '' ?>" href="index.php?page=purchases">
+  <div class="ic"><i class="bi bi-truck"></i></div>
+  <span class="lbl">Compras</span>
+</a>
             <a class="nav-item disabled-link" href="#">
               <div class="ic"><i class="bi bi-receipt"></i></div>
               <span class="lbl">Ventas</span>

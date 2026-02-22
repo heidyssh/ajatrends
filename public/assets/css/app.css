@@ -1130,3 +1130,83 @@ small{ color: var(--muted); }
 .toastx.error   .ic{ background: rgba(220,53,69,.15); color:#dc3545; }
 .toastx.warn    .ic{ background: rgba(255,193,7,.2);  color:#b78103; }
 .toastx.info    .ic{ background: rgba(13,202,240,.2); color:#0dcaf0; }
+
+/* ==========================
+   PURCHASES (match AJA theme)
+   ========================== */
+.purchases-page .hd{
+  background: linear-gradient(135deg, rgba(70,129,137,.20), rgba(119,172,162,.10));
+  border-bottom: 1px solid rgba(12,20,32,.06);
+}
+
+.purchases-page .purchases-table thead th{
+  color: rgba(12,20,32,.60);
+  font-weight: 900;
+  border-bottom: 1px solid rgba(12,20,32,.08);
+}
+
+.purchases-page .purchases-table tbody td{
+  border-top: 1px solid rgba(12,20,32,.06);
+}
+
+.purchases-page .purchases-table tbody tr:hover{
+  background: rgba(70,129,137,.07);
+}
+
+/* Estado pill */
+.status-pill{
+  display:inline-flex;
+  align-items:center;
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-weight: 900;
+  font-size: .82rem;
+  border: 1px solid rgba(12,20,32,.10);
+  background: rgba(255,255,255,.70);
+  color: rgba(12,20,32,.70);
+}
+
+.status-pill.st-ok{
+  background: rgba(70,129,137,.12);
+  border-color: rgba(70,129,137,.22);
+  color: rgba(3,25,38,.95);
+}
+
+.status-pill.st-danger{
+  background: rgba(220, 53, 69, .12);
+  border-color: rgba(220, 53, 69, .22);
+  color: rgba(120, 10, 22, .95);
+}
+/* ===== Purchases modal items table (AJA aqua) ===== */
+.purchases-items-table{
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(70,129,137,.25);
+  background: rgba(255,255,255,.72);
+}
+
+.purchases-items-table thead{
+  background: linear-gradient(135deg, var(--c2), var(--c3));
+}
+.purchases-items-table thead th{
+  color:#fff !important;
+  font-weight: 900;
+  border: none !important;
+}
+
+.purchases-items-table tbody td{
+  border-top: 1px solid rgba(12,20,32,.08) !important;
+}
+
+.purchases-items-table tbody tr:hover{
+  background: rgba(70,129,137,.08) !important;
+}
+
+.purchases-items-table tfoot{
+  background: rgba(70,129,137,.14);
+}
+.purchases-items-table tfoot th{
+  border-top: 1px solid rgba(70,129,137,.20) !important;
+  font-weight: 900;
+  color: rgba(3,25,38,.95);
+}
