@@ -19,7 +19,19 @@ final class ProductController {
     return ["ok" => true, "product" => $p, "images" => $imgs];
   }
 
+private static function redirectToProducts(array $filters): void {
+  $qs = http_build_query([
+    'page' => 'products',
+    'q' => $filters['q'] ?? '',
+    'cat' => (int)($filters['cat'] ?? 0),
+    'min' => $filters['min'] ?? '',
+    'max' => $filters['max'] ?? '',
+    'estado' => $filters['estado'] ?? '',
+  ]);
 
+  header('Location: index.php?' . $qs);
+  exit;
+}
   public static function handle(array $post, array $files, array $get): array {
     // Siempre devolvemos listas para pintar la pantalla
     $data = [
@@ -52,7 +64,8 @@ final class ProductController {
           $payload = self::sanitizeProductPayload($post);
           $id = Product::create($payload);
           self::handleUploads($id, $files);
-          $data['success'] = 'Producto creado con éxito.';
+          $_SESSION['flash_success'] = 'Producto creado con éxito.';
+          self::redirectToProducts($data['filters']);
         }
 
         if ($action === 'update') {
@@ -61,21 +74,25 @@ final class ProductController {
           $payload = self::sanitizeProductPayload($post);
           Product::update($id, $payload);
           self::handleUploads($id, $files);
-          $data['success'] = 'Producto actualizado con éxito.';
+          $_SESSION['flash_success'] = 'Producto actualizado con éxito.';
+          self::redirectToProducts($data['filters']);
+          
         }
 
         if ($action === 'delete') {
           $id = (int)($post['id_producto'] ?? 0);
           if ($id <= 0) throw new Exception('ID de producto inválido.');
           Product::delete($id);
-          $data['success'] = 'Producto eliminado.';
+          $_SESSION['flash_success'] = 'Producto eliminado.';
+          self::redirectToProducts($data['filters']);
         }
 
         if ($action === 'delete_image') {
           $idImagen = (int)($post['id_imagen'] ?? 0);
           if ($idImagen <= 0) throw new Exception('ID de imagen inválido.');
           Product::deleteImage($idImagen);
-          $data['success'] = 'Imagen eliminada.';
+          $_SESSION['flash_success'] = 'Imagen eliminada.';
+          self::redirectToProducts($data['filters']);
         }
 
         if ($action === 'set_principal') {
@@ -83,11 +100,13 @@ final class ProductController {
           $idImagen = (int)($post['id_imagen'] ?? 0);
           if ($id <= 0 || $idImagen <= 0) throw new Exception('Datos inválidos.');
           Product::setPrincipalImage($id, $idImagen);
-          $data['success'] = 'Imagen principal actualizada.';
+          $_SESSION['flash_success'] = 'Imagen principal actualizada.';
+          self::redirectToProducts($data['filters']);
         }
 
       } catch (Throwable $e) {
-        $data['error'] = $e->getMessage();
+        $_SESSION['flash_error'] = $e->getMessage();
+        self::redirectToProducts($data['filters']);
       }
     }
 

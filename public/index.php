@@ -22,11 +22,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 }
 
 /* POST: acciones */
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  if ($page === 'login')     $viewData = AuthController::login($_POST);
-  if ($page === 'register')  $viewData = AuthController::register($_POST);
-  if ($page === 'profile')   $viewData = ProfileController::update($_POST, $_FILES); // ✅ aquí guarda cambios
-}
 if ($page === 'logout') {
   AuthController::logout();
 }
@@ -58,4 +53,13 @@ if ($page === 'change_password') {
 
 require __DIR__ . '/../app/views/layout/header.php';
 require __DIR__ . "/../app/views/auth/$page.php";
+// ---- Puente global: viewData -> SESSION flash (para toasts)
+if (!empty($viewData['success'])) {
+  $_SESSION['flash_success'] = (string)$viewData['success'];
+  unset($viewData['success']); // evita que te salga alert + toast al mismo tiempo
+}
+if (!empty($viewData['error'])) {
+  $_SESSION['flash_error'] = (string)$viewData['error'];
+  unset($viewData['error']);
+}
 require __DIR__ . '/../app/views/layout/footer.php';

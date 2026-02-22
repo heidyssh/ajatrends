@@ -16,8 +16,9 @@ final class Product {
     $params = [];
 
     if ($q !== '') {
-      $where[] = '(p.nombre LIKE :q OR p.sku LIKE :q)';
-      $params[':q'] = "%$q%";
+      $where[] = '(p.nombre LIKE :q1 OR p.sku LIKE :q2)';
+      $params[':q1'] = "%$q%";
+      $params[':q2'] = "%$q%";
     }
     if ($cat > 0) {
       $where[] = 'p.id_categoria = :cat';

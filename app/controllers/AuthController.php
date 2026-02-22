@@ -49,7 +49,9 @@ final class AuthController {
     $hash = password_hash($pass, PASSWORD_BCRYPT);
     User::create($idRol, $nombre, $email, $hash);
 
-    return ['success' => 'Usuario creado. Ya podés iniciar sesión.'];
+    $_SESSION['flash_success'] = 'Usuario creado. Ya podés iniciar sesión.';
+header('Location: /ajatrends/public/index.php?page=login');
+exit;
   }
 
   public static function logout(): void {

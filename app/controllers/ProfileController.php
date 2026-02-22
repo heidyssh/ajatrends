@@ -26,7 +26,7 @@ final class ProfileController
     require_auth();
     $action = $_POST['action'] ?? '';
 
-    $idUsuario = (int) ($_SESSION['user']['id_usuario'] ?? 0);
+    $idUsuario = (int) ($_SESSION['user']['id'] ?? 0);
     if ($idUsuario <= 0)
       return ['error' => 'Sesión inválida.'];
 

@@ -124,7 +124,7 @@ $isOff = ((int)$p['estado'] === 0);
 ?>
 <div class="col-12 col-sm-6 col-lg-4 col-xxl-3">
 <div class="product-card <?= $isOff ? 'off' : '' ?>" role="button"
-data-product-id="<?= $id ?>" data-bs-toggle="modal" data-bs-target="#productModal">
+data-product-id="<?= $id ?>">
 
 <div class="img">
 <img src="<?= h($p['imagen']) ?>" alt="<?= h($p['nombre']) ?>">
@@ -391,7 +391,22 @@ data-product-id="<?= $id ?>" data-bs-toggle="modal" data-bs-target="#productModa
 <input type="hidden" name="id_imagen" id="priImgId" value="">
 </form>
 <?php endif; ?>
-
+<!-- Modal confirmación (reemplaza confirm() del navegador) -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="fw-bold" id="confirmTitle">Confirmar</div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body" id="confirmText">¿Seguro?</div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" id="confirmOk">Sí, eliminar</button>
+      </div>
+    </div>
+  </div>
+</div>
 <script>
 (function(){
 const isAdmin = <?= $isAdmin ? 'true' : 'false' ?>;
@@ -399,6 +414,13 @@ let lastOpenedId = 0;
 
 // Abrir modal detalle + cargar JSON
 const productModal = document.getElementById('productModal');
+// --- FIX stacking context: llevar overlays al <body> ---
+const upsertEl = document.getElementById('productUpsertModal');
+const filtersEl = document.getElementById('filtersCanvas');
+
+if (productModal && productModal.parentElement !== document.body) document.body.appendChild(productModal);
+if (upsertEl && upsertEl.parentElement !== document.body) document.body.appendChild(upsertEl);
+if (filtersEl && filtersEl.parentElement !== document.body) document.body.appendChild(filtersEl);
 const titleEl = document.getElementById('pmTitle');
 const metaEl = document.getElementById('pmMeta');
 const priceEl = document.getElementById('pmPrice');
@@ -416,6 +438,14 @@ return 'L ' + n.toLocaleString(undefined, {minimumFractionDigits:2, maximumFract
 document.addEventListener('click', async (e) => {
 const card = e.target.closest('.product-card');
 if (!card) return;
+// Si el modal de crear/editar está abierto, cerrarlo antes de abrir el detalle
+const upEl = document.getElementById('productUpsertModal');
+const up = bootstrap.Modal.getInstance(upEl);
+if (upEl && upEl.classList.contains('show') && up){
+  up.hide();
+  await waitHidden(upEl);
+  cleanupModals();
+}
 
 // Evitar que botones mini abran el detalle
 if (e.target.closest('[data-edit-id]') || e.target.closest('[data-delete-id]')) return;
@@ -428,7 +458,7 @@ lastOpenedId = id;
 titleEl.textContent = 'Cargando…';
 metaEl.textContent = '';
 carouselInner.innerHTML = '<div class="carousel-item active"><div class="pm-skel"></div></div>';
-
+bootstrap.Modal.getOrCreateInstance(productModal).show();
 try {
 const res = await fetch(`index.php?page=products&ajax=1&view=${id}`);
 const json = await res.json();
@@ -463,34 +493,82 @@ const delBtn = document.getElementById('pmDeleteBtn');
 if (editBtn) editBtn.onclick = () => openEdit(id);
 if (delBtn) delBtn.onclick = () => askDelete(id);
 }
-
 } catch(err){
 titleEl.textContent = 'Error';
 metaEl.textContent = '';
 descEl.textContent = err.message || 'No se pudo cargar.';
 }
 });
+function cleanupModals(){
+  // backdrops de modales
+  document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+  // backdrops de offcanvas (filtros móvil)
+  document.querySelectorAll('.offcanvas-backdrop').forEach(b => b.remove());
 
+  document.body.classList.remove('modal-open');
+  document.body.classList.remove('offcanvas-backdrop'); // por si quedó algo raro
+  document.body.style.removeProperty('padding-right');
+  document.body.style.removeProperty('overflow');
+}
+function hookCleanup(el){
+  if (!el) return;
+  el.addEventListener('hidden.bs.modal', cleanupModals);
+  el.addEventListener('hidden.bs.offcanvas', cleanupModals);
+}
+
+hookCleanup(productModal);
+hookCleanup(document.getElementById('productUpsertModal'));
+hookCleanup(document.getElementById('filtersCanvas'));
+function waitHidden(modalEl){
+  return new Promise(resolve => {
+    if (!modalEl || !modalEl.classList.contains('show')) return resolve();
+    modalEl.addEventListener('hidden.bs.modal', () => resolve(), { once:true });
+  });
+}
 // Admin: nuevo
-function openNew(){
-const m = new bootstrap.Modal(document.getElementById('productUpsertModal'));
-document.getElementById('pfTitle').textContent = 'Nuevo producto';
-document.getElementById('pfAction').value = 'create';
-document.getElementById('pfId').value = '';
-document.getElementById('productForm').reset();
-document.getElementById('pfEstado').value = '1';
-document.getElementById('pfExistingImagesWrap').style.display = 'none';
-document.getElementById('pfExistingImages').innerHTML = '';
-m.show();
+async function openNew(){
+
+  const upsertEl = document.getElementById('productUpsertModal');
+  const detailEl = document.getElementById('productModal');
+
+  // Si el modal de detalle está abierto, cerrarlo primero
+  const detailModal = bootstrap.Modal.getInstance(detailEl);
+  if (detailEl && detailEl.classList.contains('show') && detailModal){
+    detailModal.hide();
+    await new Promise(resolve => {
+      detailEl.addEventListener('hidden.bs.modal', resolve, { once:true });
+    });
+
+    // limpiar posibles backdrops pegados
+    document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());   
+  }
+    cleanupModals();
+  const m = new bootstrap.Modal(upsertEl);
+
+  document.getElementById('pfTitle').textContent = 'Nuevo producto';
+  document.getElementById('pfAction').value = 'create';
+  document.getElementById('pfId').value = '';
+  document.getElementById('productForm').reset();
+  document.getElementById('pfEstado').value = '1';
+  document.getElementById('pfExistingImagesWrap').style.display = 'none';
+  document.getElementById('pfExistingImages').innerHTML = '';
+
+  m.show();
 }
 
 // Admin: editar
 async function openEdit(id){
-const m = new bootstrap.Modal(document.getElementById('productUpsertModal'));
+const upsertEl = document.getElementById('productUpsertModal');
+cleanupModals();
+const m = bootstrap.Modal.getOrCreateInstance(upsertEl);
 
 // cerrar modal detalle si está abierto
 const pm = bootstrap.Modal.getInstance(productModal);
-if (pm) pm.hide();
+if (pm){
+  pm.hide();
+  await waitHidden(productModal);
+  cleanupModals();
+}
 
 document.getElementById('pfTitle').textContent = 'Editar producto';
 document.getElementById('pfAction').value = 'update';
@@ -548,34 +626,71 @@ alert(err.message || 'Error');
 }
 
 function askDelete(id){
-if (!confirm('¿Eliminar este producto? Esto borrará también sus imágenes (por cascada).')) return;
-document.getElementById('delId').value = String(id);
-document.getElementById('deleteForm').submit();
+  const modalEl = document.getElementById('confirmModal');
+  const titleEl = document.getElementById('confirmTitle');
+  const textEl  = document.getElementById('confirmText');
+  const okBtn   = document.getElementById('confirmOk');
+
+  titleEl.textContent = 'Eliminar producto';
+  textEl.textContent  = '¿Eliminar este producto? Esto borrará también sus imágenes.';
+
+  const m = bootstrap.Modal.getOrCreateInstance(modalEl);
+
+  // IMPORTANTE: evitar que se acumulen onclick
+  okBtn.onclick = null;
+  okBtn.onclick = () => {
+    document.getElementById('delId').value = String(id);
+    document.getElementById('deleteForm').submit();
+    m.hide();
+  };
+
+  m.show();
 }
 
 // Botones mini en cards
 document.addEventListener('click', (e) => {
 const btnEdit = e.target.closest('[data-edit-id]');
 if (btnEdit){
-e.stopPropagation();
-openEdit(Number(btnEdit.getAttribute('data-edit-id')));
-return;
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  openEdit(Number(btnEdit.getAttribute('data-edit-id')));
+  return;
 }
 
 const btnDel = e.target.closest('[data-delete-id]');
 if (btnDel){
-e.stopPropagation();
-askDelete(Number(btnDel.getAttribute('data-delete-id')));
-return;
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  const id = Number(btnDel.getAttribute('data-delete-id'));
+  askDelete(id);
+  return;
 }
 
 const btnDelImg = e.target.closest('[data-del-img]');
 if (btnDelImg){
-const idImg = Number(btnDelImg.getAttribute('data-del-img'));
-if (!confirm('¿Eliminar esta imagen?')) return;
-document.getElementById('delImgId').value = String(idImg);
-document.getElementById('deleteImgForm').submit();
-return;
+  e.preventDefault();
+  e.stopImmediatePropagation();
+
+  const idImg = Number(btnDelImg.getAttribute('data-del-img'));
+  const modalEl = document.getElementById('confirmModal');
+  const titleEl = document.getElementById('confirmTitle');
+  const textEl  = document.getElementById('confirmText');
+  const okBtn   = document.getElementById('confirmOk');
+
+  titleEl.textContent = 'Eliminar imagen';
+  textEl.textContent  = '¿Eliminar esta imagen del producto?';
+
+  const m = bootstrap.Modal.getOrCreateInstance(modalEl);
+
+  okBtn.onclick = null;
+  okBtn.onclick = () => {
+    document.getElementById('delImgId').value = String(idImg);
+    document.getElementById('deleteImgForm').submit();
+    m.hide();
+  };
+
+  m.show();
+  return;
 }
 
 const btnPri = e.target.closest('[data-set-principal]');
@@ -608,4 +723,5 @@ form.classList.add('was-validated');
 }, false);
 }
 })();
+
 </script>
