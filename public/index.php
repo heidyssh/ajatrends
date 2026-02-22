@@ -6,6 +6,7 @@ require_once __DIR__ . '/../app/controllers/AuthController.php';
 require_once __DIR__ . '/../app/controllers/ProfileController.php';
 require_once __DIR__ . '/../app/controllers/ProductController.php';
 require_once __DIR__ . '/../app/controllers/PurchaseController.php';
+require_once __DIR__ . '/../app/controllers/AgendaController.php';
 start_session();
 
 $page = $_GET['page'] ?? 'login';
@@ -20,6 +21,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
   if ($page === 'profile') {
     $viewData = ProfileController::show();   // ✅ aquí carga avatars y perfil
   }
+  if ($page === 'agenda') {
+    require_auth();
+    $viewData = AgendaController::handle($_GET, $_POST);
+  }
 }
 
 /* POST: acciones */
@@ -32,6 +37,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   if ($page === 'login')   $viewData = AuthController::login($_POST);
   if ($page === 'register') $viewData = AuthController::register($_POST);
   if ($page === 'profile')   $viewData = ProfileController::update($_POST, $_FILES);
+  if ($page === 'agenda') {
+    require_auth();
+    $viewData = AgendaController::handle($_GET, $_POST);
+  }
   }
 if ($page === 'products' && isset($_GET['ajax']) && $_GET['ajax'] == '1') {
   require_auth();
@@ -43,9 +52,9 @@ if ($page === 'purchases') {
   require_auth();
   $viewData = PurchaseController::handle($_POST, $_GET);
 }
-$allowed = ['login', 'register', 'dashboard','profile','change_password','products','purchases'];
+$allowed = ['login', 'register', 'dashboard','profile','change_password','products','purchases','agenda'];
 if (!in_array($page, $allowed, true)) $page = 'login';
-
+if ($page === 'agenda') require_auth();
 if ($page === 'dashboard') require_auth();
 if ($page === 'profile') require_auth();
 if ($page === 'products') {

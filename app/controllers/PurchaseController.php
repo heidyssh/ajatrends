@@ -7,13 +7,12 @@ require_once __DIR__ . '/../models/Purchase.php';
 final class PurchaseController {
 
   private static function redirectToPurchases(array $filters = []): void {
-    $qs = http_build_query([
+    $qs = [
       'page' => 'purchases',
       'q' => $filters['q'] ?? '',
       'estado' => $filters['estado'] ?? 'TODOS',
-      'view' => (int)($filters['view'] ?? 0),
-    ]);
-    header('Location: index.php?' . $qs);
+    ];
+    header('Location: index.php?' . http_build_query($qs));
     exit;
   }
 
@@ -32,7 +31,83 @@ final class PurchaseController {
       'products' => Purchase::productosActivos(),
       'isAdmin' => is_admin(),
     ];
+     // ✅ AJAX: devolver detalle en JSON para modal "Ver"
+    $actionGet = (string)($get['action'] ?? '');
+    if ($actionGet === 'view_json') {
+      $id = (int)($get['id'] ?? 0);
+      if ($id <= 0) {
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['ok' => false, 'message' => 'ID inválido']);
+        exit;
+      }
 
+      $compra = Purchase::find($id);
+      if (!$compra) {
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['ok' => false, 'message' => 'Compra no encontrada']);
+        exit;
+      }
+
+      $items = Purchase::items($id);
+
+      header('Content-Type: application/json; charset=utf-8');
+      echo json_encode([
+        'ok' => true,
+        'id_compra' => (int)$compra['id_compra'],
+        'fecha' => (string)($compra['fecha'] ?? ''),
+        'usuario' => (string)($compra['usuario'] ?? ''),
+        'nota' => (string)($compra['nota'] ?? ''),
+        'estado' => (string)($compra['estado'] ?? ''),
+        'items' => array_map(static function($it){
+          return [
+            'sku' => (string)($it['sku'] ?? ''),
+            'nombre' => (string)($it['nombre'] ?? ''),
+            'cantidad' => (int)($it['cantidad'] ?? 0),
+            'costo_unit' => (float)($it['costo_unit'] ?? 0),
+            'subtotal' => (float)($it['subtotal'] ?? 0),
+          ];
+        }, is_array($items) ? $items : []),
+      ], JSON_UNESCAPED_UNICODE);
+      exit;
+    } // ✅ AJAX: devolver detalle en JSON para modal "Ver"
+    $actionGet = (string)($get['action'] ?? '');
+    if ($actionGet === 'view_json') {
+      $id = (int)($get['id'] ?? 0);
+      if ($id <= 0) {
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['ok' => false, 'message' => 'ID inválido']);
+        exit;
+      }
+
+      $compra = Purchase::find($id);
+      if (!$compra) {
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['ok' => false, 'message' => 'Compra no encontrada']);
+        exit;
+      }
+
+      $items = Purchase::items($id);
+
+      header('Content-Type: application/json; charset=utf-8');
+      echo json_encode([
+        'ok' => true,
+        'id_compra' => (int)$compra['id_compra'],
+        'fecha' => (string)($compra['fecha'] ?? ''),
+        'usuario' => (string)($compra['usuario'] ?? ''),
+        'nota' => (string)($compra['nota'] ?? ''),
+        'estado' => (string)($compra['estado'] ?? ''),
+        'items' => array_map(static function($it){
+          return [
+            'sku' => (string)($it['sku'] ?? ''),
+            'nombre' => (string)($it['nombre'] ?? ''),
+            'cantidad' => (int)($it['cantidad'] ?? 0),
+            'costo_unit' => (float)($it['costo_unit'] ?? 0),
+            'subtotal' => (float)($it['subtotal'] ?? 0),
+          ];
+        }, is_array($items) ? $items : []),
+      ], JSON_UNESCAPED_UNICODE);
+      exit;
+    }
     if (!empty($post)) {
       $action = (string)($post['action'] ?? '');
 
@@ -85,11 +160,6 @@ if ($action === 'delete') {
 
     $data['purchases'] = Purchase::list($data['filters']);
 
-    $idView = (int)($get['view'] ?? 0);
-    if ($idView > 0) {
-      $data['purchase'] = Purchase::find($idView);
-      $data['items'] = Purchase::items($idView);
-    }
 
     return $data;
   }

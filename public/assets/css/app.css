@@ -1210,3 +1210,521 @@ small{ color: var(--muted); }
   font-weight: 900;
   color: rgba(3,25,38,.95);
 }
+/* =========================================
+   Purchases UI — AdminLTE-ish (pro)
+   Archivo: public/assets/css/app.css
+   ========================================= */
+
+/* Fondo de la sección */
+.purchases-page{
+  padding-bottom: 18px;
+}
+
+/* Cards “pro” */
+.purchases-page .cardx{
+  background: #fff !important;
+  border: 1px solid rgba(17,24,39,.10) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,.08) !important;
+  overflow: hidden !important;
+}
+
+/* Header tipo AdminLTE */
+.purchases-page .cardx .hd{
+  background: linear-gradient(180deg, #ffffff 0%, rgba(17,24,39,.02) 100%) !important;
+  border-bottom: 1px solid rgba(17,24,39,.08) !important;
+  padding: 16px 18px !important;
+}
+
+/* Body más aire */
+.purchases-page .cardx .bd{
+  padding: 16px 18px !important;
+}
+
+/* Títulos mejor jerarquía */
+.purchases-page .cardx .hd .fw-bold{
+  letter-spacing: .2px;
+}
+.purchases-page .cardx .hd small{
+  color: rgba(17,24,39,.65) !important;
+}
+
+/* Toolbar (inputs y botones) */
+.purchases-page .form-control,
+.purchases-page .form-select{
+  background: #fff !important;
+  border: 1px solid rgba(17,24,39,.12) !important;
+  border-radius: 12px !important;
+  padding: 10px 12px !important;
+  box-shadow: none !important;
+}
+
+.purchases-page .form-control:focus,
+.purchases-page .form-select:focus{
+  border-color: rgba(72, 138, 148, .55) !important;
+  box-shadow: 0 0 0 .2rem rgba(72, 138, 148, .14) !important;
+}
+
+/* Botones estilo “pill” */
+.purchases-page .btn{
+  border-radius: 12px !important;
+  padding: 10px 14px !important;
+  font-weight: 700;
+}
+.purchases-page .btn.btn-success,
+.purchases-page .btn.btn-primary{
+  box-shadow: 0 10px 22px rgba(72,138,148,.22) !important;
+}
+.purchases-page .btn.btn-light{
+  background: #fff !important;
+  border: 1px solid rgba(17,24,39,.14) !important;
+  color: rgba(17,24,39,.85) !important;
+}
+
+/* Tabla: compacta, moderna */
+.purchases-page .table-responsive{
+  border-radius: 14px !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(17,24,39,.08) !important;
+}
+
+.purchases-page table.table{
+  margin: 0 !important;
+}
+
+.purchases-page table.table thead th{
+  background: rgba(17,24,39,.035) !important;
+  border-bottom: 1px solid rgba(17,24,39,.10) !important;
+  color: rgba(17,24,39,.78) !important;
+  font-weight: 800;
+  padding: 12px 12px !important;
+  text-transform: none;
+}
+
+.purchases-page table.table tbody td{
+  padding: 12px 12px !important;
+  border-top: 1px solid rgba(17,24,39,.06) !important;
+  vertical-align: middle !important;
+}
+
+/* Hover suave */
+.purchases-page table.table tbody tr:hover{
+  background: rgba(72,138,148,.055) !important;
+}
+
+/* Acciones: botones compactos */
+.purchases-page .actions .btn{
+  padding: 7px 10px !important;
+  border-radius: 10px !important;
+  font-weight: 800;
+}
+.purchases-page .actions .btn-danger{
+  box-shadow: 0 10px 22px rgba(220,53,69,.16);
+}
+
+/* Badge estado */
+.purchases-page .badge{
+  border-radius: 999px;
+  padding: .45rem .7rem;
+  font-weight: 800;
+}
+
+/* “Secciones” dentro del detalle */
+.purchases-page .section-title{
+  font-weight: 800;
+  color: rgba(17,24,39,.78);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0 12px;
+}
+.purchases-page .muted{
+  color: rgba(17,24,39,.60);
+}
+
+/* Ajuste móvil */
+@media (max-width: 768px){
+  .purchases-page .cardx .hd,
+  .purchases-page .cardx .bd{
+    padding: 14px 14px !important;
+  }
+  .purchases-page .btn{
+    width: 100%;
+  }
+  .purchases-page .actions{
+    display: flex;
+    gap: 8px;
+  }
+  .purchases-page .actions .btn{
+    width: auto;
+    flex: 1;
+  }
+}
+/* Purchases layout pro */
+.purchases-page .purchases-toolbar{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:14px; flex-wrap:wrap;
+}
+.purchases-page .purchases-toolbar .title{ font-size:1.1rem; font-weight:900; }
+.purchases-page .purchases-toolbar .subtitle{ color:rgba(17,24,39,.6); font-size:.92rem; }
+
+.purchases-page .purchases-filters{
+  display:flex; gap:12px; flex-wrap:wrap; align-items:end;
+}
+.purchases-page .purchases-filters .filter{ flex: 1 1 240px; }
+.purchases-page .purchases-filters .filter.actions{ flex: 0 0 180px; }
+.purchases-page .purchases-filters .form-label{ font-size:.78rem; color:rgba(17,24,39,.62); margin-bottom:6px; font-weight:800; }
+
+.purchases-page .actions{
+  display:inline-flex; gap:8px; align-items:center; justify-content:flex-end;
+}
+
+.purchases-page .meta{
+  display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:6px;
+}
+.purchases-page .chip{
+  background: rgba(17,24,39,.045);
+  border: 1px solid rgba(17,24,39,.08);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: .82rem;
+  color: rgba(17,24,39,.72);
+  font-weight: 800;
+}
+/* ==============================
+   Modal View Compra PRO
+   ============================== */
+
+#modalViewCompra .modal-content {
+  border-radius: 18px;
+  border: none;
+  box-shadow: 0 30px 60px rgba(0,0,0,.25);
+}
+
+#modalViewCompra .modal-header {
+  border-bottom: 1px solid rgba(0,0,0,.08);
+  padding: 18px 22px;
+}
+
+#modalViewCompra .modal-title {
+  font-weight: 900;
+  font-size: 1.1rem;
+}
+
+#modalViewCompra .modal-body {
+  padding: 20px 22px;
+}
+
+#modalViewCompra .table thead th {
+  background: rgba(17,24,39,.05);
+  font-weight: 800;
+}
+
+#modalViewCompra .table tfoot th {
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+#modalViewCompra .table tfoot th:last-child {
+  color: #111827;
+}
+
+#modalViewCompra .modal-footer {
+  border-top: 1px solid rgba(0,0,0,.08);
+  padding: 16px 22px;
+}
+
+#modalViewCompra .btn-light {
+  border-radius: 10px;
+  font-weight: 700;
+}
+/* ==============================
+   Purchases Badges PRO
+   ============================== */
+
+.purchases-page .badge.bg-success {
+  background: #16a34a !important;   /* verde fuerte */
+  color: #fff !important;
+  font-weight: 800;
+  letter-spacing: .5px;
+}
+
+.purchases-page .badge.bg-danger {
+  background: #dc2626 !important;
+  color: #fff !important;
+  font-weight: 800;
+}
+
+.modal .badge.bg-success {
+  background: #16a34a !important;
+  color: #fff !important;
+}
+
+.modal .badge.bg-danger {
+  background: #dc2626 !important;
+  color: #fff !important;
+}
+.agenda-card{ border-radius:18px; overflow:hidden; }
+.agenda-mini-cal{
+  border:1px solid rgba(17,24,39,.08);
+  border-radius:16px;
+  padding:12px;
+  background: rgba(17,24,39,.015);
+}
+.agenda-cal-grid{ display:grid; grid-template-columns: repeat(7, 1fr); gap:6px; }
+.agenda-cal-grid .d{
+  cursor:pointer;
+user-select:none;
+  text-align:center; padding:8px 0; border-radius:12px;
+  font-weight:800; font-size:.82rem; color:rgba(17,24,39,.75);
+}
+.agenda-cal-grid .d:hover{ background: rgba(17,24,39,.03); }
+.agenda-cal-grid .dow{ font-size:.72rem; font-weight:900; color:rgba(17,24,39,.55); padding:6px 0; }
+.agenda-cal-grid .today{ background: rgba(72,138,148,.18); border:1px solid rgba(72,138,148,.35); }
+.agenda-cal-grid .has{ background: rgba(72,138,148,.10); border:1px dashed rgba(72,138,148,.35); }
+.agenda-cal-grid .muted{ color: rgba(17,24,39,.30); }
+
+.agenda-list{ display:flex; flex-direction:column; gap:10px; }
+.agenda-item{
+  display:flex; align-items:flex-start; gap:10px;
+  padding:10px 12px;
+  border:1px solid rgba(17,24,39,.08);
+  border-radius:14px;
+  background:rgba(17,24,39,.015);
+}
+.agenda-item .dot{
+  width:10px; height:10px; border-radius:999px; margin-top:6px;
+  background: rgba(72,138,148,.95);
+  box-shadow:0 0 0 4px rgba(72,138,148,.15);
+}
+.agenda-item .content{ flex:1; }
+.agenda-item .title{ font-weight:900; }
+.agenda-item .meta{ font-size:.82rem; color:rgba(17,24,39,.62); }
+.agenda-item .pill{
+  font-size:.72rem; font-weight:900;
+  padding:.25rem .55rem; border-radius:999px;
+  border:1px solid rgba(72,138,148,.25);
+  background: rgba(72,138,148,.10);
+  color: rgba(17,24,39,.75);
+}
+/* Layout tipo inspo: main + panel derecho */
+.dash-layout{
+  display:grid;
+  grid-template-columns: 1fr 360px;
+  gap: 18px;
+  align-items:start;
+}
+
+.dash-main{ min-width:0; }
+
+.dash-right{
+  position: sticky;
+  top: 16px;
+  align-self: start;
+}
+
+/* responsive */
+@media (max-width: 992px){
+  .dash-layout{ grid-template-columns:1fr; }
+  .dash-right{ position: static; }
+}
+/* ===== BOTONES AJA ===== */
+
+.btn-primary{
+  background: linear-gradient(135deg,#1f2937,#111827);
+  border: none;
+  box-shadow: 0 6px 16px rgba(0,0,0,.15);
+  transition: all .25s ease;
+}
+
+.btn-primary:hover{
+  background: linear-gradient(135deg,#111827,#0f172a);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(0,0,0,.25);
+}
+.form-control,
+.form-select{
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  transition: all .2s ease;
+}
+
+.form-control:focus,
+.form-select:focus{
+  border-color: #d1d5db !important;
+  box-shadow: 0 0 0 3px rgba(0,0,0,.05) !important;
+  background: #ffffff;
+}
+#newEvtCard{
+  border-radius: 18px;
+  border: 1px solid rgba(0,0,0,.05);
+  background: rgba(255,255,255,.75);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 30px rgba(0,0,0,.08);
+}
+#btnNewEvt{
+  border-radius: 999px;
+  padding-left: 18px;
+  padding-right: 18px;
+}
+/* =========================
+   AGENDA UI (AJA PRO)
+   ========================= */
+.agenda-page .cardx{
+  background:#fff !important;
+  border:1px solid rgba(17,24,39,.10) !important;
+  border-radius:16px !important;
+  box-shadow:0 10px 30px rgba(0,0,0,.08) !important;
+  overflow:hidden !important;
+}
+.agenda-page .cardx .hd{
+  background: linear-gradient(180deg,#ffffff 0%, rgba(17,24,39,.02) 100%) !important;
+  border-bottom:1px solid rgba(17,24,39,.08) !important;
+}
+.agenda-page .btn{
+  border-radius:12px !important;
+  font-weight:800;
+}
+.agenda-page .btn.btn-primary{
+  background:#111827 !important;
+  border:none !important;
+  box-shadow:0 10px 22px rgba(17,24,39,.18) !important;
+}
+.agenda-page .btn.btn-primary:hover{ background:#0b1220 !important; }
+
+.agenda-page .btn.btn-light{
+  background:#fff !important;
+  border:1px solid rgba(17,24,39,.14) !important;
+  color:rgba(17,24,39,.85) !important;
+}
+
+.agenda-page .form-control,
+.agenda-page .form-select{
+  background:#fff !important;
+  border:1px solid rgba(17,24,39,.12) !important;
+  border-radius:12px !important;
+  box-shadow:none !important;
+}
+.agenda-page .form-control:focus,
+.agenda-page .form-select:focus{
+  border-color: rgba(72, 138, 148, .55) !important;
+  box-shadow: 0 0 0 .2rem rgba(72, 138, 148, .14) !important;
+}
+
+.agenda-page .modal-content{
+  border-radius:18px !important;
+  border:none !important;
+  box-shadow:0 20px 50px rgba(0,0,0,.15) !important;
+}
+.modal { 
+  z-index: 20050 !important; 
+}
+.modal-backdrop {
+  z-index: 20040 !important;
+}
+/* ====== AJA VERDE PALETTE ====== */
+
+:root {
+  --aja-green: #1f6f5c;
+  --aja-green-soft: #2e8b73;
+  --aja-green-light: #e6f4ef;
+}
+
+/* Botón principal verde */
+.btn-primary {
+  background-color: var(--aja-green) !important;
+  border-color: var(--aja-green) !important;
+}
+
+.btn-primary:hover {
+  background-color: var(--aja-green-soft) !important;
+  border-color: var(--aja-green-soft) !important;
+}
+
+/* Botones pequeños estilo acción */
+.btn-light.btn-sm {
+  background-color: var(--aja-green-light);
+  border: 1px solid #cfe8df;
+  color: var(--aja-green);
+}
+
+.btn-light.btn-sm:hover {
+  background-color: #d7efe7;
+}
+
+/* Botón oscuro reemplazado por verde elegante */
+.btn-dark {
+  background-color: var(--aja-green) !important;
+  border-color: var(--aja-green) !important;
+}
+
+.btn-dark:hover {
+  background-color: var(--aja-green-soft) !important;
+}
+.btn-aja-success {
+  background: linear-gradient(135deg,#2ecc71,#27ae60);
+  border: none;
+  color: white;
+  box-shadow: 0 4px 10px rgba(39,174,96,.25);
+}
+
+.btn-aja-success:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 15px rgba(39,174,96,.35);
+}
+
+.btn-aja-danger {
+  background: linear-gradient(135deg,#ff4d4d,#dc3545);
+  border: none;
+  color: white;
+  box-shadow: 0 4px 10px rgba(220,53,69,.25);
+}
+
+.btn-aja-danger:hover {
+  transform: translateY(-1px);
+}
+
+.btn-aja-outline {
+  background: #eef4f3;
+  border: 1px solid #cfe2df;
+  color: #1f6f5c;
+}
+
+.btn-aja-outline:hover {
+  background: #e0f0ec;
+}
+
+/* Redondear tabla como productos */
+.table {
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.table thead {
+  background: #f5f7f7;
+}
+
+/* Sombra suave tipo productos */
+.cardx {
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.08);
+}
+/* Botón estilo Registrar compra */
+.btn-soft-success {
+  background: #5f8f8b; /* mismo tono teal */
+  border: none;
+  color: white;
+  box-shadow: 0 6px 14px rgba(95,143,139,.25);
+}
+
+.btn-soft-success:hover {
+  background: #537e7a;
+  transform: translateY(-1px);
+}
+/* ✅ FIX: badges legibles en Agenda (no blancos) */
+.agenda-page .badge{
+  background: transparent !important;
+  border: none !important;
+  color: #111827 !important;
+}

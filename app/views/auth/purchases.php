@@ -5,7 +5,10 @@ $purchase = $viewData['purchase'] ?? null;
 $items = $viewData['items'] ?? [];
 $products = $viewData['products'] ?? [];
 
-function h($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
+function h($v)
+{
+  return htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
+}
 
 $q = $filters['q'] ?? '';
 $estado = $filters['estado'] ?? 'TODOS';
@@ -13,13 +16,13 @@ $estado = $filters['estado'] ?? 'TODOS';
 <div class="products-page page-fade purchases-page">
 
   <div class="cardx mb-4">
-    <div class="hd d-flex align-items-start justify-content-between flex-wrap gap-3">
-      <div>
-        <div class="fw-bold" style="font-size:1.15rem;">Compras · Inventario AJA 🧾</div>
-        <small class="text-muted">Registrá compras ordenadas y actualizá el stock automáticamente.</small>
+    <div class="hd purchases-toolbar">
+      <div class="toolbar-left">
+        <div class="fw-bold title">Compras · Inventario AJA</div>
+        <div class="subtitle">Registrá compras ordenadas y actualizá el stock automáticamente.</div>
       </div>
 
-      <div class="d-flex gap-2">
+      <div class="toolbar-right">
         <button class="btn btn-brand btn-sm" data-bs-toggle="modal" data-bs-target="#modalCreate">
           <i class="bi bi-plus-lg me-1"></i> Registrar compra
         </button>
@@ -27,24 +30,25 @@ $estado = $filters['estado'] ?? 'TODOS';
     </div>
 
     <div class="bd">
-      <form class="row g-2 align-items-end" method="get" action="index.php">
+      <form class="purchases-filters" method="get" action="index.php">
         <input type="hidden" name="page" value="purchases">
 
-        <div class="col-12 col-md-6">
-          <label class="form-label small text-muted">Buscar (ID o nota)</label>
-          <input class="form-control form-control-sm" name="q" value="<?= h($q) ?>" placeholder="Ej: 12 o 'proveedor'">
+        <div class="filter">
+          <label class="form-label">Buscar</label>
+          <input class="form-control form-control-sm" name="q" value="<?= h($q) ?>"
+            placeholder="ID, nota, proveedor...">
         </div>
 
-        <div class="col-12 col-md-3">
-          <label class="form-label small text-muted">Estado</label>
+        <div class="filter">
+          <label class="form-label">Estado</label>
           <select class="form-select form-select-sm" name="estado">
-            <?php foreach (['TODOS','REGISTRADA','ANULADA'] as $op): ?>
+            <?php foreach (['TODOS', 'REGISTRADA', 'ANULADA'] as $op): ?>
               <option value="<?= h($op) ?>" <?= $estado === $op ? 'selected' : '' ?>><?= h($op) ?></option>
             <?php endforeach; ?>
           </select>
         </div>
 
-        <div class="col-12 col-md-3">
+        <div class="filter actions">
           <button class="btn btn-brand btn-sm w-100">
             <i class="bi bi-search me-1"></i> Filtrar
           </button>
@@ -71,33 +75,40 @@ $estado = $filters['estado'] ?? 'TODOS';
           </thead>
           <tbody>
             <?php if (!$purchases): ?>
-              <tr><td colspan="8" class="text-center text-muted py-4">Sin registros.</td></tr>
+              <tr>
+                <td colspan="8" class="text-center text-muted py-4">Sin registros.</td>
+              </tr>
             <?php endif; ?>
 
             <?php foreach ($purchases as $c): ?>
               <tr>
-                <td class="fw-semibold">#<?= (int)$c['id_compra'] ?></td>
+                <td class="fw-semibold">#<?= (int) $c['id_compra'] ?></td>
                 <td class="text-muted"><?= h($c['fecha']) ?></td>
                 <td><?= h($c['usuario'] ?? '') ?></td>
                 <td class="text-muted"><?= h($c['nota']) ?></td>
-                <td class="text-end"><?= (int)$c['items'] ?></td>
-                <td class="text-end">L. <?= number_format((float)$c['total'], 2) ?></td>
+                <td class="text-end"><?= (int) $c['items'] ?></td>
+                <td class="text-end">L. <?= number_format((float) $c['total'], 2) ?></td>
                 <td>
-                  <?php $st = (string)$c['estado']; $badge = ($st === 'ANULADA') ? 'bg-danger' : 'bg-success'; ?>
+                  <?php $st = (string) $c['estado'];
+                  $badge = ($st === 'ANULADA') ? 'bg-danger' : 'bg-success'; ?>
                   <span class="badge <?= $badge ?>"><?= h($st) ?></span>
                 </td>
                 <td class="text-end">
-                  <a class="btn btn-light btn-sm shadow-sm"
-                     href="index.php?page=purchases&view=<?= (int)$c['id_compra'] ?>">
-                    <i class="bi bi-eye me-1"></i> Ver
-                  </a>
-
-                  <?php if ((string)$c['estado'] !== 'ANULADA'): ?>
-                    <button type="button" class="btn btn-danger btn-sm"
-                            onclick="openDeleteCompra(<?= (int)$c['id_compra'] ?>)">
-                      <i class="bi bi-trash me-1"></i> Eliminar
+                  <div class="actions">
+                    <button type="button" class="btn btn-light btn-sm"
+                      onclick="openViewCompra(<?= (int) $c['id_compra'] ?>)">
+                      <i class="bi bi-eye"></i>
+                      <span class="d-none d-md-inline ms-1">Ver</span>
                     </button>
-                  <?php endif; ?>
+
+                    <?php if ((string) $c['estado'] !== 'ANULADA'): ?>
+                      <button type="button" class="btn btn-danger btn-sm"
+                        onclick="openDeleteCompra(<?= (int) $c['id_compra'] ?>)">
+                        <i class="bi bi-trash"></i>
+                        <span class="d-none d-md-inline ms-1">Eliminar</span>
+                      </button>
+                    <?php endif; ?>
+                  </div>
                 </td>
               </tr>
             <?php endforeach; ?>
@@ -107,60 +118,6 @@ $estado = $filters['estado'] ?? 'TODOS';
       </div>
     </div>
   </div>
-
-  <?php if ($purchase): ?>
-    <div class="cardx mt-4">
-      <div class="hd d-flex justify-content-between flex-wrap gap-2">
-        <div>
-          <div class="fw-bold">Detalle · Compra #<?= (int)$purchase['id_compra'] ?></div>
-          <small class="text-muted">
-            <?= h($purchase['fecha']) ?> · <?= h($purchase['usuario'] ?? '') ?> ·
-            <span class="badge <?= ((string)$purchase['estado']==='ANULADA')?'bg-danger':'bg-success' ?>"><?= h($purchase['estado']) ?></span>
-          </small>
-        </div>
-        <a class="btn btn-light btn-sm shadow-sm" href="index.php?page=purchases">
-          <i class="bi bi-arrow-left me-1"></i> Volver
-        </a>
-      </div>
-
-      <div class="bd">
-        <div class="mb-3 text-muted"><i class="bi bi-chat-quote me-1"></i> <?= h($purchase['nota']) ?></div>
-
-        <div class="table-responsive">
-          <table class="table table-sm align-middle">
-            <thead>
-              <tr>
-                <th>SKU</th>
-                <th>Producto</th>
-                <th class="text-end">Cant.</th>
-                <th class="text-end">Precio</th>
-                <th class="text-end">Subtotal</th>
-              </tr>
-            </thead>
-            <tbody>
-              <?php $total = 0.0; foreach ($items as $it): $total += (float)$it['subtotal']; ?>
-                <tr>
-                  <td class="text-muted"><?= h($it['sku']) ?></td>
-                  <td><?= h($it['nombre']) ?></td>
-                  <td class="text-end"><?= (int)$it['cantidad'] ?></td>
-                  <td class="text-end">L. <?= number_format((float)$it['costo_unit'], 2) ?></td>
-                  <td class="text-end">L. <?= number_format((float)$it['subtotal'], 2) ?></td>
-                </tr>
-              <?php endforeach; ?>
-            </tbody>
-            <tfoot>
-              <tr>
-                <th colspan="4" class="text-end">TOTAL</th>
-                <th class="text-end">L. <?= number_format($total, 2) ?></th>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-
-      </div>
-    </div>
-  <?php endif; ?>
-
 </div>
 
 <!-- MODAL CREAR COMPRA -->
@@ -187,8 +144,8 @@ $estado = $filters['estado'] ?? 'TODOS';
               <select class="form-select" id="selProducto">
                 <option value="">-- Elegí un producto --</option>
                 <?php foreach ($products as $p): ?>
-                  <option value="<?= (int)$p['id_producto'] ?>" data-precio="<?= h($p['precio']) ?>">
-                    <?= h($p['nombre']) ?> (<?= h($p['sku']) ?>) · L. <?= number_format((float)$p['precio'],2) ?>
+                  <option value="<?= (int) $p['id_producto'] ?>" data-precio="<?= h($p['precio']) ?>">
+                    <?= h($p['nombre']) ?> (<?= h($p['sku']) ?>) · L. <?= number_format((float) $p['precio'], 2) ?>
                   </option>
                 <?php endforeach; ?>
               </select>
@@ -249,7 +206,54 @@ $estado = $filters['estado'] ?? 'TODOS';
     </div>
   </div>
 </div>
+<!-- MODAL VER COMPRA -->
+<div class="modal fade" id="modalViewCompra" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <h5 class="modal-title mb-0">Detalle de compra</h5>
+          <div class="small text-muted" id="viewMeta">Cargando...</div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
 
+      <div class="modal-body">
+        <div class="mb-3">
+          <div class="fw-semibold">Nota</div>
+          <div class="text-muted" id="viewNota">-</div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-sm align-middle mb-0">
+            <thead>
+              <tr>
+                <th>SKU</th>
+                <th>Producto</th>
+                <th class="text-end">Cant.</th>
+                <th class="text-end">Precio</th>
+                <th class="text-end">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody id="viewItems">
+              <tr><td colspan="5" class="text-center text-muted py-3">Cargando...</td></tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <th colspan="4" class="text-end">TOTAL</th>
+                <th class="text-end" id="viewTotal">L. 0.00</th>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
 <!-- MODAL ELIMINAR COMPRA -->
 <div class="modal fade" id="modalDeleteCompra" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
@@ -280,43 +284,43 @@ $estado = $filters['estado'] ?? 'TODOS';
 </div>
 
 <script>
-(function(){
-  const sel = document.getElementById('selProducto');
-  const qty = document.getElementById('inpCantidad');
-  const btn = document.getElementById('btnAdd');
-  const tbody = document.querySelector('#tblItems tbody');
-  const lblTotal = document.getElementById('lblTotal');
+  (function () {
+    const sel = document.getElementById('selProducto');
+    const qty = document.getElementById('inpCantidad');
+    const btn = document.getElementById('btnAdd');
+    const tbody = document.querySelector('#tblItems tbody');
+    const lblTotal = document.getElementById('lblTotal');
 
-  function money(n){
-    return 'L. ' + (Math.round((n + Number.EPSILON) * 100) / 100).toFixed(2);
-  }
+    function money(n) {
+      return 'L. ' + (Math.round((n + Number.EPSILON) * 100) / 100).toFixed(2);
+    }
 
-  function recomputeTotal(){
-    let total = 0;
-    tbody.querySelectorAll('tr[data-subtotal]').forEach(tr => {
-      total += parseFloat(tr.getAttribute('data-subtotal') || '0');
-    });
-    lblTotal.textContent = money(total);
-  }
+    function recomputeTotal() {
+      let total = 0;
+      tbody.querySelectorAll('tr[data-subtotal]').forEach(tr => {
+        total += parseFloat(tr.getAttribute('data-subtotal') || '0');
+      });
+      lblTotal.textContent = money(total);
+    }
 
-  btn?.addEventListener('click', () => {
-    const id = parseInt(sel.value || '0', 10);
-    if (!id) return;
+    btn?.addEventListener('click', () => {
+      const id = parseInt(sel.value || '0', 10);
+      if (!id) return;
 
-    const opt = sel.options[sel.selectedIndex];
-    const name = opt.textContent.trim();
-    const precio = parseFloat(opt.getAttribute('data-precio') || '0');
-    const cantidad = parseInt(qty.value || '1', 10);
-    if (cantidad <= 0) return;
+      const opt = sel.options[sel.selectedIndex];
+      const name = opt.textContent.trim();
+      const precio = parseFloat(opt.getAttribute('data-precio') || '0');
+      const cantidad = parseInt(qty.value || '1', 10);
+      if (cantidad <= 0) return;
 
-    const rowEmpty = document.getElementById('rowEmpty');
-    if (rowEmpty) rowEmpty.remove();
+      const rowEmpty = document.getElementById('rowEmpty');
+      if (rowEmpty) rowEmpty.remove();
 
-    const subtotal = precio * cantidad;
+      const subtotal = precio * cantidad;
 
-    const tr = document.createElement('tr');
-    tr.setAttribute('data-subtotal', String(subtotal));
-    tr.innerHTML = `
+      const tr = document.createElement('tr');
+      tr.setAttribute('data-subtotal', String(subtotal));
+      tr.innerHTML = `
       <td>
         <div class="fw-semibold">${name}</div>
         <input type="hidden" name="id_producto[]" value="${id}">
@@ -336,49 +340,109 @@ $estado = $filters['estado'] ?? 'TODOS';
         </button>
       </td>
     `;
-    tbody.appendChild(tr);
-    recomputeTotal();
-  });
+      tbody.appendChild(tr);
+      recomputeTotal();
+    });
 
-  tbody?.addEventListener('input', (e) => {
-    const tr = e.target.closest('tr');
-    if (!tr) return;
-    const cant = tr.querySelector('input[name="cantidad[]"]');
-    const cu = tr.querySelector('input[name="costo_unit[]"]');
-    if (!cant || !cu) return;
+    tbody?.addEventListener('input', (e) => {
+      const tr = e.target.closest('tr');
+      if (!tr) return;
+      const cant = tr.querySelector('input[name="cantidad[]"]');
+      const cu = tr.querySelector('input[name="costo_unit[]"]');
+      if (!cant || !cu) return;
 
-    const cantidad = parseInt(cant.value || '0', 10);
-    const precio = parseFloat(cu.value || '0');
-    const subtotal = Math.max(0, cantidad) * Math.max(0, precio);
+      const cantidad = parseInt(cant.value || '0', 10);
+      const precio = parseFloat(cu.value || '0');
+      const subtotal = Math.max(0, cantidad) * Math.max(0, precio);
 
-    tr.setAttribute('data-subtotal', String(subtotal));
-    const cell = tr.querySelector('td:nth-child(4) span');
-    if (cell) cell.textContent = money(subtotal);
-    recomputeTotal();
-  });
+      tr.setAttribute('data-subtotal', String(subtotal));
+      const cell = tr.querySelector('td:nth-child(4) span');
+      if (cell) cell.textContent = money(subtotal);
+      recomputeTotal();
+    });
 
-  tbody?.addEventListener('click', (e) => {
-    const btnDel = e.target.closest('.btnDel');
-    if (!btnDel) return;
-    const tr = btnDel.closest('tr');
-    tr.remove();
+    tbody?.addEventListener('click', (e) => {
+      const btnDel = e.target.closest('.btnDel');
+      if (!btnDel) return;
+      const tr = btnDel.closest('tr');
+      tr.remove();
 
-    if (!tbody.querySelector('tr[data-subtotal]')) {
-      const empty = document.createElement('tr');
-      empty.className = 'text-muted';
-      empty.id = 'rowEmpty';
-      empty.innerHTML = '<td colspan="5" class="text-center py-3">Agregá productos a la compra.</td>';
-      tbody.appendChild(empty);
-    }
-    recomputeTotal();
-  });
-})();
+      if (!tbody.querySelector('tr[data-subtotal]')) {
+        const empty = document.createElement('tr');
+        empty.className = 'text-muted';
+        empty.id = 'rowEmpty';
+        empty.innerHTML = '<td colspan="5" class="text-center py-3">Agregá productos a la compra.</td>';
+        tbody.appendChild(empty);
+      }
+      recomputeTotal();
+    });
+  })();
 </script>
 
 <script>
-function openDeleteCompra(id) {
-  document.getElementById('deleteCompraId').value = id;
-  const modal = new bootstrap.Modal(document.getElementById('modalDeleteCompra'));
+  function openDeleteCompra(id) {
+    document.getElementById('deleteCompraId').value = id;
+    const modal = new bootstrap.Modal(document.getElementById('modalDeleteCompra'));
+    modal.show();
+  }
+</script>
+<script>
+async function openViewCompra(id){
+  const modalEl = document.getElementById('modalViewCompra');
+  const modal = new bootstrap.Modal(modalEl);
+
+  // UI loading
+  document.getElementById('viewMeta').textContent = 'Cargando...';
+  document.getElementById('viewNota').textContent = '-';
+  document.getElementById('viewItems').innerHTML =
+    '<tr><td colspan="5" class="text-center text-muted py-3">Cargando...</td></tr>';
+  document.getElementById('viewTotal').textContent = 'L. 0.00';
+
   modal.show();
+
+  try{
+    const res = await fetch(`index.php?page=purchases&action=view_json&id=${id}`, {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    });
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+
+    // meta
+    document.getElementById('viewMeta').textContent =
+      `Compra #${data.id_compra} · ${data.fecha} · ${data.usuario} · ${data.estado}`;
+
+    document.getElementById('viewNota').textContent = data.nota || '-';
+
+    // items
+    let total = 0;
+    const rows = (data.items || []).map(it => {
+      total += parseFloat(it.subtotal || 0);
+      return `
+        <tr>
+          <td class="text-muted">${escapeHtml(it.sku || '')}</td>
+          <td>${escapeHtml(it.nombre || '')}</td>
+          <td class="text-end">${parseInt(it.cantidad || 0,10)}</td>
+          <td class="text-end">L. ${Number(it.costo_unit || 0).toFixed(2)}</td>
+          <td class="text-end">L. ${Number(it.subtotal || 0).toFixed(2)}</td>
+        </tr>
+      `;
+    }).join('');
+
+    document.getElementById('viewItems').innerHTML =
+      rows || '<tr><td colspan="5" class="text-center text-muted py-3">Sin items.</td></tr>';
+
+    document.getElementById('viewTotal').textContent = 'L. ' + total.toFixed(2);
+
+  }catch(err){
+    document.getElementById('viewMeta').textContent = 'Error cargando detalle';
+    document.getElementById('viewItems').innerHTML =
+      '<tr><td colspan="5" class="text-center text-danger py-3">No se pudo cargar el detalle.</td></tr>';
+  }
+}
+
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, s => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[s]));
 }
 </script>
