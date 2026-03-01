@@ -84,14 +84,16 @@ $events = Agenda::upcoming($idUser, 8);
           </div>
 
           <div class="col-md-6">
-            <div class="quick-card">
-              <div class="ic"><i class="bi bi-receipt"></i></div>
-              <div>
-                <div class="fw-bold">Ventas</div>
-                <small>Factura · pagos</small>
-              </div>
-            </div>
-          </div>
+  <a href="index.php?page=sales" class="quick-link">
+    <div class="quick-card">
+      <div class="ic"><i class="bi bi-receipt"></i></div>
+      <div>
+        <div class="fw-bold">Ventas</div>
+        <small>Facturación · salidas · estadísticas</small>
+      </div>
+    </div>
+  </a>
+</div>
 
           <div class="col-md-6">
             <div class="quick-card">

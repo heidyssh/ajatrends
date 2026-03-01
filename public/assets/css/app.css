@@ -1507,26 +1507,37 @@ user-select:none;
   background: rgba(72,138,148,.10);
   color: rgba(17,24,39,.75);
 }
-/* Layout tipo inspo: main + panel derecho */
+/* Layout Dashboard: main + panel derecho (Agenda) */
 .dash-layout{
-  display:grid;
-  grid-template-columns: 1fr 360px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;  /* panel derecho fijo */
   gap: 18px;
-  align-items:start;
+  align-items: start;
+  width: 100%;
 }
 
-.dash-main{ min-width:0; }
+.dash-main{
+  min-width: 0;
+}
 
 .dash-right{
+  width: 380px;
+  justify-self: end;       /* CLAVE: lo pega a la derecha del grid */
+  align-self: start;
   position: sticky;
   top: 16px;
-  align-self: start;
 }
 
-/* responsive */
-@media (max-width: 992px){
-  .dash-layout{ grid-template-columns:1fr; }
-  .dash-right{ position: static; }
+/* responsive (solo apilar cuando de verdad no cabe) */
+@media (max-width: 1200px){
+  .dash-layout{
+    grid-template-columns: 1fr;
+  }
+  .dash-right{
+    width: 100%;
+    position: static;
+    justify-self: stretch;
+  }
 }
 /* ===== BOTONES AJA ===== */
 
@@ -1727,4 +1738,58 @@ user-select:none;
   background: transparent !important;
   border: none !important;
   color: #111827 !important;
+}
+/* --- FIX: que el botón Guardar venta se vea siempre --- */
+#modalCreateVenta .modal-footer{
+  position: sticky;
+  bottom: 0;
+  background: #fff;
+  z-index: 10;
+  border-top: 1px solid rgba(0,0,0,.08);
+}
+/* =========================
+   SALES - ESTADOS (SOLIDOS)
+   Pegarlo AL FINAL del app.css
+   ========================= */
+
+.sales-page .status-pill{
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  padding:.35rem .75rem !important;
+  border-radius:999px !important;
+  font-weight:900 !important;
+  font-size:.80rem !important;
+  min-width:110px !important;
+  border:1px solid rgba(0,0,0,.12) !important;
+  background:#6c757d !important;
+  color:#fff !important;
+}
+
+/* VERDE */
+.sales-page .status-pill.st-ok{
+  background:#198754 !important;
+  border-color:#146c43 !important;
+  color:#fff !important;
+}
+
+/* ROJO */
+.sales-page .status-pill.st-danger{
+  background:#dc3545 !important;
+  border-color:#b02a37 !important;
+  color:#fff !important;
+}
+
+/* AZUL */
+.sales-page .status-pill.st-blue{
+  background:#0d6efd !important;
+  border-color:#0a58ca !important;
+  color:#fff !important;
+}
+
+/* GRIS */
+.sales-page .status-pill.st-neutral{
+  background:#6c757d !important;
+  border-color:#5c636a !important;
+  color:#fff !important;
 }

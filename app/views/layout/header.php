@@ -72,10 +72,10 @@ $userName = $_SESSION['user']['nombre'] ?? 'Admin';
   <div class="ic"><i class="bi bi-truck"></i></div>
   <span class="lbl">Compras</span>
 </a>
-            <a class="nav-item disabled-link" href="#">
-              <div class="ic"><i class="bi bi-receipt"></i></div>
-              <span class="lbl">Ventas</span>
-            </a>
+            <a class="nav-item <?= $page === 'sales' ? 'active' : '' ?>" href="index.php?page=sales">
+  <div class="ic"><i class="bi bi-receipt"></i></div>
+  <span class="lbl">Ventas</span>
+</a>
             <a class="nav-item disabled-link" href="#">
               <div class="ic"><i class="bi bi-box-seam"></i></div>
               <span class="lbl">Kardex</span>
@@ -110,6 +110,7 @@ $userName = $_SESSION['user']['nombre'] ?? 'Admin';
             </div>
 
             <div class="right d-flex align-items-center gap-2 gap-sm-3">
+              
               <span class="pill d-none d-lg-inline-flex">
                 <i class="bi bi-shield-lock"></i> Admin
               </span>
