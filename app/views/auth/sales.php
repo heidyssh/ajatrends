@@ -318,6 +318,10 @@ function money($n){ return 'L. ' . number_format((float)$n, 2); }
 
       <form method="post" action="index.php?page=sales" id="frmVenta">
         <input type="hidden" name="action" value="create">
+        <input type="hidden" name="_q" value="<?= h($q) ?>">
+<input type="hidden" name="_estado" value="<?= h($estado) ?>">
+<input type="hidden" name="_from" value="<?= h($from) ?>">
+<input type="hidden" name="_to" value="<?= h($to) ?>">
 
         <div class="modal-body">
 <div class="row g-3 mb-3">
@@ -443,21 +447,39 @@ function money($n){ return 'L. ' . number_format((float)$n, 2); }
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
 
-      <div class="modal-body">
-        <div class="mb-2">
-          <div class="fw-semibold">Cliente</div>
-          <div class="text-muted" id="viewCliente">-</div>
-        </div>
+     <form method="post" action="index.php?page=sales" id="frmEditVenta" class="mb-3">
+  <input type="hidden" name="action" value="update">
+  <input type="hidden" name="id_venta" id="editIdVenta" value="">
 
-        <div class="mb-3">
-          <div class="fw-semibold">Dirección</div>
-          <div class="text-muted" id="viewDir">-</div>
-        </div>
+  <input type="hidden" name="_q" value="<?= h($q) ?>">
+  <input type="hidden" name="_estado" value="<?= h($estado) ?>">
+  <input type="hidden" name="_from" value="<?= h($from) ?>">
+  <input type="hidden" name="_to" value="<?= h($to) ?>">
 
-        <div class="mb-3">
-          <div class="fw-semibold">Nota</div>
-          <div class="text-muted" id="viewNota">-</div>
-        </div>
+  <div class="row g-3">
+    <div class="col-12 col-lg-5">
+      <label class="form-label fw-semibold">Cliente</label>
+      <input type="text" class="form-control" name="cliente_txt" id="editCliente" value="" readonly>
+    </div>
+    <div class="col-12 col-lg-7">
+      <label class="form-label fw-semibold">Dirección</label>
+      <input type="text" class="form-control" name="direccion_txt" id="editDir" value="" readonly>
+    </div>
+    <div class="col-12">
+      <label class="form-label fw-semibold">Nota</label>
+      <input type="text" class="form-control" name="nota" id="editNota" value="" readonly>
+    </div>
+  </div>
+
+  <div class="d-flex gap-2 mt-3">
+    <button type="button" class="btn btn-outline-dark" id="btnEditVenta">
+      <i class="bi bi-pencil-square me-1"></i> Editar
+    </button>
+    <button type="submit" class="btn btn-brand" id="btnSaveVenta" disabled>
+      <i class="bi bi-check2-circle me-1"></i> Guardar cambios
+    </button>
+  </div>
+</form>
 
         <div class="table-responsive">
           <table class="table table-sm align-middle mb-0">
@@ -648,60 +670,33 @@ function openCancelVenta(id){
 }
 
 async function openViewVenta(id){
-  const modalEl = document.getElementById('modalViewVenta');
-  const modal = new bootstrap.Modal(modalEl);
+document.getElementById('editIdVenta').value = '';
+document.getElementById('editCliente').value = '';
+document.getElementById('editDir').value = '';
+document.getElementById('editNota').value = '';
+setEditEnabled(false);
 
-  document.getElementById('viewMeta').textContent = 'Cargando...';
-  document.getElementById('viewCliente').textContent = '-';
-  document.getElementById('viewDir').textContent = '-';
-  document.getElementById('viewNota').textContent = '-';
-  document.getElementById('viewItems').innerHTML =
-    '<tr><td colspan="5" class="text-center text-muted py-3">Cargando...</td></tr>';
-  document.getElementById('viewSub').textContent = 'L. 0.00';
-  document.getElementById('viewDesc').textContent = 'L. 0.00';
-  document.getElementById('viewTotal').textContent = 'L. 0.00';
+// cuando llega data:
+document.getElementById('editIdVenta').value = data.id_venta;
+document.getElementById('editCliente').value = data.cliente || '';
+document.getElementById('editDir').value = data.direccion || '';
+document.getElementById('editNota').value = data.nota || '';
 
-  modal.show();
-
-  try{
-    const res = await fetch(`index.php?page=sales&action=view_json&id=${id}`, {
-      headers: { 'X-Requested-With': 'XMLHttpRequest' }
-    });
-    if(!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-    if(!data.ok) throw new Error(data.message || 'Error');
-
-    document.getElementById('viewMeta').textContent =
-      `Venta #${data.id_venta} · ${data.fecha} · Estado: ${data.estado}`;
-
-    document.getElementById('viewCliente').textContent = data.cliente || '-';
-    const dir = [data.direccion, data.ciudad, data.referencia].filter(Boolean).join(' · ');
-    document.getElementById('viewDir').textContent = dir || '-';
-    document.getElementById('viewNota').textContent = data.nota || '-';
-
-    const rows = (data.items || []).map(it => `
-      <tr>
-        <td class="text-muted">${escapeHtml(it.sku || '')}</td>
-        <td>${escapeHtml(it.nombre || '')}</td>
-        <td class="text-end">${parseInt(it.cantidad || 0,10)}</td>
-        <td class="text-end">L. ${Number(it.precio_unit || 0).toFixed(2)}</td>
-        <td class="text-end">L. ${Number(it.subtotal || 0).toFixed(2)}</td>
-      </tr>
-    `).join('');
-
-    document.getElementById('viewItems').innerHTML =
-      rows || '<tr><td colspan="5" class="text-center text-muted py-3">Sin items.</td></tr>';
-
-    document.getElementById('viewSub').textContent = 'L. ' + Number(data.subtotal||0).toFixed(2);
-    document.getElementById('viewDesc').textContent = 'L. ' + Number(data.descuento||0).toFixed(2);
-    document.getElementById('viewTotal').textContent = 'L. ' + Number(data.total||0).toFixed(2);
-
-  }catch(err){
-    document.getElementById('viewMeta').textContent = 'Error cargando detalle';
-    document.getElementById('viewItems').innerHTML =
-      '<tr><td colspan="5" class="text-center text-danger py-3">No se pudo cargar el detalle.</td></tr>';
-  }
+function setEditEnabled(enabled){
+  const c = document.getElementById('editCliente');
+  const d = document.getElementById('editDir');
+  const n = document.getElementById('editNota');
+  const save = document.getElementById('btnSaveVenta');
+  c.readOnly = !enabled;
+  d.readOnly = !enabled;
+  n.readOnly = !enabled;
+  save.disabled = !enabled;
 }
+
+document.getElementById('btnEditVenta')?.addEventListener('click', () => {
+  setEditEnabled(true);
+  document.getElementById('editCliente')?.focus();
+});
 
 function escapeHtml(str){
   return String(str).replace(/[&<>"']/g, s => ({

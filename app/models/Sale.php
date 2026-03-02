@@ -15,7 +15,13 @@ final class Sale {
     $from = trim((string)($filters['from'] ?? ''));
     $to   = trim((string)($filters['to'] ?? ''));
 
-    $where = [];
+   $where[] = '(
+  v.id_venta = :idq
+  OR v.nota LIKE :nota
+  OR cl.nombre LIKE :cliente
+  OR v.cliente_txt LIKE :cliente
+  OR v.direccion_txt LIKE :cliente
+)';
     $params = [];
 
     if ($q !== '') {
@@ -54,6 +60,7 @@ final class Sale {
         u.nombre AS usuario,
         cl.nombre AS cliente,
         COALESCE(SUM(vd.cantidad),0) AS items
+        COALESCE(NULLIF(v.cliente_txt,''), cl.nombre) AS cliente,
       FROM ventas v
       INNER JOIN usuarios u ON u.id_usuario = v.id_usuario
       INNER JOIN clientes cl ON cl.id_cliente = v.id_cliente
@@ -201,14 +208,17 @@ final class Sale {
     throw new Exception("No existe ningún usuario en la tabla usuarios. Creá al menos 1 usuario admin.");
   }
 
-  public static function createVenta(
-    int $idUsuario,
-    int $idCliente,
-    int $idDireccion,
-    float $descuento,
-    string $nota,
-    array $items
-  ): int {
+ public static function createVenta(
+  int $idUsuario,
+  int $idCliente,
+  int $idDireccion,
+  float $descuento,
+  string $nota,
+  string $clienteTxt,
+  string $direccionTxt,
+  array $items
+): int {
+  
 
     if ($idCliente <= 0) throw new Exception('Elegí un cliente.');
     if ($idDireccion <= 0) throw new Exception('Elegí una dirección del cliente.');
@@ -243,20 +253,23 @@ final class Sale {
 
       // 1) insertar venta
       $st = $pdo->prepare("
-        INSERT INTO ventas
-          (id_usuario, id_cliente, id_direccion, fecha, estado, subtotal, descuento, total, nota)
-        VALUES
-          (:u, :c, :d, NOW(), 'PENDIENTE', :sub, :des, :tot, :nota)
-      ");
-      $st->execute([
-        ':u' => $uid,
-        ':c' => $idCliente,
-        ':d' => $idDireccion,
-        ':sub' => $subtotal,
-        ':des' => $descuento,
-        ':tot' => $total,
-        ':nota' => $nota,
-      ]);
+  INSERT INTO ventas
+    (id_usuario, id_cliente, id_direccion, fecha, estado, subtotal, descuento, total, nota, cliente_txt, direccion_txt)
+  VALUES
+    (:u, :c, :d, NOW(), 'PENDIENTE', :sub, :des, :tot, :nota, :ct, :dt)
+");
+$st->execute([
+  ':u' => $uid,
+  ':c' => $idCliente,
+  ':d' => $idDireccion,
+  ':sub' => $subtotal,
+  ':des' => $descuento,
+  ':tot' => $total,
+  ':nota' => $nota,
+  ':ct' => $clienteTxt,
+  ':dt' => $direccionTxt,
+]);
+
       $idVenta = (int)$pdo->lastInsertId();
 
       // 2) movimiento inventario SALIDA_VENTA
@@ -332,6 +345,16 @@ final class Sale {
       throw $e;
     }
   }
+  public static function updateLibre(int $idVenta, string $clienteTxt, string $direccionTxt, string $nota): void {
+  if ($idVenta <= 0) throw new Exception('ID inválido.');
+  $st = db()->prepare("UPDATE ventas SET cliente_txt=:ct, direccion_txt=:dt, nota=:n WHERE id_venta=:id LIMIT 1");
+  $st->execute([
+    ':ct' => $clienteTxt,
+    ':dt' => $direccionTxt,
+    ':n'  => $nota,
+    ':id' => $idVenta,
+  ]);
+}
 
   /* ===========================
      ANULAR VENTA (DEVUELVE STOCK)

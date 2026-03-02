@@ -112,45 +112,64 @@ final class SaleController {
         if ($idUser <= 0) $idUser = (int)($_SESSION['auth']['id_usuario'] ?? 0);
         if ($idUser <= 0) $idUser = (int)($_SESSION['user']['id'] ?? 0);
 
-        if ($action === 'create') {
-          // ✅ Ventas modo libreta: NO se selecciona cliente/dirección
-$idCliente   = 1; // CONSUMIDOR FINAL (de tu BD)
-$idDireccion = 1; // SIN DIRECCION (de tu BD)
+        // ... dentro de handle(), en POST actions:
 
-$descuento = (float)($post['descuento'] ?? 0);
+$filtersBack = [
+  'q' => trim((string)($post['_q'] ?? $filters['q'] ?? '')),
+  'estado' => (string)($post['_estado'] ?? $filters['estado'] ?? 'TODOS'),
+  'from' => (string)($post['_from'] ?? $filters['from'] ?? ''),
+  'to' => (string)($post['_to'] ?? $filters['to'] ?? ''),
+];
 
-// Texto libre escrito por ella
-$clienteTxt   = trim((string)($post['cliente_txt'] ?? ''));
-$direccionTxt = trim((string)($post['direccion_txt'] ?? ''));
-$notaBase     = trim((string)($post['nota'] ?? ''));
+if ($action === 'create') {
+  $idCliente   = 1; // CONSUMIDOR FINAL
+  $idDireccion = 1; // SIN DIRECCION
 
-if ($clienteTxt === '')   $clienteTxt = 'CONSUMIDOR FINAL';
-if ($direccionTxt === '') $direccionTxt = 'SIN DIRECCION';
+  $descuento = (float)($post['descuento'] ?? 0);
 
-// ✅ Guardamos todo como “libreta” en la nota
-$nota = "Cliente: $clienteTxt | Dirección: $direccionTxt";
-if ($notaBase !== '') $nota .= " | Nota: $notaBase";
+  $clienteTxt   = trim((string)($post['cliente_txt'] ?? ''));
+  $direccionTxt = trim((string)($post['direccion_txt'] ?? ''));
+  $nota         = trim((string)($post['nota'] ?? ''));
 
-          $ids = $post['id_producto'] ?? [];
-          $cants = $post['cantidad'] ?? [];
-          $pus = $post['precio_unit'] ?? [];
+  if ($clienteTxt === '')   $clienteTxt = 'CONSUMIDOR FINAL';
+  if ($direccionTxt === '') $direccionTxt = 'SIN DIRECCION';
 
-          $items = [];
-          if (is_array($ids) && is_array($cants)) {
-            $n = min(count($ids), count($cants));
-            for ($i = 0; $i < $n; $i++) {
-              $items[] = [
-                'id_producto' => (int)$ids[$i],
-                'cantidad' => (int)$cants[$i],
-                'precio_unit' => isset($pus[$i]) ? (float)$pus[$i] : 0,
-              ];
-            }
-          }
+  $ids = $post['id_producto'] ?? [];
+  $cants = $post['cantidad'] ?? [];
+  $pus = $post['precio_unit'] ?? [];
 
-          $idVenta = Sale::createVenta($idUser, $idCliente, $idDireccion, $descuento, $nota, $items);
-          $_SESSION['flash_success'] = "Venta #$idVenta registrada. Stock actualizado.";
-          self::redirectToSales($filters);
-        }
+  $items = [];
+  if (is_array($ids) && is_array($cants)) {
+    $n = min(count($ids), count($cants));
+    for ($i = 0; $i < $n; $i++) {
+      $items[] = [
+        'id_producto' => (int)$ids[$i],
+        'cantidad' => (int)$cants[$i],
+        'precio_unit' => isset($pus[$i]) ? (float)$pus[$i] : 0,
+      ];
+    }
+  }
+
+  $idVenta = Sale::createVenta($idUser, $idCliente, $idDireccion, $descuento, $nota, $clienteTxt, $direccionTxt, $items);
+  $_SESSION['flash_success'] = "Venta #$idVenta registrada. Stock actualizado.";
+  self::redirectToSales($filtersBack);
+}
+
+if ($action === 'update') {
+  $idVenta = (int)($post['id_venta'] ?? 0);
+  if ($idVenta <= 0) throw new Exception('ID inválido.');
+
+  $clienteTxt   = trim((string)($post['cliente_txt'] ?? ''));
+  $direccionTxt = trim((string)($post['direccion_txt'] ?? ''));
+  $nota         = trim((string)($post['nota'] ?? ''));
+
+  if ($clienteTxt === '')   $clienteTxt = 'CONSUMIDOR FINAL';
+  if ($direccionTxt === '') $direccionTxt = 'SIN DIRECCION';
+
+  Sale::updateLibre($idVenta, $clienteTxt, $direccionTxt, $nota);
+  $_SESSION['flash_success'] = "Venta #$idVenta actualizada.";
+  self::redirectToSales($filtersBack);
+}
 
         if ($action === 'cancel') {
           $idVenta = (int)($post['id_venta'] ?? 0);
