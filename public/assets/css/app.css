@@ -818,7 +818,67 @@ small{ color: var(--muted); }
   opacity: 0;
   pointer-events: none;
 }
+/* ====== Ventas: modal detalle (mismo look que compras) ====== */
+.sale-modal{
+  border-radius: 22px;
+  overflow: hidden;
+}
 
+/* Header ya hereda de .product-modal, pero ajustamos spacing */
+.sale-modal .modal-header{
+  padding: 18px 20px;
+}
+.sale-modal .modal-title{
+  font-weight: 950;
+  letter-spacing: .2px;
+}
+
+/* Body más aireado */
+.sale-modal .modal-body{
+  padding: 18px 20px 10px;
+}
+
+/* Inputs más “app” */
+.sale-modal .form-control{
+  border-radius: 14px;
+  border: 1px solid rgba(12,20,32,.10);
+  background: rgba(255,255,255,.65);
+}
+.sale-modal .form-label{
+  font-weight: 900;
+  color: rgba(12,20,32,.72);
+}
+
+/* Tabla menos pesada */
+.sale-table thead th{
+  font-size: .75rem;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  color: rgba(12,20,32,.55);
+  border-bottom: 1px solid rgba(12,20,32,.10) !important;
+}
+.sale-table td{
+  border-top: 1px solid rgba(12,20,32,.08);
+}
+.sale-table tfoot th{
+  border-top: 1px solid rgba(12,20,32,.10);
+  color: rgba(12,20,32,.72);
+}
+.sale-table tfoot tr:last-child th{
+  font-size: 1rem;
+}
+
+/* Footer limpio */
+.sale-modal .modal-footer{
+  border-top: 1px solid rgba(12,20,32,.08);
+  padding: 12px 20px 18px;
+}
+
+/* Botones: que no se vean “cuadrados” */
+.sale-modal .btn{
+  border-radius: 14px;
+  font-weight: 900;
+}
 .avatar-item img{
   width: 100%;
   height: 92px;

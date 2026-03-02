@@ -5,44 +5,51 @@ require_once __DIR__ . '/../helpers/auth.php';
 require_once __DIR__ . '/../models/Product.php';
 require_once __DIR__ . '/../models/Category.php';
 
-final class ProductController {
-  public static function ajax(array $get): array {
-    $id = (int)($get["view"] ?? 0);
-    if ($id <= 0) return ["ok" => false, "error" => "ID inválido"];
+final class ProductController
+{
+  public static function ajax(array $get): array
+  {
+    $id = (int) ($get["view"] ?? 0);
+    if ($id <= 0)
+      return ["ok" => false, "error" => "ID inválido"];
 
     $p = Product::find($id);
-    if (!$p) return ["ok" => false, "error" => "Producto no encontrado"];
+    if (!$p)
+      return ["ok" => false, "error" => "Producto no encontrado"];
 
     $imgs = Product::images($id);
-    if (!$imgs) $imgs = [["id_imagen" => 0, "url" => "assets/img/logo.jpeg", "es_principal" => 1]];
+    if (!$imgs)
+      $imgs = [["id_imagen" => 0, "url" => "assets/img/logo.jpeg", "es_principal" => 1]];
 
     return ["ok" => true, "product" => $p, "images" => $imgs];
   }
 
-private static function redirectToProducts(array $filters): void {
-  $qs = http_build_query([
-    'page' => 'products',
-    'q' => $filters['q'] ?? '',
-    'cat' => (int)($filters['cat'] ?? 0),
-    'min' => $filters['min'] ?? '',
-    'max' => $filters['max'] ?? '',
-    'estado' => $filters['estado'] ?? '',
-  ]);
+  private static function redirectToProducts(array $filters): void
+  {
+    $qs = http_build_query([
+      'page' => 'products',
+      'q' => $filters['q'] ?? '',
+      'cat' => (int) ($filters['cat'] ?? 0),
+      'min' => $filters['min'] ?? '',
+      'max' => $filters['max'] ?? '',
+      'estado' => $filters['estado'] ?? '',
+    ]);
 
-  header('Location: index.php?' . $qs);
-  exit;
-}
-  public static function handle(array $post, array $files, array $get): array {
+    header('Location: index.php?' . $qs);
+    exit;
+  }
+  public static function handle(array $post, array $files, array $get): array
+  {
     // Siempre devolvemos listas para pintar la pantalla
     $data = [
       'error' => '',
       'success' => '',
       'filters' => [
-        'q' => trim((string)($get['q'] ?? '')),
-        'cat' => (int)($get['cat'] ?? 0),
-        'min' => (string)($get['min'] ?? ''),
-        'max' => (string)($get['max'] ?? ''),
-        'estado' => (string)($get['estado'] ?? ''),
+        'q' => trim((string) ($get['q'] ?? '')),
+        'cat' => (int) ($get['cat'] ?? 0),
+        'min' => (string) ($get['min'] ?? ''),
+        'max' => (string) ($get['max'] ?? ''),
+        'estado' => (string) ($get['estado'] ?? ''),
       ],
       'categories' => Category::allActive(),
       'products' => [],
@@ -53,52 +60,82 @@ private static function redirectToProducts(array $filters): void {
 
     // Acciones admin (CRUD)
     if (!empty($post)) {
-      $action = (string)($post['action'] ?? '');
+      $action = (string) ($post['action'] ?? '');
 
       // Acciones que modifican requieren admin
       $mutating = in_array($action, ['create', 'update', 'delete', 'delete_image', 'set_principal'], true);
-      if ($mutating) require_admin();
+      if ($mutating)
+        require_admin();
 
       try {
         if ($action === 'create') {
           $payload = self::sanitizeProductPayload($post);
           $id = Product::create($payload);
+
+          $idUser = (int) ($_SESSION['user']['id_usuario'] ?? 0);
+          if ($idUser <= 0)
+            $idUser = (int) ($_SESSION['usuario']['id_usuario'] ?? 0);
+          if ($idUser <= 0)
+            $idUser = (int) ($_SESSION['auth']['id_usuario'] ?? 0);
+          if ($idUser <= 0)
+            $idUser = (int) ($_SESSION['user']['id'] ?? 0);
+
+          $stockTarget = (int) ($post['stock'] ?? 0);
+          if ($stockTarget > 0) {
+            Product::setStock($id, $stockTarget, $idUser, 'Stock inicial desde Productos');
+          }
+
           self::handleUploads($id, $files);
           $_SESSION['flash_success'] = 'Producto creado con éxito.';
           self::redirectToProducts($data['filters']);
         }
 
         if ($action === 'update') {
-          $id = (int)($post['id_producto'] ?? 0);
-          if ($id <= 0) throw new Exception('ID de producto inválido.');
+          $id = (int) ($post['id_producto'] ?? 0);
+          if ($id <= 0)
+            throw new Exception('ID de producto inválido.');
           $payload = self::sanitizeProductPayload($post);
           Product::update($id, $payload);
+          $idUser = (int) ($_SESSION['user']['id_usuario'] ?? 0);
+          if ($idUser <= 0)
+            $idUser = (int) ($_SESSION['usuario']['id_usuario'] ?? 0);
+          if ($idUser <= 0)
+            $idUser = (int) ($_SESSION['auth']['id_usuario'] ?? 0);
+          if ($idUser <= 0)
+            $idUser = (int) ($_SESSION['user']['id'] ?? 0);
+
+          $stockTarget = (int) ($post['stock'] ?? -1);
+          if ($stockTarget >= 0) {
+            Product::setStock($id, $stockTarget, $idUser, 'Ajuste manual desde Productos');
+          }
           self::handleUploads($id, $files);
           $_SESSION['flash_success'] = 'Producto actualizado con éxito.';
           self::redirectToProducts($data['filters']);
-          
         }
 
         if ($action === 'delete') {
-          $id = (int)($post['id_producto'] ?? 0);
-          if ($id <= 0) throw new Exception('ID de producto inválido.');
+          $id = (int) ($post['id_producto'] ?? 0);
+          if ($id <= 0)
+            throw new Exception('ID de producto inválido.');
           Product::delete($id);
           $_SESSION['flash_success'] = 'Producto eliminado.';
           self::redirectToProducts($data['filters']);
         }
 
         if ($action === 'delete_image') {
-          $idImagen = (int)($post['id_imagen'] ?? 0);
-          if ($idImagen <= 0) throw new Exception('ID de imagen inválido.');
+          $idImagen = (int) ($post['id_imagen'] ?? 0);
+          if ($idImagen <= 0)
+            throw new Exception('ID de imagen inválido.');
           Product::deleteImage($idImagen);
           $_SESSION['flash_success'] = 'Imagen eliminada.';
           self::redirectToProducts($data['filters']);
         }
 
         if ($action === 'set_principal') {
-          $id = (int)($post['id_producto'] ?? 0);
-          $idImagen = (int)($post['id_imagen'] ?? 0);
-          if ($id <= 0 || $idImagen <= 0) throw new Exception('Datos inválidos.');
+          $id = (int) ($post['id_producto'] ?? 0);
+          $idImagen = (int) ($post['id_imagen'] ?? 0);
+          if ($id <= 0 || $idImagen <= 0)
+            throw new Exception('Datos inválidos.');
           Product::setPrincipalImage($id, $idImagen);
           $_SESSION['flash_success'] = 'Imagen principal actualizada.';
           self::redirectToProducts($data['filters']);
@@ -114,7 +151,7 @@ private static function redirectToProducts(array $filters): void {
     $data['products'] = Product::list($data['filters']);
 
     // Si piden detalle (para modal/offcanvas via query)
-    $idView = (int)($get['view'] ?? 0);
+    $idView = (int) ($get['view'] ?? 0);
     if ($idView > 0) {
       $data['product'] = Product::find($idView);
       $data['images'] = Product::images($idView);
@@ -123,19 +160,20 @@ private static function redirectToProducts(array $filters): void {
     return $data;
   }
 
-  private static function sanitizeProductPayload(array $post): array {
-    $sku = trim((string)($post['sku'] ?? ''));
-    $nombre = trim((string)($post['nombre'] ?? ''));
-    $idCategoria = (int)($post['id_categoria'] ?? 0);
+  private static function sanitizeProductPayload(array $post): array
+  {
+    $sku = trim((string) ($post['sku'] ?? ''));
+    $nombre = trim((string) ($post['nombre'] ?? ''));
+    $idCategoria = (int) ($post['id_categoria'] ?? 0);
 
     if ($sku === '' || $nombre === '' || $idCategoria <= 0) {
       throw new Exception('Completá SKU, nombre y categoría.');
     }
 
-    $costo = (float)($post['costo'] ?? 0);
-    $precio = (float)($post['precio'] ?? 0);
-    $stockMin = (int)($post['stock_min'] ?? 0);
-    $estado = (int)($post['estado'] ?? 1);
+    $costo = (float) ($post['costo'] ?? 0);
+    $precio = (float) ($post['precio'] ?? 0);
+    $stockMin = (int) ($post['stock_min'] ?? 0);
+    $estado = (int) ($post['estado'] ?? 1);
 
     return [
       'sku' => $sku,
@@ -145,12 +183,14 @@ private static function redirectToProducts(array $filters): void {
       'precio' => $precio,
       'stock_min' => $stockMin,
       'estado' => $estado ? 1 : 0,
-      'descripcion' => (string)($post['descripcion'] ?? ''),
+      'descripcion' => (string) ($post['descripcion'] ?? ''),
     ];
   }
 
-  private static function handleUploads(int $idProducto, array $files): void {
-    if (!isset($files['imagenes'])) return;
+  private static function handleUploads(int $idProducto, array $files): void
+  {
+    if (!isset($files['imagenes']))
+      return;
 
     $destDir = __DIR__ . '/../../public/assets/img/products';
     if (!is_dir($destDir)) {
@@ -175,26 +215,95 @@ private static function redirectToProducts(array $filters): void {
     $existing = Product::images($idProducto);
     $hasPrincipal = false;
     foreach ($existing as $e) {
-      if ((int)$e['es_principal'] === 1) { $hasPrincipal = true; break; }
+      if ((int) $e['es_principal'] === 1) {
+        $hasPrincipal = true;
+        break;
+      }
     }
 
-    for ($i=0; $i<count($names); $i++) {
-      if (($err[$i] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) continue;
+    for ($i = 0; $i < count($names); $i++) {
+      if (($err[$i] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK)
+        continue;
 
-      $original = (string)$names[$i];
+      $original = (string) $names[$i];
       $ext = strtolower(pathinfo($original, PATHINFO_EXTENSION));
-      if (!in_array($ext, ['jpg','jpeg','png','webp'], true)) continue;
+      if (!in_array($ext, ['jpg', 'jpeg', 'png', 'webp'], true))
+        continue;
 
       $safe = preg_replace('/[^a-zA-Z0-9_-]/', '_', pathinfo($original, PATHINFO_FILENAME));
       $filename = $idProducto . '_' . date('Ymd_His') . '_' . bin2hex(random_bytes(3)) . '_' . $safe . '.' . $ext;
       $dest = $destDir . '/' . $filename;
 
-      if (!move_uploaded_file($tmp[$i], $dest)) continue;
+      if (!move_uploaded_file($tmp[$i], $dest))
+        continue;
 
       $publicUrl = 'assets/img/products/' . $filename;
       $makePrincipal = !$hasPrincipal && $i === 0; // primera subida, se vuelve principal
       Product::addImage($idProducto, $publicUrl, $makePrincipal);
-      if ($makePrincipal) $hasPrincipal = true;
+      if ($makePrincipal)
+        $hasPrincipal = true;
     }
   }
+  public static function stockActual(int $idProducto): int {
+  $st = db()->prepare("
+    SELECT imd.stock_despues
+    FROM inventario_mov_detalle imd
+    WHERE imd.id_producto = :p
+    ORDER BY imd.id_mov_det DESC
+    LIMIT 1
+  ");
+  $st->execute([':p' => $idProducto]);
+  $r = $st->fetch();
+  return $r ? (int)$r['stock_despues'] : 0;
+}
+
+public static function setStock(int $idProducto, int $stockTarget, int $idUsuario, string $nota = ''): void {
+  if ($idProducto <= 0) throw new Exception('Producto inválido.');
+  if ($stockTarget < 0) throw new Exception('Stock inválido.');
+
+  $pdo = db();
+  $pdo->beginTransaction();
+  try {
+    $stockAntes = self::stockActual($idProducto);
+    $diff = $stockTarget - $stockAntes;
+
+    if ($diff === 0) { $pdo->commit(); return; }
+
+    if (trim($nota) === '') $nota = 'Ajuste de stock';
+
+    $st = $pdo->prepare("
+      INSERT INTO inventario_movimientos (fecha, tipo, ref_tabla, ref_id, id_usuario, nota)
+      VALUES (NOW(), 'AJUSTE_STOCK', 'productos', :rid, :u, :nota)
+    ");
+    $st->execute([
+      ':rid' => $idProducto,
+      ':u' => $idUsuario,
+      ':nota' => $nota
+    ]);
+    $idMov = (int)$pdo->lastInsertId();
+
+    // costo_unit: usar costo actual del producto (sirve para tus stats)
+    $stC = $pdo->prepare("SELECT costo FROM productos WHERE id_producto=:p LIMIT 1");
+    $stC->execute([':p' => $idProducto]);
+    $costoUnit = (float)($stC->fetch()['costo'] ?? 0);
+
+    $stDet = $pdo->prepare("
+      INSERT INTO inventario_mov_detalle (id_mov, id_producto, cantidad, costo_unit, stock_antes, stock_despues)
+      VALUES (:m, :p, :cant, :cu, :antes, :despues)
+    ");
+    $stDet->execute([
+      ':m' => $idMov,
+      ':p' => $idProducto,
+      ':cant' => $diff,              // positivo sube, negativo baja
+      ':cu' => $costoUnit,
+      ':antes' => $stockAntes,
+      ':despues' => $stockTarget,
+    ]);
+
+    $pdo->commit();
+  } catch (Throwable $e) {
+    $pdo->rollBack();
+    throw $e;
+  }
+}
 }

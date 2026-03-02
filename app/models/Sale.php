@@ -3,31 +3,26 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../config/database.php';
 
-final class Sale {
+final class Sale
+{
 
   /* ===========================
      LISTADO / DETALLE
   =========================== */
 
-  public static function list(array $filters = []): array {
-    $q = trim((string)($filters['q'] ?? ''));
-    $estado = trim((string)($filters['estado'] ?? 'TODOS'));
-    $from = trim((string)($filters['from'] ?? ''));
-    $to   = trim((string)($filters['to'] ?? ''));
+  public static function list(array $filters = []): array
+  {
+    $q = trim((string) ($filters['q'] ?? ''));
+    $estado = trim((string) ($filters['estado'] ?? 'TODOS'));
+    $from = trim((string) ($filters['from'] ?? ''));
+    $to = trim((string) ($filters['to'] ?? ''));
 
-   $where[] = '(
-  v.id_venta = :idq
-  OR v.nota LIKE :nota
-  OR cl.nombre LIKE :cliente
-  OR v.cliente_txt LIKE :cliente
-  OR v.direccion_txt LIKE :cliente
-)';
+    $where = [];
     $params = [];
-
     if ($q !== '') {
       // Buscar por id_venta o por nota o por cliente
       $where[] = '(v.id_venta = :idq OR v.nota LIKE :nota OR cl.nombre LIKE :cliente)';
-      $params[':idq'] = ctype_digit($q) ? (int)$q : 0;
+      $params[':idq'] = ctype_digit($q) ? (int) $q : 0;
       $params[':nota'] = "%$q%";
       $params[':cliente'] = "%$q%";
     }
@@ -49,41 +44,48 @@ final class Sale {
     $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
 
     $sql = "
-      SELECT
-        v.id_venta,
-        v.fecha,
-        v.estado,
-        v.subtotal,
-        v.descuento,
-        v.total,
-        v.nota,
-        u.nombre AS usuario,
-        cl.nombre AS cliente,
-        COALESCE(SUM(vd.cantidad),0) AS items
-        COALESCE(NULLIF(v.cliente_txt,''), cl.nombre) AS cliente,
-      FROM ventas v
-      INNER JOIN usuarios u ON u.id_usuario = v.id_usuario
-      INNER JOIN clientes cl ON cl.id_cliente = v.id_cliente
-      LEFT JOIN ventas_detalle vd ON vd.id_venta = v.id_venta
-      $whereSql
-      GROUP BY v.id_venta
-      ORDER BY v.id_venta DESC
-    ";
+  SELECT
+    v.id_venta,
+    v.fecha,
+    v.estado,
+    v.subtotal,
+    v.descuento,
+    v.total,
+    v.nota,
+    u.nombre AS usuario,
+    COALESCE(NULLIF(v.cliente_txt,''), cl.nombre) AS cliente,
+    COALESCE(SUM(vd.cantidad),0) AS items
+  FROM ventas v
+  INNER JOIN usuarios u ON u.id_usuario = v.id_usuario
+  INNER JOIN clientes cl ON cl.id_cliente = v.id_cliente
+  LEFT JOIN ventas_detalle vd ON vd.id_venta = v.id_venta
+  $whereSql
+  GROUP BY v.id_venta
+  ORDER BY v.id_venta DESC
+";
 
     $st = db()->prepare($sql);
     $st->execute($params);
     return $st->fetchAll();
   }
 
-  public static function find(int $idVenta): ?array {
+  public static function find(int $idVenta): ?array
+  {
     $st = db()->prepare("
       SELECT
         v.*,
-        u.nombre AS usuario,
-        cl.nombre AS cliente,
-        d.direccion_linea,
-        d.ciudad,
-        d.referencia
+        COALESCE(NULLIF(v.cliente_txt,''), cl.nombre) AS cliente,
+COALESCE(NULLIF(v.direccion_txt,''), d.direccion_linea) AS direccion_linea,
+
+CASE 
+  WHEN TRIM(COALESCE(v.direccion_txt,'')) <> '' THEN ''
+  ELSE d.ciudad
+END AS ciudad,
+
+CASE 
+  WHEN TRIM(COALESCE(v.direccion_txt,'')) <> '' THEN ''
+  ELSE d.referencia
+END AS referencia
       FROM ventas v
       INNER JOIN usuarios u ON u.id_usuario = v.id_usuario
       INNER JOIN clientes cl ON cl.id_cliente = v.id_cliente
@@ -96,7 +98,8 @@ final class Sale {
     return $row ?: null;
   }
 
-  public static function items(int $idVenta): array {
+  public static function items(int $idVenta): array
+  {
     $st = db()->prepare("
       SELECT
         vd.id_venta_det,
@@ -119,7 +122,8 @@ final class Sale {
      CATALOGOS
   =========================== */
 
-  public static function clientes(): array {
+  public static function clientes(): array
+  {
     return db()->query("
       SELECT id_cliente, nombre, telefono, email
       FROM clientes
@@ -127,7 +131,8 @@ final class Sale {
     ")->fetchAll();
   }
 
-  public static function direccionesByCliente(int $idCliente): array {
+  public static function direccionesByCliente(int $idCliente): array
+  {
     $st = db()->prepare("
       SELECT id_direccion, direccion_linea, ciudad, referencia, es_principal
       FROM cliente_direcciones
@@ -138,7 +143,8 @@ final class Sale {
     return $st->fetchAll();
   }
 
-  public static function productosActivosConStock(): array {
+  public static function productosActivosConStock(): array
+  {
     // stock actual = ultimo stock_despues en inventario_mov_detalle
     $sql = "
       SELECT
@@ -160,7 +166,8 @@ final class Sale {
     return db()->query($sql)->fetchAll();
   }
 
-  public static function stockActual(int $idProducto): int {
+  public static function stockActual(int $idProducto): int
+  {
     $st = db()->prepare("
       SELECT imd.stock_despues
       FROM inventario_mov_detalle imd
@@ -170,14 +177,15 @@ final class Sale {
     ");
     $st->execute([':p' => $idProducto]);
     $r = $st->fetch();
-    return $r ? (int)$r['stock_despues'] : 0;
+    return $r ? (int) $r['stock_despues'] : 0;
   }
 
   /**
    * Costo estimado actual: último costo_unit de ENTRADA_COMPRA para ese producto.
    * (Esto sirve para estadística de utilidad: ganancia ≈ ventas - costo)
    */
-  public static function costoEstimado(int $idProducto): float {
+  public static function costoEstimado(int $idProducto): float
+  {
     $st = db()->prepare("
       SELECT imd.costo_unit
       FROM inventario_mov_detalle imd
@@ -189,41 +197,48 @@ final class Sale {
     ");
     $st->execute([':p' => $idProducto]);
     $r = $st->fetch();
-    return $r ? (float)$r['costo_unit'] : 0.0;
+    return $r ? (float) $r['costo_unit'] : 0.0;
   }
 
   /* ===========================
      CREAR VENTA (SALIDA STOCK)
   =========================== */
 
-  private static function resolveUserId(PDO $pdo, int $preferred): int {
+  private static function resolveUserId(PDO $pdo, int $preferred): int
+  {
     if ($preferred > 0) {
       $st = $pdo->prepare("SELECT id_usuario FROM usuarios WHERE id_usuario=:u LIMIT 1");
       $st->execute([':u' => $preferred]);
-      if ($st->fetch()) return $preferred;
+      if ($st->fetch())
+        return $preferred;
     }
     $st = $pdo->query("SELECT id_usuario FROM usuarios ORDER BY id_usuario ASC LIMIT 1");
     $r = $st->fetch();
-    if ($r) return (int)$r['id_usuario'];
+    if ($r)
+      return (int) $r['id_usuario'];
     throw new Exception("No existe ningún usuario en la tabla usuarios. Creá al menos 1 usuario admin.");
   }
 
- public static function createVenta(
-  int $idUsuario,
-  int $idCliente,
-  int $idDireccion,
-  float $descuento,
-  string $nota,
-  string $clienteTxt,
-  string $direccionTxt,
-  array $items
-): int {
-  
+  public static function createVenta(
+    int $idUsuario,
+    int $idCliente,
+    int $idDireccion,
+    float $descuento,
+    string $nota,
+    string $clienteTxt,
+    string $direccionTxt,
+    array $items
+  ): int {
 
-    if ($idCliente <= 0) throw new Exception('Elegí un cliente.');
-    if ($idDireccion <= 0) throw new Exception('Elegí una dirección del cliente.');
-    if (!$items) throw new Exception('Agregá al menos 1 producto.');
-    if ($descuento < 0) $descuento = 0;
+
+    if ($idCliente <= 0)
+      throw new Exception('Elegí un cliente.');
+    if ($idDireccion <= 0)
+      throw new Exception('Elegí una dirección del cliente.');
+    if (!$items)
+      throw new Exception('Agregá al menos 1 producto.');
+    if ($descuento < 0)
+      $descuento = 0;
 
     $pdo = db();
     $pdo->beginTransaction();
@@ -234,22 +249,26 @@ final class Sale {
       // validar cliente/direccion
       $st = $pdo->prepare("SELECT id_cliente FROM clientes WHERE id_cliente=:c LIMIT 1");
       $st->execute([':c' => $idCliente]);
-      if (!$st->fetch()) throw new Exception('Cliente inválido.');
+      if (!$st->fetch())
+        throw new Exception('Cliente inválido.');
 
       $st = $pdo->prepare("SELECT id_direccion FROM cliente_direcciones WHERE id_direccion=:d AND id_cliente=:c LIMIT 1");
       $st->execute([':d' => $idDireccion, ':c' => $idCliente]);
-      if (!$st->fetch()) throw new Exception('Dirección inválida para ese cliente.');
+      if (!$st->fetch())
+        throw new Exception('Dirección inválida para ese cliente.');
 
       // calcular subtotal
       $subtotal = 0.0;
       foreach ($items as $it) {
-        $cant = (int)($it['cantidad'] ?? 0);
-        $pu = (float)($it['precio_unit'] ?? 0);
-        if ($cant > 0 && $pu >= 0) $subtotal += ($cant * $pu);
+        $cant = (int) ($it['cantidad'] ?? 0);
+        $pu = (float) ($it['precio_unit'] ?? 0);
+        if ($cant > 0 && $pu >= 0)
+          $subtotal += ($cant * $pu);
       }
 
       $total = max(0, $subtotal - $descuento);
-      if (trim($nota) === '') $nota = 'Venta registrada';
+      if (trim($nota) === '')
+        $nota = 'Venta registrada';
 
       // 1) insertar venta
       $st = $pdo->prepare("
@@ -258,19 +277,19 @@ final class Sale {
   VALUES
     (:u, :c, :d, NOW(), 'PENDIENTE', :sub, :des, :tot, :nota, :ct, :dt)
 ");
-$st->execute([
-  ':u' => $uid,
-  ':c' => $idCliente,
-  ':d' => $idDireccion,
-  ':sub' => $subtotal,
-  ':des' => $descuento,
-  ':tot' => $total,
-  ':nota' => $nota,
-  ':ct' => $clienteTxt,
-  ':dt' => $direccionTxt,
-]);
+      $st->execute([
+        ':u' => $uid,
+        ':c' => $idCliente,
+        ':d' => $idDireccion,
+        ':sub' => $subtotal,
+        ':des' => $descuento,
+        ':tot' => $total,
+        ':nota' => $nota,
+        ':ct' => $clienteTxt,
+        ':dt' => $direccionTxt,
+      ]);
 
-      $idVenta = (int)$pdo->lastInsertId();
+      $idVenta = (int) $pdo->lastInsertId();
 
       // 2) movimiento inventario SALIDA_VENTA
       $st = $pdo->prepare("
@@ -278,7 +297,7 @@ $st->execute([
         VALUES (NOW(), 'SALIDA_VENTA', 'ventas', :rid, :u, :nota)
       ");
       $st->execute([':rid' => $idVenta, ':u' => $uid, ':nota' => $nota]);
-      $idMov = (int)$pdo->lastInsertId();
+      $idMov = (int) $pdo->lastInsertId();
 
       $stDet = $pdo->prepare("
         INSERT INTO ventas_detalle (id_venta, id_producto, cantidad, precio_unit, subtotal)
@@ -293,15 +312,21 @@ $st->execute([
       ");
 
       foreach ($items as $it) {
-        $idProducto = (int)($it['id_producto'] ?? 0);
-        $cantidad   = (int)($it['cantidad'] ?? 0);
-        $pu         = (float)($it['precio_unit'] ?? 0);
+        $idProducto = (int) ($it['id_producto'] ?? 0);
+        $cantidad = (int) ($it['cantidad'] ?? 0);
+        $pu = (float) ($it['precio_unit'] ?? 0);
 
-        if ($idProducto <= 0 || $cantidad <= 0) continue;
+        if ($idProducto <= 0 || $cantidad <= 0)
+          continue;
 
         $stockAntes = self::stockActual($idProducto);
         if ($stockAntes < $cantidad) {
-          throw new Exception("Stock insuficiente para el producto #$idProducto. Stock: $stockAntes, solicitado: $cantidad.");
+          $stP = db()->prepare("SELECT nombre, sku FROM productos WHERE id_producto=:p LIMIT 1");
+          $stP->execute([':p' => $idProducto]);
+          $pr = $stP->fetch() ?: ['nombre' => "Producto #$idProducto", 'sku' => ''];
+          $nom = (string) $pr['nombre'];
+          $sku = (string) $pr['sku'];
+          throw new Exception("Sin stock: {$nom} (SKU: {$sku}). Disponible: {$stockAntes}. Solicitado: {$cantidad}. Podés registrar una compra o ajustar stock en Productos.");
         }
 
         $sub = $cantidad * $pu;
@@ -333,7 +358,7 @@ $st->execute([
       // validar al menos 1 item guardado
       $st = $pdo->prepare("SELECT COUNT(*) n FROM ventas_detalle WHERE id_venta=:v");
       $st->execute([':v' => $idVenta]);
-      if ((int)($st->fetch()['n'] ?? 0) <= 0) {
+      if ((int) ($st->fetch()['n'] ?? 0) <= 0) {
         throw new Exception("No se guardó detalle de venta.");
       }
 
@@ -345,28 +370,34 @@ $st->execute([
       throw $e;
     }
   }
-  public static function updateLibre(int $idVenta, string $clienteTxt, string $direccionTxt, string $nota): void {
-  if ($idVenta <= 0) throw new Exception('ID inválido.');
-  $st = db()->prepare("UPDATE ventas SET cliente_txt=:ct, direccion_txt=:dt, nota=:n WHERE id_venta=:id LIMIT 1");
-  $st->execute([
-    ':ct' => $clienteTxt,
-    ':dt' => $direccionTxt,
-    ':n'  => $nota,
-    ':id' => $idVenta,
-  ]);
-}
+  public static function updateLibre(int $idVenta, string $clienteTxt, string $direccionTxt, string $nota): void
+  {
+    if ($idVenta <= 0)
+      throw new Exception('ID inválido.');
+    $st = db()->prepare("UPDATE ventas SET cliente_txt=:ct, direccion_txt=:dt, nota=:n WHERE id_venta=:id LIMIT 1");
+    $st->execute([
+      ':ct' => $clienteTxt,
+      ':dt' => $direccionTxt,
+      ':n' => $nota,
+      ':id' => $idVenta,
+    ]);
+  }
 
   /* ===========================
      ANULAR VENTA (DEVUELVE STOCK)
   =========================== */
 
-  public static function cancel(int $idVenta, int $idUsuario, string $nota = 'Venta anulada'): void {
+  public static function cancel(int $idVenta, int $idUsuario, string $nota = 'Venta anulada'): void
+  {
     $venta = self::find($idVenta);
-    if (!$venta) throw new Exception('La venta no existe.');
-    if ((string)$venta['estado'] === 'ANULADA') throw new Exception('Esta venta ya está ANULADA.');
+    if (!$venta)
+      throw new Exception('La venta no existe.');
+    if ((string) $venta['estado'] === 'ANULADA')
+      throw new Exception('Esta venta ya está ANULADA.');
 
     $items = self::items($idVenta);
-    if (!$items) throw new Exception('Esta venta no tiene detalle.');
+    if (!$items)
+      throw new Exception('Esta venta no tiene detalle.');
 
     $pdo = db();
     $pdo->beginTransaction();
@@ -384,7 +415,7 @@ $st->execute([
         VALUES (NOW(), 'ENTRADA_ANULACION_VENTA', 'ventas', :rid, :u, :nota)
       ");
       $st->execute([':rid' => $idVenta, ':u' => $uid, ':nota' => $nota]);
-      $idMov = (int)$pdo->lastInsertId();
+      $idMov = (int) $pdo->lastInsertId();
 
       $stMovDet = $pdo->prepare("
         INSERT INTO inventario_mov_detalle
@@ -394,8 +425,8 @@ $st->execute([
       ");
 
       foreach ($items as $it) {
-        $idProducto = (int)$it['id_producto'];
-        $cantidad = (int)$it['cantidad'];
+        $idProducto = (int) $it['id_producto'];
+        $cantidad = (int) $it['cantidad'];
 
         $stockAntes = self::stockActual($idProducto);
         $stockDespues = $stockAntes + $cantidad; // devuelve
@@ -418,24 +449,89 @@ $st->execute([
       throw $e;
     }
   }
+  public static function complete(int $idVenta): void
+{
+  if ($idVenta <= 0) throw new Exception('ID inválido.');
+
+  $venta = self::find($idVenta);
+  if (!$venta) throw new Exception('La venta no existe.');
+  if ((string)$venta['estado'] === 'ANULADA') throw new Exception('No podés completar una venta ANULADA.');
+  if ((string)$venta['estado'] === 'ENTREGADA') throw new Exception('Esta venta ya está ENTREGADA.');
+
+  $st = db()->prepare("UPDATE ventas SET estado='ENTREGADA' WHERE id_venta=:v LIMIT 1");
+  $st->execute([':v' => $idVenta]);
+}
+
+public static function deleteVenta(int $idVenta): void
+{
+  if ($idVenta <= 0) throw new Exception('ID inválido.');
+
+  $venta = self::find($idVenta);
+  if (!$venta) throw new Exception('La venta no existe.');
+
+  // Seguridad: solo eliminar si está ANULADA (así no arruinás inventario)
+  if ((string)$venta['estado'] !== 'ANULADA') {
+    throw new Exception('Solo podés eliminar ventas ANULADAS.');
+  }
+
+  $pdo = db();
+  $pdo->beginTransaction();
+  try {
+    // borrar movimientos inventario ligados a esta venta
+    $st = $pdo->prepare("SELECT id_mov FROM inventario_movimientos WHERE ref_tabla='ventas' AND ref_id=:v");
+    $st->execute([':v' => $idVenta]);
+    $movs = $st->fetchAll(PDO::FETCH_COLUMN);
+
+    if ($movs) {
+      // detalles primero
+      $in = implode(',', array_fill(0, count($movs), '?'));
+      $stD = $pdo->prepare("DELETE FROM inventario_mov_detalle WHERE id_mov IN ($in)");
+      $stD->execute(array_map('intval', $movs));
+
+      $stM = $pdo->prepare("DELETE FROM inventario_movimientos WHERE id_mov IN ($in)");
+      $stM->execute(array_map('intval', $movs));
+    }
+
+    // borrar detalle venta
+    $st = $pdo->prepare("DELETE FROM ventas_detalle WHERE id_venta=:v");
+    $st->execute([':v' => $idVenta]);
+
+    // borrar cabecera venta
+    $st = $pdo->prepare("DELETE FROM ventas WHERE id_venta=:v LIMIT 1");
+    $st->execute([':v' => $idVenta]);
+
+    $pdo->commit();
+  } catch (Throwable $e) {
+    $pdo->rollBack();
+    throw $e;
+  }
+}
 
   /* ===========================
      ESTADÍSTICA (KPIs + Top + Series)
   =========================== */
 
-  private static function dateWhere(array $filters, array &$params): string {
-    $from = trim((string)($filters['from'] ?? ''));
-    $to   = trim((string)($filters['to'] ?? ''));
+  private static function dateWhere(array $filters, array &$params): string
+  {
+    $from = trim((string) ($filters['from'] ?? ''));
+    $to = trim((string) ($filters['to'] ?? ''));
 
     $w = ["v.estado <> 'ANULADA'"];
 
-    if ($from !== '') { $w[] = "DATE(v.fecha) >= :from"; $params[':from'] = $from; }
-    if ($to !== '')   { $w[] = "DATE(v.fecha) <= :to";   $params[':to']   = $to; }
+    if ($from !== '') {
+      $w[] = "DATE(v.fecha) >= :from";
+      $params[':from'] = $from;
+    }
+    if ($to !== '') {
+      $w[] = "DATE(v.fecha) <= :to";
+      $params[':to'] = $to;
+    }
 
     return 'WHERE ' . implode(' AND ', $w);
   }
 
-  public static function kpis(array $filters = []): array {
+  public static function kpis(array $filters = []): array
+  {
     $params = [];
     $where = self::dateWhere($filters, $params);
 
@@ -473,33 +569,34 @@ $st->execute([
     $st->execute($params);
     $x = $st->fetch() ?: [];
 
-    $ingreso = (float)($x['ingreso_items'] ?? 0);
-    $costo = (float)($x['costo_est'] ?? 0);
+    $ingreso = (float) ($x['ingreso_items'] ?? 0);
+    $costo = (float) ($x['costo_est'] ?? 0);
     $util = $ingreso - $costo;
 
     return [
-      'ventas' => (int)($r['ventas'] ?? 0),
-      'total' => (float)($r['total'] ?? 0),
-      'subtotal' => (float)($r['subtotal'] ?? 0),
-      'descuento' => (float)($r['descuento'] ?? 0),
-      'ticket_prom' => (float)($r['ticket_prom'] ?? 0),
-      'unidades' => (int)($r['unidades'] ?? 0),
-      'clientes_unicos' => (int)($r['clientes_unicos'] ?? 0),
+      'ventas' => (int) ($r['ventas'] ?? 0),
+      'total' => (float) ($r['total'] ?? 0),
+      'subtotal' => (float) ($r['subtotal'] ?? 0),
+      'descuento' => (float) ($r['descuento'] ?? 0),
+      'ticket_prom' => (float) ($r['ticket_prom'] ?? 0),
+      'unidades' => (int) ($r['unidades'] ?? 0),
+      'clientes_unicos' => (int) ($r['clientes_unicos'] ?? 0),
       'costo_est' => $costo,
       'util_est' => $util,
       'margen_est' => ($ingreso > 0) ? ($util / $ingreso) : 0,
     ];
   }
 
-  public static function seriesDiaria(array $filters = [], int $days = 14): array {
+  public static function seriesDiaria(array $filters = [], int $days = 14): array
+  {
     // Si no mandan from/to, damos últimos N días
     $params = [];
-    $from = trim((string)($filters['from'] ?? ''));
-    $to   = trim((string)($filters['to'] ?? ''));
+    $from = trim((string) ($filters['from'] ?? ''));
+    $to = trim((string) ($filters['to'] ?? ''));
 
     if ($from === '' && $to === '') {
       $params[':from'] = date('Y-m-d', strtotime("-$days days"));
-      $params[':to']   = date('Y-m-d');
+      $params[':to'] = date('Y-m-d');
       $filters = ['from' => $params[':from'], 'to' => $params[':to']];
     }
 
@@ -517,7 +614,8 @@ $st->execute([
     return $st->fetchAll();
   }
 
-  public static function topProductos(array $filters = [], int $limit = 8): array {
+  public static function topProductos(array $filters = [], int $limit = 8): array
+  {
     $params = [];
     $where = self::dateWhere($filters, $params);
 
@@ -553,15 +651,16 @@ $st->execute([
 
     // agregar utilidad estimada
     foreach ($rows as &$r) {
-      $ing = (float)$r['ingreso'];
-      $cos = (float)$r['costo_est'];
+      $ing = (float) $r['ingreso'];
+      $cos = (float) $r['costo_est'];
       $r['util_est'] = $ing - $cos;
       $r['margen_est'] = ($ing > 0) ? (($ing - $cos) / $ing) : 0;
     }
     return $rows;
   }
 
-  public static function ventasPorCategoria(array $filters = [], int $limit = 8): array {
+  public static function ventasPorCategoria(array $filters = [], int $limit = 8): array
+  {
     $params = [];
     $where = self::dateWhere($filters, $params);
     $limit = max(1, min(20, $limit));

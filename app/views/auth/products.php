@@ -1,3 +1,12 @@
+<style>
+.product-card.no-stock{ outline:2px solid rgba(220,53,69,.35); }
+.badge-zero{
+  position:absolute; top:10px; right:10px;
+  background:#dc3545; color:#fff;
+  font-size:.75rem; padding:4px 10px;
+  border-radius:999px;
+}
+</style>
 <?php
 // $viewData viene de ProductController
 $filters = $viewData['filters'] ?? [];
@@ -121,15 +130,18 @@ $estado = $filters['estado'] ?? '';
 <?php
 $id = (int)$p['id_producto'];
 $isOff = ((int)$p['estado'] === 0);
+$stock = (int)($p['stock'] ?? 0);
+$isZero = ($stock <= 0);
 ?>
 <div class="col-12 col-sm-6 col-lg-4 col-xxl-3">
-<div class="product-card <?= $isOff ? 'off' : '' ?>" role="button"
+<div class="product-card <?= $isOff ? 'off' : '' ?> <?= $isZero ? 'no-stock' : '' ?>" role="button"
 data-product-id="<?= $id ?>">
 
 <div class="img">
 <img src="<?= h($p['imagen']) ?>" alt="<?= h($p['nombre']) ?>">
 <span class="badge-cat"><i class="bi bi-tag"></i> <?= h($p['categoria']) ?></span>
 <?php if ($isOff): ?><span class="badge-off">Inactivo</span><?php endif; ?>
+  <?php if ($isZero): ?><span class="badge-zero">Sin stock</span><?php endif; ?>
 </div>
 
 <div class="info">
@@ -141,7 +153,10 @@ data-product-id="<?= $id ?>">
 </div>
 
 <div class="price-row">
+  <div>
 <div class="price">L <?= number_format((float)$p['precio'], 2) ?></div>
+<div class="small text-muted mt-1">Stock: <?= $stock ?></div>
+  </div>
 <div class="ms-auto">
 <?php if ($isAdmin): ?>
 <button class="btn btn-sm btn-light btn-mini" type="button" data-edit-id="<?= $id ?>" title="Editar">
@@ -330,6 +345,10 @@ data-product-id="<?= $id ?>">
 <div class="col-md-1">
 <label class="form-label small">Min</label>
 <input class="form-control" type="number" name="stock_min" id="pfMin" value="0" required>
+</div>
+<div class="col-md-2">
+  <label class="form-label small">Stock</label>
+  <input class="form-control" type="number" name="stock" id="pfStock" value="0" min="0">
 </div>
 
 <div class="col-md-3">
@@ -590,6 +609,7 @@ document.getElementById('pfCat').value = p.id_categoria || '';
 document.getElementById('pfCosto').value = p.costo || 0;
 document.getElementById('pfPrecio').value = p.precio || 0;
 document.getElementById('pfMin').value = p.stock_min || 0;
+document.getElementById('pfStock').value = p.stock ?? 0;
 document.getElementById('pfEstado').value = String(p.estado ?? 1);
 document.getElementById('pfDesc').value = p.descripcion || '';
 

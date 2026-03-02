@@ -5,7 +5,10 @@ $products = $viewData['products'] ?? [];
 $clientes = $viewData['clientes'] ?? [];
 $stats = $viewData['stats'] ?? [];
 
-function h($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
+function h($v)
+{
+  return htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
+}
 
 $q = $filters['q'] ?? '';
 $estado = $filters['estado'] ?? 'TODOS';
@@ -17,7 +20,10 @@ $serie = $stats['serie'] ?? [];
 $top = $stats['top'] ?? [];
 $cats = $stats['cats'] ?? [];
 
-function money($n){ return 'L. ' . number_format((float)$n, 2); }
+function money($n)
+{
+  return 'L. ' . number_format((float) $n, 2);
+}
 ?>
 <div class="products-page page-fade sales-page">
 
@@ -42,15 +48,14 @@ function money($n){ return 'L. ' . number_format((float)$n, 2); }
 
         <div class="filter">
           <label class="form-label">Buscar</label>
-          <input class="form-control form-control-sm" name="q" value="<?= h($q) ?>"
-            placeholder="ID, nota, cliente...">
+          <input class="form-control form-control-sm" name="q" value="<?= h($q) ?>" placeholder="ID, nota, cliente...">
         </div>
 
         <div class="filter">
           <label class="form-label">Estado</label>
           <select class="form-select form-select-sm" name="estado">
-            <?php foreach (['TODOS','PENDIENTE','PAGADA','ENTREGADA','ANULADA'] as $op): ?>
-              <option value="<?= h($op) ?>" <?= $estado===$op ? 'selected':'' ?>><?= h($op) ?></option>
+            <?php foreach (['TODOS', 'PENDIENTE', 'PAGADA', 'ENTREGADA', 'ANULADA'] as $op): ?>
+              <option value="<?= h($op) ?>" <?= $estado === $op ? 'selected' : '' ?>><?= h($op) ?></option>
             <?php endforeach; ?>
           </select>
         </div>
@@ -81,7 +86,9 @@ function money($n){ return 'L. ' . number_format((float)$n, 2); }
         <div class="bd">
           <div class="small text-muted">Total vendido (neto)</div>
           <div class="fw-bold" style="font-size:1.35rem;"><?= money($k['total'] ?? 0) ?></div>
-          <div class="small text-muted">Ventas: <?= (int)($k['ventas'] ?? 0) ?> · Ticket prom: <?= money($k['ticket_prom'] ?? 0) ?></div>
+          <div class="small text-muted">Ventas: <?= (int) ($k['ventas'] ?? 0) ?> · Ticket prom:
+            <?= money($k['ticket_prom'] ?? 0) ?>
+          </div>
         </div>
       </div>
     </div>
@@ -90,8 +97,8 @@ function money($n){ return 'L. ' . number_format((float)$n, 2); }
       <div class="cardx">
         <div class="bd">
           <div class="small text-muted">Unidades vendidas</div>
-          <div class="fw-bold" style="font-size:1.35rem;"><?= (int)($k['unidades'] ?? 0) ?></div>
-          <div class="small text-muted">Clientes únicos: <?= (int)($k['clientes_unicos'] ?? 0) ?></div>
+          <div class="fw-bold" style="font-size:1.35rem;"><?= (int) ($k['unidades'] ?? 0) ?></div>
+          <div class="small text-muted">Clientes únicos: <?= (int) ($k['clientes_unicos'] ?? 0) ?></div>
         </div>
       </div>
     </div>
@@ -111,7 +118,8 @@ function money($n){ return 'L. ' . number_format((float)$n, 2); }
         <div class="bd">
           <div class="small text-muted">Utilidad estimada*</div>
           <div class="fw-bold" style="font-size:1.35rem;"><?= money($k['util_est'] ?? 0) ?></div>
-          <div class="small text-muted">Margen est: <?= number_format(((float)($k['margen_est'] ?? 0))*100, 1) ?>%</div>
+          <div class="small text-muted">Margen est: <?= number_format(((float) ($k['margen_est'] ?? 0)) * 100, 1) ?>%
+          </div>
         </div>
       </div>
     </div>
@@ -145,20 +153,22 @@ function money($n){ return 'L. ' . number_format((float)$n, 2); }
                 </tr>
               </thead>
               <tbody>
-              <?php if(!$top): ?>
-                <tr><td colspan="4" class="text-center text-muted py-4">Sin datos.</td></tr>
-              <?php endif; ?>
-              <?php foreach($top as $t): ?>
-                <tr>
-                  <td>
-                    <div class="fw-semibold"><?= h($t['nombre']) ?></div>
-                    <div class="small text-muted"><?= h($t['sku']) ?></div>
-                  </td>
-                  <td class="text-end"><?= (int)$t['unidades'] ?></td>
-                  <td class="text-end"><?= money($t['ingreso']) ?></td>
-                  <td class="text-end"><?= money($t['util_est']) ?></td>
-                </tr>
-              <?php endforeach; ?>
+                <?php if (!$top): ?>
+                  <tr>
+                    <td colspan="4" class="text-center text-muted py-4">Sin datos.</td>
+                  </tr>
+                <?php endif; ?>
+                <?php foreach ($top as $t): ?>
+                  <tr>
+                    <td>
+                      <div class="fw-semibold"><?= h($t['nombre']) ?></div>
+                      <div class="small text-muted"><?= h($t['sku']) ?></div>
+                    </td>
+                    <td class="text-end"><?= (int) $t['unidades'] ?></td>
+                    <td class="text-end"><?= money($t['ingreso']) ?></td>
+                    <td class="text-end"><?= money($t['util_est']) ?></td>
+                  </tr>
+                <?php endforeach; ?>
               </tbody>
             </table>
           </div>
@@ -186,16 +196,18 @@ function money($n){ return 'L. ' . number_format((float)$n, 2); }
                 </tr>
               </thead>
               <tbody>
-              <?php if(!$cats): ?>
-                <tr><td colspan="3" class="text-center text-muted py-4">Sin datos.</td></tr>
-              <?php endif; ?>
-              <?php foreach($cats as $c): ?>
-                <tr>
-                  <td class="fw-semibold"><?= h($c['categoria'] ?? 'Sin categoría') ?></td>
-                  <td class="text-end"><?= (int)$c['unidades'] ?></td>
-                  <td class="text-end"><?= money($c['ingreso']) ?></td>
-                </tr>
-              <?php endforeach; ?>
+                <?php if (!$cats): ?>
+                  <tr>
+                    <td colspan="3" class="text-center text-muted py-4">Sin datos.</td>
+                  </tr>
+                <?php endif; ?>
+                <?php foreach ($cats as $c): ?>
+                  <tr>
+                    <td class="fw-semibold"><?= h($c['categoria'] ?? 'Sin categoría') ?></td>
+                    <td class="text-end"><?= (int) $c['unidades'] ?></td>
+                    <td class="text-end"><?= money($c['ingreso']) ?></td>
+                  </tr>
+                <?php endforeach; ?>
               </tbody>
             </table>
           </div>
@@ -222,15 +234,17 @@ function money($n){ return 'L. ' . number_format((float)$n, 2); }
                 </tr>
               </thead>
               <tbody>
-              <?php if(!$serie): ?>
-                <tr><td colspan="2" class="text-center text-muted py-4">Sin datos.</td></tr>
-              <?php endif; ?>
-              <?php foreach($serie as $s): ?>
-                <tr>
-                  <td class="text-muted"><?= h($s['dia']) ?></td>
-                  <td class="text-end"><?= money($s['total']) ?></td>
-                </tr>
-              <?php endforeach; ?>
+                <?php if (!$serie): ?>
+                  <tr>
+                    <td colspan="2" class="text-center text-muted py-4">Sin datos.</td>
+                  </tr>
+                <?php endif; ?>
+                <?php foreach ($serie as $s): ?>
+                  <tr>
+                    <td class="text-muted"><?= h($s['dia']) ?></td>
+                    <td class="text-end"><?= money($s['total']) ?></td>
+                  </tr>
+                <?php endforeach; ?>
               </tbody>
             </table>
           </div>
@@ -259,38 +273,60 @@ function money($n){ return 'L. ' . number_format((float)$n, 2); }
           </thead>
           <tbody>
             <?php if (!$sales): ?>
-              <tr><td colspan="8" class="text-center text-muted py-4">Sin registros.</td></tr>
+              <tr>
+                <td colspan="8" class="text-center text-muted py-4">Sin registros.</td>
+              </tr>
             <?php endif; ?>
 
             <?php foreach ($sales as $v): ?>
               <tr>
-                <td class="fw-semibold">#<?= (int)$v['id_venta'] ?></td>
+                <td class="fw-semibold">#<?= (int) $v['id_venta'] ?></td>
                 <td class="text-muted"><?= h($v['fecha']) ?></td>
                 <td><?= h($v['cliente'] ?? '') ?></td>
                 <td class="text-muted"><?= h($v['nota'] ?? '') ?></td>
-                <td class="text-end"><?= (int)$v['items'] ?></td>
+                <td class="text-end"><?= (int) $v['items'] ?></td>
                 <td class="text-end"><?= money($v['total'] ?? 0) ?></td>
                 <td>
-<?php
-  $st = strtoupper(trim((string)($v['estado'] ?? '')));
-  $cls = 'status-pill'; // base (igual que compras)
-
-  if ($st === 'ANULADA') $cls .= ' st-danger';              // ROJO
-  else if ($st === 'PENDIENTE') $cls .= ' st-blue';         // AZUL
-  else if ($st === 'PAGADA' || $st === 'ENTREGADA') $cls .= ' st-ok'; // VERDE
-  else $cls .= ' st-neutral';                               // GRIS
-?>
-<span class="<?= $cls ?>"><?= h($st) ?></span>
+                  <?php
+                  $st = strtoupper(trim((string) ($v['estado'] ?? '')));
+                  $cls = 'status-pill'; // base (igual que compras)
+                
+                  if ($st === 'ANULADA')
+                    $cls .= ' st-danger';              // ROJO
+                  else if ($st === 'PENDIENTE')
+                    $cls .= ' st-blue';         // AZUL
+                  else if ($st === 'PAGADA' || $st === 'ENTREGADA')
+                    $cls .= ' st-ok'; // VERDE
+                  else
+                    $cls .= ' st-neutral';                               // GRIS
+                  ?>
+                  <span class="<?= $cls ?>"><?= h($st) ?></span>
                 </td>
                 <td class="text-end">
                   <div class="actions">
-                    <button type="button" class="btn btn-light btn-sm" onclick="openViewVenta(<?= (int)$v['id_venta'] ?>)">
+                    <button type="button" class="btn btn-light btn-sm"
+                      onclick="openViewVenta(<?= (int) $v['id_venta'] ?>)">
                       <i class="bi bi-eye"></i><span class="d-none d-md-inline ms-1">Ver</span>
                     </button>
 
-                    <?php if ((string)$v['estado'] !== 'ANULADA'): ?>
-                      <button type="button" class="btn btn-danger btn-sm" onclick="openCancelVenta(<?= (int)$v['id_venta'] ?>)">
+                    <?php if ((string) $v['estado'] !== 'ANULADA'): ?>
+                      <button type="button" class="btn btn-danger btn-sm"
+                        onclick="openCancelVenta(<?= (int) $v['id_venta'] ?>)">
                         <i class="bi bi-x-circle"></i><span class="d-none d-md-inline ms-1">Anular</span>
+                      </button>
+                    <?php endif; ?>
+
+                    <?php if ((string) $v['estado'] !== 'ANULADA' && (string) $v['estado'] !== 'ENTREGADA'): ?>
+                      <button type="button" class="btn btn-success btn-sm"
+                        onclick="openCompleteVenta(<?= (int) $v['id_venta'] ?>)">
+                        <i class="bi bi-check2-circle"></i><span class="d-none d-md-inline ms-1">Completada</span>
+                      </button>
+                    <?php endif; ?>
+
+                    <?php if ((string) $v['estado'] === 'ANULADA'): ?>
+                      <button type="button" class="btn btn-outline-dark btn-sm"
+                        onclick="openDeleteVenta(<?= (int) $v['id_venta'] ?>)">
+                        <i class="bi bi-trash"></i><span class="d-none d-md-inline ms-1">Eliminar</span>
                       </button>
                     <?php endif; ?>
                   </div>
@@ -319,31 +355,34 @@ function money($n){ return 'L. ' . number_format((float)$n, 2); }
       <form method="post" action="index.php?page=sales" id="frmVenta">
         <input type="hidden" name="action" value="create">
         <input type="hidden" name="_q" value="<?= h($q) ?>">
-<input type="hidden" name="_estado" value="<?= h($estado) ?>">
-<input type="hidden" name="_from" value="<?= h($from) ?>">
-<input type="hidden" name="_to" value="<?= h($to) ?>">
+        <input type="hidden" name="_estado" value="<?= h($estado) ?>">
+        <input type="hidden" name="_from" value="<?= h($from) ?>">
+        <input type="hidden" name="_to" value="<?= h($to) ?>">
 
         <div class="modal-body">
-<div class="row g-3 mb-3">
+          <div class="row g-3 mb-3">
 
-  <div class="col-12 col-lg-4">
-    <label class="form-label small text-muted">Cliente (texto)</label>
-    <input type="text" class="form-control" name="cliente_txt" placeholder="Ej: María López / Pedido IG / Cliente X" />
-    <div class="small text-muted mt-1">Si se deja vacío, se guardará como “CONSUMIDOR FINAL”.</div>
-  </div>
+            <div class="col-12 col-lg-4">
+              <label class="form-label small text-muted">Cliente (texto)</label>
+              <input type="text" class="form-control" name="cliente_txt" required
+                placeholder="Ej: María López / Pedido IG / Cliente X" />
+              <div class="small text-muted mt-1">Si se deja vacío, se guardará como “CONSUMIDOR FINAL”.</div>
+            </div>
 
-  <div class="col-12 col-lg-5">
-    <label class="form-label small text-muted">Dirección (texto)</label>
-    <input type="text" class="form-control" name="direccion_txt" placeholder="Ej: Col. XYZ, La Ceiba · casa #12 · referencia..." />
-    <div class="small text-muted mt-1">Si se deja vacío, se guardará como “SIN DIRECCION”.</div>
-  </div>
+            <div class="col-12 col-lg-5">
+              <label class="form-label small text-muted">Dirección (texto)</label>
+              <input type="text" class="form-control" name="direccion_txt"
+                placeholder="Ej: Col. XYZ, La Ceiba · casa #12 · referencia..." />
+              <div class="small text-muted mt-1">Si se deja vacío, se guardará como “SIN DIRECCION”.</div>
+            </div>
 
-  <div class="col-12 col-lg-3">
-    <label class="form-label small text-muted">Descuento</label>
-    <input type="number" step="0.01" min="0" class="form-control" name="descuento" id="inpDescuento" value="0.00">
-  </div>
+            <div class="col-12 col-lg-3">
+              <label class="form-label small text-muted">Descuento</label>
+              <input type="number" step="0.01" min="0" class="form-control" name="descuento" id="inpDescuento"
+                value="0.00">
+            </div>
 
-</div>
+          </div>
 
           <div class="mb-3">
             <label class="form-label small text-muted">Nota / referencia</label>
@@ -355,15 +394,12 @@ function money($n){ return 'L. ' . number_format((float)$n, 2); }
               <label class="form-label small text-muted">Producto (con stock)</label>
               <select class="form-select" id="selProducto">
                 <option value="">-- Elegí un producto --</option>
-                <?php foreach($products as $p): ?>
-                  <option
-                    value="<?= (int)$p['id_producto'] ?>"
-                    data-precio="<?= h($p['precio']) ?>"
-                    data-stock="<?= (int)$p['stock'] ?>"
-                  >
+                <?php foreach ($products as $p): ?>
+                  <option value="<?= (int) $p['id_producto'] ?>" data-precio="<?= h($p['precio']) ?>"
+                    data-stock="<?= (int) $p['stock'] ?>">
                     <?= h($p['nombre']) ?> (<?= h($p['sku']) ?>)
-                    · Stock: <?= (int)$p['stock'] ?>
-                    · L. <?= number_format((float)$p['precio'],2) ?>
+                    · Stock: <?= (int) $p['stock'] ?>
+                    · L. <?= number_format((float) $p['precio'], 2) ?>
                   </option>
                 <?php endforeach; ?>
               </select>
@@ -438,51 +474,54 @@ function money($n){ return 'L. ' . number_format((float)$n, 2); }
 <!-- MODAL VER VENTA -->
 <div class="modal fade" id="modalViewVenta" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
-    <div class="modal-content">
+    <div class="modal-content product-modal sale-modal">
+
       <div class="modal-header">
         <div>
           <h5 class="modal-title mb-0">Detalle de venta</h5>
           <div class="small text-muted" id="viewMeta">Cargando...</div>
         </div>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
 
-     <form method="post" action="index.php?page=sales" id="frmEditVenta" class="mb-3">
-  <input type="hidden" name="action" value="update">
-  <input type="hidden" name="id_venta" id="editIdVenta" value="">
+      <div class="modal-body pt-3">
 
-  <input type="hidden" name="_q" value="<?= h($q) ?>">
-  <input type="hidden" name="_estado" value="<?= h($estado) ?>">
-  <input type="hidden" name="_from" value="<?= h($from) ?>">
-  <input type="hidden" name="_to" value="<?= h($to) ?>">
+        <form method="post" action="index.php?page=sales" id="frmEditVenta" class="mb-3">
+          <input type="hidden" name="action" value="update">
+          <input type="hidden" name="id_venta" id="editIdVenta" value="">
 
-  <div class="row g-3">
-    <div class="col-12 col-lg-5">
-      <label class="form-label fw-semibold">Cliente</label>
-      <input type="text" class="form-control" name="cliente_txt" id="editCliente" value="" readonly>
-    </div>
-    <div class="col-12 col-lg-7">
-      <label class="form-label fw-semibold">Dirección</label>
-      <input type="text" class="form-control" name="direccion_txt" id="editDir" value="" readonly>
-    </div>
-    <div class="col-12">
-      <label class="form-label fw-semibold">Nota</label>
-      <input type="text" class="form-control" name="nota" id="editNota" value="" readonly>
-    </div>
-  </div>
+          <input type="hidden" name="_q" value="<?= h($q) ?>">
+          <input type="hidden" name="_estado" value="<?= h($estado) ?>">
+          <input type="hidden" name="_from" value="<?= h($from) ?>">
+          <input type="hidden" name="_to" value="<?= h($to) ?>">
 
-  <div class="d-flex gap-2 mt-3">
-    <button type="button" class="btn btn-outline-dark" id="btnEditVenta">
-      <i class="bi bi-pencil-square me-1"></i> Editar
-    </button>
-    <button type="submit" class="btn btn-brand" id="btnSaveVenta" disabled>
-      <i class="bi bi-check2-circle me-1"></i> Guardar cambios
-    </button>
-  </div>
-</form>
+          <div class="row g-3">
+            <div class="col-12 col-lg-5">
+              <label class="form-label fw-semibold">Cliente</label>
+              <input type="text" class="form-control" name="cliente_txt" id="editCliente" value="" readonly>
+            </div>
+            <div class="col-12 col-lg-7">
+              <label class="form-label fw-semibold">Dirección</label>
+              <input type="text" class="form-control" name="direccion_txt" id="editDir" value="" readonly>
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Nota</label>
+              <input type="text" class="form-control" name="nota" id="editNota" value="" readonly>
+            </div>
+          </div>
+
+          <div class="d-flex gap-2 mt-3">
+            <button type="button" class="btn btn-outline-dark" id="btnEditVenta">
+              <i class="bi bi-pencil-square me-1"></i> Editar
+            </button>
+            <button type="submit" class="btn btn-brand" id="btnSaveVenta" disabled>
+              <i class="bi bi-check2-circle me-1"></i> Guardar cambios
+            </button>
+          </div>
+        </form>
 
         <div class="table-responsive">
-          <table class="table table-sm align-middle mb-0">
+          <table class="table table-sm align-middle mb-0 sale-table">
             <thead>
               <tr>
                 <th>SKU</th>
@@ -493,7 +532,9 @@ function money($n){ return 'L. ' . number_format((float)$n, 2); }
               </tr>
             </thead>
             <tbody id="viewItems">
-              <tr><td colspan="5" class="text-center text-muted py-3">Cargando...</td></tr>
+              <tr>
+                <td colspan="5" class="text-center text-muted py-3">Cargando...</td>
+              </tr>
             </tbody>
             <tfoot>
               <tr>
@@ -511,14 +552,16 @@ function money($n){ return 'L. ' . number_format((float)$n, 2); }
             </tfoot>
           </table>
         </div>
-      </div>
+
+      </div><!-- /modal-body -->
 
       <div class="modal-footer">
         <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cerrar</button>
       </div>
-    </div>
-  </div>
-</div>
+
+    </div><!-- /modal-content -->
+  </div><!-- /modal-dialog -->
+</div><!-- /modal -->
 
 <!-- MODAL ANULAR -->
 <div class="modal fade" id="modalCancelVenta" tabindex="-1">
@@ -548,60 +591,114 @@ function money($n){ return 'L. ' . number_format((float)$n, 2); }
     </div>
   </div>
 </div>
+<!-- MODAL COMPLETAR -->
+<div class="modal fade" id="modalCompleteVenta" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content product-modal">
+      <div class="modal-header">
+        <h5 class="modal-title">Marcar como completada</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
 
+      <div class="modal-body">
+        ¿Querés marcar esta venta como <b>ENTREGADA</b>?
+        <div class="small text-muted mt-2">Esto solo cambia el estado (no toca inventario).</div>
+      </div>
+
+      <div class="modal-footer">
+        <form method="post" action="index.php?page=sales">
+          <input type="hidden" name="action" value="complete">
+          <input type="hidden" name="id_venta" id="completeVentaId">
+          <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-success">Marcar entregada</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ELIMINAR -->
+<div class="modal fade" id="modalDeleteVenta" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content product-modal">
+      <div class="modal-header">
+        <h5 class="modal-title">Eliminar venta</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        Esto <b>elimina definitivamente</b> la venta del sistema.
+        <div class="small text-muted mt-2">Por seguridad, solo se permite eliminar ventas ANULADAS.</div>
+      </div>
+
+      <div class="modal-footer">
+        <form method="post" action="index.php?page=sales">
+          <input type="hidden" name="action" value="delete">
+          <input type="hidden" name="id_venta" id="deleteVentaId">
+          <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-outline-dark">Eliminar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 
 
 <script>
-(function () {
-  const sel = document.getElementById('selProducto');
-  const qty = document.getElementById('inpCantidad');
-  const btn = document.getElementById('btnAdd');
-  const tbody = document.querySelector('#tblItems tbody');
-  const lblSub = document.getElementById('lblSub');
-  const lblDesc = document.getElementById('lblDesc');
-  const lblTotal = document.getElementById('lblTotal');
-  const inpDesc = document.getElementById('inpDescuento');
+  (function () {
+    const sel = document.getElementById('selProducto');
+    const qty = document.getElementById('inpCantidad');
+    const btn = document.getElementById('btnAdd');
+    const tbody = document.querySelector('#tblItems tbody');
+    const lblSub = document.getElementById('lblSub');
+    const lblDesc = document.getElementById('lblDesc');
+    const lblTotal = document.getElementById('lblTotal');
+    const inpDesc = document.getElementById('inpDescuento');
 
-  function money(n){ return 'L. ' + (Math.round((n + Number.EPSILON) * 100) / 100).toFixed(2); }
+    function money(n) { return 'L. ' + (Math.round((n + Number.EPSILON) * 100) / 100).toFixed(2); }
 
-  function recompute(){
-    let sub = 0;
-    tbody.querySelectorAll('tr[data-subtotal]').forEach(tr => {
-      sub += parseFloat(tr.getAttribute('data-subtotal') || '0');
-    });
-    const desc = Math.max(0, parseFloat(inpDesc?.value || '0') || 0);
-    const tot = Math.max(0, sub - desc);
-    lblSub.textContent = money(sub);
-    lblDesc.textContent = money(desc);
-    lblTotal.textContent = money(tot);
-  }
-
-  inpDesc?.addEventListener('input', recompute);
-
-  btn?.addEventListener('click', () => {
-    const id = parseInt(sel.value || '0', 10);
-    if (!id) return;
-
-    const opt = sel.options[sel.selectedIndex];
-    const name = opt.textContent.trim();
-    const precio = parseFloat(opt.getAttribute('data-precio') || '0');
-    const stock = parseInt(opt.getAttribute('data-stock') || '0', 10);
-    const cantidad = parseInt(qty.value || '1', 10);
-    if (cantidad <= 0) return;
-
-    if (stock < cantidad) {
-      alert(`Stock insuficiente. Stock: ${stock}, solicitado: ${cantidad}`);
-      return;
+    function recompute() {
+      let sub = 0;
+      tbody.querySelectorAll('tr[data-subtotal]').forEach(tr => {
+        sub += parseFloat(tr.getAttribute('data-subtotal') || '0');
+      });
+      const desc = Math.max(0, parseFloat(inpDesc?.value || '0') || 0);
+      const tot = Math.max(0, sub - desc);
+      lblSub.textContent = money(sub);
+      lblDesc.textContent = money(desc);
+      lblTotal.textContent = money(tot);
     }
 
-    const rowEmpty = document.getElementById('rowEmpty');
-    if (rowEmpty) rowEmpty.remove();
+    inpDesc?.addEventListener('input', recompute);
 
-    const subtotal = precio * cantidad;
+    btn?.addEventListener('click', () => {
+      const id = parseInt(sel.value || '0', 10);
+      if (!id) return;
 
-    const tr = document.createElement('tr');
-    tr.setAttribute('data-subtotal', String(subtotal));
-    tr.innerHTML = `
+      const opt = sel.options[sel.selectedIndex];
+      const name = opt.textContent.trim();
+      const precio = parseFloat(opt.getAttribute('data-precio') || '0');
+      const stock = parseInt(opt.getAttribute('data-stock') || '0', 10);
+      const cantidad = parseInt(qty.value || '1', 10);
+      if (cantidad <= 0) return;
+
+      if (stock < cantidad) {
+        if (typeof window.showToast === 'function') {
+          window.showToast('error', `Stock insuficiente. Disponible: ${stock}. Solicitado: ${cantidad}`);
+        } else {
+          alert(`Stock insuficiente. Disponible: ${stock}. Solicitado: ${cantidad}`);
+        }
+        return;
+      }
+
+      const rowEmpty = document.getElementById('rowEmpty');
+      if (rowEmpty) rowEmpty.remove();
+
+      const subtotal = precio * cantidad;
+
+      const tr = document.createElement('tr');
+      tr.setAttribute('data-subtotal', String(subtotal));
+      tr.innerHTML = `
       <td>
         <div class="fw-semibold">${escapeHtml(name)}</div>
         <input type="hidden" name="id_producto[]" value="${id}">
@@ -619,88 +716,168 @@ function money($n){ return 'L. ' . number_format((float)$n, 2); }
         <button type="button" class="btn btn-outline-dark btn-sm btnDel"><i class="bi bi-trash"></i></button>
       </td>
     `;
-    tbody.appendChild(tr);
+      tbody.appendChild(tr);
+      recompute();
+    });
+
+    tbody?.addEventListener('input', (e) => {
+      const tr = e.target.closest('tr');
+      if (!tr) return;
+
+      const cant = tr.querySelector('input[name="cantidad[]"]');
+      const pu = tr.querySelector('input[name="precio_unit[]"]');
+      if (!cant || !pu) return;
+
+      const cantidad = parseInt(cant.value || '0', 10);
+      const precio = parseFloat(pu.value || '0');
+      const subtotal = Math.max(0, cantidad) * Math.max(0, precio);
+
+      tr.setAttribute('data-subtotal', String(subtotal));
+      const cell = tr.querySelector('td:nth-child(4) span');
+      if (cell) cell.textContent = money(subtotal);
+
+      recompute();
+    });
+
+    tbody?.addEventListener('click', (e) => {
+      const btnDel = e.target.closest('.btnDel');
+      if (!btnDel) return;
+      const tr = btnDel.closest('tr');
+      tr.remove();
+
+      if (!tbody.querySelector('tr[data-subtotal]')) {
+        const empty = document.createElement('tr');
+        empty.className = 'text-muted';
+        empty.id = 'rowEmpty';
+        empty.innerHTML = '<td colspan="5" class="text-center py-3">Agregá productos a la venta.</td>';
+        tbody.appendChild(empty);
+      }
+      recompute();
+    });
+
+    // iniciar totales
     recompute();
-  });
+  })();
+</script>
+<script>
+  async function reloadProductsForSale() {
+    const sel = document.getElementById('selProducto');
+    if (!sel) return;
 
-  tbody?.addEventListener('input', (e) => {
-    const tr = e.target.closest('tr');
-    if (!tr) return;
+    const prev = sel.value;
 
-    const cant = tr.querySelector('input[name="cantidad[]"]');
-    const pu = tr.querySelector('input[name="precio_unit[]"]');
-    if (!cant || !pu) return;
+    const res = await fetch('index.php?page=sales&action=productos_json');
+    const json = await res.json();
 
-    const cantidad = parseInt(cant.value || '0', 10);
-    const precio = parseFloat(pu.value || '0');
-    const subtotal = Math.max(0, cantidad) * Math.max(0, precio);
+    if (!json.ok) return;
 
-    tr.setAttribute('data-subtotal', String(subtotal));
-    const cell = tr.querySelector('td:nth-child(4) span');
-    if (cell) cell.textContent = money(subtotal);
+    sel.innerHTML = '<option value="">-- Elegí un producto --</option>';
 
-    recompute();
-  });
+    (json.products || []).forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.id_producto;
+      opt.setAttribute('data-precio', String(p.precio));
+      opt.setAttribute('data-stock', String(p.stock));
+      opt.textContent = `${p.nombre} (${p.sku}) · Stock: ${p.stock} · L. ${Number(p.precio).toFixed(2)}`;
+      sel.appendChild(opt);
+    });
 
-  tbody?.addEventListener('click', (e) => {
-    const btnDel = e.target.closest('.btnDel');
-    if (!btnDel) return;
-    const tr = btnDel.closest('tr');
-    tr.remove();
+    if (prev) sel.value = prev;
+  }
 
-    if (!tbody.querySelector('tr[data-subtotal]')) {
-      const empty = document.createElement('tr');
-      empty.className = 'text-muted';
-      empty.id = 'rowEmpty';
-      empty.innerHTML = '<td colspan="5" class="text-center py-3">Agregá productos a la venta.</td>';
-      tbody.appendChild(empty);
-    }
-    recompute();
-  });
-
-  // iniciar totales
-  recompute();
-})();
+  // cada vez que se abre el modal, refrescamos lista y stock
+  document.getElementById('modalCreateVenta')?.addEventListener('shown.bs.modal', reloadProductsForSale);
 </script>
 
+
+
 <script>
-function openCancelVenta(id){
-  document.getElementById('cancelVentaId').value = id;
-  new bootstrap.Modal(document.getElementById('modalCancelVenta')).show();
+  function setEditEnabled(enabled) {
+    const c = document.getElementById('editCliente');
+    const d = document.getElementById('editDir');
+    const n = document.getElementById('editNota');
+    const save = document.getElementById('btnSaveVenta');
+    if (!c || !d || !n || !save) return;
+    c.readOnly = !enabled;
+    d.readOnly = !enabled;
+    n.readOnly = !enabled;
+    save.disabled = !enabled;
+  }
+
+  function openCancelVenta(id) {
+    document.getElementById('cancelVentaId').value = id;
+    new bootstrap.Modal(document.getElementById('modalCancelVenta')).show();
+  }
+  function openCompleteVenta(id){
+  document.getElementById('completeVentaId').value = id;
+  new bootstrap.Modal(document.getElementById('modalCompleteVenta')).show();
 }
 
-async function openViewVenta(id){
-document.getElementById('editIdVenta').value = '';
-document.getElementById('editCliente').value = '';
-document.getElementById('editDir').value = '';
-document.getElementById('editNota').value = '';
-setEditEnabled(false);
-
-// cuando llega data:
-document.getElementById('editIdVenta').value = data.id_venta;
-document.getElementById('editCliente').value = data.cliente || '';
-document.getElementById('editDir').value = data.direccion || '';
-document.getElementById('editNota').value = data.nota || '';
-
-function setEditEnabled(enabled){
-  const c = document.getElementById('editCliente');
-  const d = document.getElementById('editDir');
-  const n = document.getElementById('editNota');
-  const save = document.getElementById('btnSaveVenta');
-  c.readOnly = !enabled;
-  d.readOnly = !enabled;
-  n.readOnly = !enabled;
-  save.disabled = !enabled;
+function openDeleteVenta(id){
+  document.getElementById('deleteVentaId').value = id;
+  new bootstrap.Modal(document.getElementById('modalDeleteVenta')).show();
 }
 
-document.getElementById('btnEditVenta')?.addEventListener('click', () => {
-  setEditEnabled(true);
-  document.getElementById('editCliente')?.focus();
-});
+  async function openViewVenta(id) {
+    // limpiar
+    document.getElementById('editIdVenta').value = '';
+    document.getElementById('editCliente').value = '';
+    document.getElementById('editDir').value = '';
+    document.getElementById('editNota').value = '';
+    setEditEnabled(false);
 
-function escapeHtml(str){
-  return String(str).replace(/[&<>"']/g, s => ({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-  }[s]));
-}
+    // abrir modal
+    const modal = new bootstrap.Modal(document.getElementById('modalViewVenta'));
+    modal.show();
+
+    // pedir JSON al controller (YA EXISTE en tu SaleController.php)
+    const res = await fetch(`index.php?page=sales&action=view_json&id=${encodeURIComponent(id)}`);
+    const json = await res.json();
+
+    if (!json.ok) {
+      if (typeof window.showToast === 'function') window.showToast('error', json.message || 'No se pudo cargar la venta.');
+      else alert(json.message || 'No se pudo cargar la venta.');
+      return;
+    }
+
+    document.getElementById('editIdVenta').value = json.id_venta;
+    document.getElementById('editCliente').value = json.cliente || '';
+    document.getElementById('editDir').value = json.direccion || '';
+    document.getElementById('editNota').value = json.nota || '';
+
+    // items
+    const tbody = document.getElementById('viewItems');
+    tbody.innerHTML = '';
+    (json.items || []).forEach(it => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+      <td class="text-muted">${escapeHtml(it.sku || '')}</td>
+      <td>${escapeHtml(it.nombre || '')}</td>
+      <td class="text-end">${Number(it.cantidad || 0)}</td>
+      <td class="text-end">L. ${Number(it.precio_unit || 0).toFixed(2)}</td>
+      <td class="text-end">L. ${Number(it.subtotal || 0).toFixed(2)}</td>
+    `;
+      tbody.appendChild(tr);
+    });
+
+    document.getElementById('viewSub').textContent = `L. ${Number(json.subtotal || 0).toFixed(2)}`;
+    document.getElementById('viewDesc').textContent = `L. ${Number(json.descuento || 0).toFixed(2)}`;
+    document.getElementById('viewTotal').textContent = `L. ${Number(json.total || 0).toFixed(2)}`;
+
+    const meta = document.getElementById('viewMeta');
+    if (meta) {
+      meta.textContent = `Venta #${json.id_venta} · ${json.fecha} · Estado: ${json.estado}`;
+    }
+  }
+
+  document.getElementById('btnEditVenta')?.addEventListener('click', () => {
+    setEditEnabled(true);
+    document.getElementById('editCliente')?.focus();
+  });
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, s => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[s]));
+  }
 </script>

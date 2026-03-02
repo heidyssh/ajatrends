@@ -3,11 +3,13 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../config/database.php';
 
-final class Product {
+final class Product
+{
 
-  public static function list(array $filters = []): array {
-    $q = trim((string)($filters['q'] ?? ''));
-    $cat = (int)($filters['cat'] ?? 0);
+  public static function list(array $filters = []): array
+  {
+    $q = trim((string) ($filters['q'] ?? ''));
+    $cat = (int) ($filters['cat'] ?? 0);
     $min = $filters['min'] ?? '';
     $max = $filters['max'] ?? '';
     $estado = $filters['estado'] ?? '';
@@ -26,15 +28,15 @@ final class Product {
     }
     if ($min !== '' && is_numeric($min)) {
       $where[] = 'p.precio >= :min';
-      $params[':min'] = (float)$min;
+      $params[':min'] = (float) $min;
     }
     if ($max !== '' && is_numeric($max)) {
       $where[] = 'p.precio <= :max';
-      $params[':max'] = (float)$max;
+      $params[':max'] = (float) $max;
     }
     if ($estado !== '' && ($estado === '0' || $estado === '1')) {
       $where[] = 'p.estado = :estado';
-      $params[':estado'] = (int)$estado;
+      $params[':estado'] = (int) $estado;
     }
 
     $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
@@ -51,6 +53,13 @@ final class Product {
         p.precio,
         p.stock_min,
         p.estado,
+        COALESCE((
+  SELECT imd.stock_despues
+  FROM inventario_mov_detalle imd
+  WHERE imd.id_producto = p.id_producto
+  ORDER BY imd.id_mov_det DESC
+  LIMIT 1
+), 0) AS stock,
         COALESCE(img_principal.url, img_first.url, 'assets/img/logo.jpeg') AS imagen,
         COALESCE(d.descripcion, '') AS descripcion,
         (SELECT COUNT(*) FROM producto_imagenes pi2 WHERE pi2.id_producto = p.id_producto) AS total_imagenes
@@ -75,9 +84,18 @@ final class Product {
     return $stmt->fetchAll();
   }
 
-  public static function find(int $id): ?array {
+  public static function find(int $id): ?array
+  {
     $sql = "
-      SELECT p.*, c.nombre AS categoria, COALESCE(d.descripcion,'') AS descripcion
+      SELECT p.*, c.nombre AS categoria, 
+      COALESCE(d.descripcion,'') AS descripcion,
+      COALESCE((
+        SELECT imd.stock_despues
+        FROM inventario_mov_detalle imd
+        WHERE imd.id_producto = p.id_producto
+        ORDER BY imd.id_mov_det DESC
+        LIMIT 1
+      ), 0) AS stock
       FROM productos p
       INNER JOIN categorias c ON c.id_categoria = p.id_categoria
       LEFT JOIN producto_descripcion d ON d.id_producto = p.id_producto
@@ -90,29 +108,31 @@ final class Product {
     return $row ?: null;
   }
 
-  public static function images(int $idProducto): array {
+  public static function images(int $idProducto): array
+  {
     $sql = "SELECT id_imagen, url, es_principal FROM producto_imagenes WHERE id_producto=:id ORDER BY es_principal DESC, id_imagen ASC";
     $st = db()->prepare($sql);
     $st->execute([':id' => $idProducto]);
     return $st->fetchAll();
   }
 
-  public static function create(array $data): int {
+  public static function create(array $data): int
+  {
     $sql = "INSERT INTO productos (sku, nombre, id_categoria, costo, precio, stock_min, estado)
             VALUES (:sku,:nombre,:cat,:costo,:precio,:stock_min,:estado)";
     $st = db()->prepare($sql);
     $st->execute([
       ':sku' => $data['sku'],
       ':nombre' => $data['nombre'],
-      ':cat' => (int)$data['id_categoria'],
-      ':costo' => (float)$data['costo'],
-      ':precio' => (float)$data['precio'],
-      ':stock_min' => (int)$data['stock_min'],
-      ':estado' => (int)$data['estado'],
+      ':cat' => (int) $data['id_categoria'],
+      ':costo' => (float) $data['costo'],
+      ':precio' => (float) $data['precio'],
+      ':stock_min' => (int) $data['stock_min'],
+      ':estado' => (int) $data['estado'],
     ]);
-    $id = (int)db()->lastInsertId();
+    $id = (int) db()->lastInsertId();
 
-    $desc = trim((string)($data['descripcion'] ?? ''));
+    $desc = trim((string) ($data['descripcion'] ?? ''));
     if ($desc !== '') {
       $st2 = db()->prepare("INSERT INTO producto_descripcion (id_producto, descripcion) VALUES (:id,:d)");
       $st2->execute([':id' => $id, ':d' => $desc]);
@@ -121,7 +141,8 @@ final class Product {
     return $id;
   }
 
-  public static function update(int $id, array $data): void {
+  public static function update(int $id, array $data): void
+  {
     $sql = "UPDATE productos SET sku=:sku, nombre=:nombre, id_categoria=:cat, costo=:costo, precio=:precio, stock_min=:stock_min, estado=:estado
             WHERE id_producto=:id";
     $st = db()->prepare($sql);
@@ -129,14 +150,14 @@ final class Product {
       ':id' => $id,
       ':sku' => $data['sku'],
       ':nombre' => $data['nombre'],
-      ':cat' => (int)$data['id_categoria'],
-      ':costo' => (float)$data['costo'],
-      ':precio' => (float)$data['precio'],
-      ':stock_min' => (int)$data['stock_min'],
-      ':estado' => (int)$data['estado'],
+      ':cat' => (int) $data['id_categoria'],
+      ':costo' => (float) $data['costo'],
+      ':precio' => (float) $data['precio'],
+      ':stock_min' => (int) $data['stock_min'],
+      ':estado' => (int) $data['estado'],
     ]);
 
-    $desc = trim((string)($data['descripcion'] ?? ''));
+    $desc = trim((string) ($data['descripcion'] ?? ''));
     // UPSERT de descripción
     $st2 = db()->prepare("INSERT INTO producto_descripcion (id_producto, descripcion)
                           VALUES (:id,:d)
@@ -144,12 +165,14 @@ final class Product {
     $st2->execute([':id' => $id, ':d' => $desc]);
   }
 
-  public static function delete(int $id): void {
+  public static function delete(int $id): void
+  {
     $st = db()->prepare("DELETE FROM productos WHERE id_producto=:id");
     $st->execute([':id' => $id]);
   }
 
-  public static function addImage(int $idProducto, string $url, bool $principal = false): void {
+  public static function addImage(int $idProducto, string $url, bool $principal = false): void
+  {
     if ($principal) {
       db()->prepare("UPDATE producto_imagenes SET es_principal=0 WHERE id_producto=:id")
         ->execute([':id' => $idProducto]);
@@ -158,15 +181,87 @@ final class Product {
     $st->execute([':id' => $idProducto, ':url' => $url, ':p' => $principal ? 1 : 0]);
   }
 
-  public static function deleteImage(int $idImagen): void {
+  public static function deleteImage(int $idImagen): void
+  {
     $st = db()->prepare("DELETE FROM producto_imagenes WHERE id_imagen=:id");
     $st->execute([':id' => $idImagen]);
   }
 
-  public static function setPrincipalImage(int $idProducto, int $idImagen): void {
+  public static function setPrincipalImage(int $idProducto, int $idImagen): void
+  {
     db()->prepare("UPDATE producto_imagenes SET es_principal=0 WHERE id_producto=:id")
       ->execute([':id' => $idProducto]);
     db()->prepare("UPDATE producto_imagenes SET es_principal=1 WHERE id_imagen=:img AND id_producto=:id")
       ->execute([':img' => $idImagen, ':id' => $idProducto]);
   }
+  public static function stockActual(int $idProducto): int
+{
+  $st = db()->prepare("
+    SELECT imd.stock_despues
+    FROM inventario_mov_detalle imd
+    WHERE imd.id_producto = :p
+    ORDER BY imd.id_mov_det DESC
+    LIMIT 1
+  ");
+  $st->execute([':p' => $idProducto]);
+  $r = $st->fetch();
+  return $r ? (int)$r['stock_despues'] : 0;
 }
+
+public static function setStock(int $idProducto, int $stockTarget, int $idUsuario, string $nota = ''): void
+{
+  if ($idProducto <= 0) throw new Exception('Producto inválido.');
+  if ($stockTarget < 0) throw new Exception('Stock inválido.');
+
+  $pdo = db();
+  $pdo->beginTransaction();
+
+  try {
+    $stockAntes = self::stockActual($idProducto);
+    $diff = $stockTarget - $stockAntes;
+
+    if ($diff === 0) { $pdo->commit(); return; }
+
+    if (trim($nota) === '') $nota = 'Ajuste de stock';
+
+    // 1) movimiento cabecera
+    $st = $pdo->prepare("
+      INSERT INTO inventario_movimientos (fecha, tipo, ref_tabla, ref_id, id_usuario, nota)
+      VALUES (NOW(), 'AJUSTE_STOCK', 'productos', :rid, :u, :nota)
+    ");
+    $st->execute([
+      ':rid' => $idProducto,
+      ':u'   => $idUsuario,
+      ':nota'=> $nota
+    ]);
+    $idMov = (int)$pdo->lastInsertId();
+
+    // 2) costo unit (tomamos costo del producto)
+    $stC = $pdo->prepare("SELECT costo FROM productos WHERE id_producto = :p LIMIT 1");
+    $stC->execute([':p' => $idProducto]);
+    $rowC = $stC->fetch();
+    $costoUnit = $rowC ? (float)$rowC['costo'] : 0.0;
+
+    // 3) detalle: diff puede ser + o -
+    $stockDespues = $stockTarget;
+    $stDet = $pdo->prepare("
+      INSERT INTO inventario_mov_detalle (id_mov, id_producto, cantidad, costo_unit, stock_antes, stock_despues)
+      VALUES (:m, :p, :cant, :cu, :antes, :despues)
+    ");
+    $stDet->execute([
+      ':m'       => $idMov,
+      ':p'       => $idProducto,
+      ':cant'    => $diff,
+      ':cu'      => $costoUnit,
+      ':antes'   => $stockAntes,
+      ':despues' => $stockDespues
+    ]);
+
+    $pdo->commit();
+  } catch (Throwable $e) {
+    $pdo->rollBack();
+    throw $e;
+  }
+}
+}
+
