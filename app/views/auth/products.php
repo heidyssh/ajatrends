@@ -34,18 +34,12 @@ $estado = $filters['estado'] ?? '';
 ?>
 <div class="products-page page-fade">
   <div class="cardx mb-4">
-    <div class="hd d-flex align-items-start justify-content-between flex-wrap gap-3">
-      <div>
-        <div class="fw-bold" style="font-size:1.15rem;">Productos · Catálogo AJA ✨</div>
-        <small>Catálogo visual (móvil) + filtros + CRUD admin · Imágenes/Precio/Categoría desde tu BD</small>
+    <div class="hd purchases-toolbar">
+      <div class="toolbar-left">
+        <div class="fw-bold title">Productos · Catálogo AJA ✨</div>
+        <div class="subtitle">Catálogo visual + filtros + CRUD admin.</div>
       </div>
-
-      <div class="d-flex align-items-center gap-2">
-        
-        <button class="btn btn-sm btn-outline-dark d-md-none" type="button" data-bs-toggle="offcanvas"
-          data-bs-target="#filtersCanvas">
-          <i class="bi bi-funnel me-1"></i> Filtros
-        </button>
+      <div class="toolbar-right">
         <?php if ($isAdmin): ?>
           <button class="btn btn-sm btn-brand" type="button" id="btnNewProduct">
             <i class="bi bi-plus-lg me-1"></i> Nuevo
@@ -414,6 +408,12 @@ $estado = $filters['estado'] ?? '';
 
             <div class="modal-footer">
               <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancelar</button>
+
+              <!-- SOLO cuando es editar -->
+              <button class="btn btn-outline-dark" type="button" id="btnAdjustStock" style="display:none;">
+                <i class="bi bi-sliders me-1"></i> Ajustar inventario
+              </button>
+
               <button class="btn btn-brand" type="submit"><i class="bi bi-save me-1"></i> Guardar</button>
             </div>
           </form>
@@ -457,6 +457,57 @@ $estado = $filters['estado'] ?? '';
     </div>
   </div>
 </div>
+<!-- Modal Ajustar Inventario -->
+<div class="modal fade" id="adjustStockModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form method="post" id="adjustStockForm">
+        <input type="hidden" name="action" value="adjust_stock">
+        <input type="hidden" name="id_producto" id="asId" value="">
+
+        <div class="modal-header">
+          <div>
+            <div class="modal-title fw-bold">Ajustar inventario</div>
+            <small class="text-muted" id="asName">Producto</small>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="row g-2">
+            <div class="col-6">
+              <label class="form-label small">Stock actual</label>
+              <input class="form-control bg-light" type="number" id="asActual" readonly>
+            </div>
+            <div class="col-6">
+              <label class="form-label small">Nuevo stock</label>
+              <input class="form-control" type="number" name="stock_target" id="asTarget" min="0" required>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label small">Motivo (obligatorio)</label>
+              <input class="form-control" name="motivo" id="asMotivo" maxlength="150"
+                placeholder="Ej: Vencido, dañado, pérdida, conteo físico..." required>
+            </div>
+
+            <div class="col-12">
+              <div class="form-text">
+                Este ajuste se registrará en Kardex con tu usuario y fecha.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancelar</button>
+          <button class="btn btn-brand" type="submit">
+            <i class="bi bi-check2-circle me-1"></i> Aplicar ajuste
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 <script>
   (function () {
     const isAdmin = <?= $isAdmin ? 'true' : 'false' ?>;
@@ -471,6 +522,27 @@ $estado = $filters['estado'] ?? '';
     if (productModal && productModal.parentElement !== document.body) document.body.appendChild(productModal);
     if (upsertEl && upsertEl.parentElement !== document.body) document.body.appendChild(upsertEl);
     if (filtersEl && filtersEl.parentElement !== document.body) document.body.appendChild(filtersEl);
+    // --- Ajuste de inventario ---
+    const btnAdjust = document.getElementById('btnAdjustStock');
+    const adjustEl = document.getElementById('adjustStockModal');
+
+    // por stacking igual que los otros
+    if (adjustEl && adjustEl.parentElement !== document.body) document.body.appendChild(adjustEl);
+    hookCleanup(adjustEl);
+
+    btnAdjust?.addEventListener('click', () => {
+      const id = document.getElementById('pfId').value;
+      const nombre = document.getElementById('pfNombre').value || 'Producto';
+      const actual = Number(document.getElementById('pfStock').value || 0);
+
+      document.getElementById('asId').value = id;
+      document.getElementById('asName').textContent = nombre;
+      document.getElementById('asActual').value = actual;
+      document.getElementById('asTarget').value = actual;
+      document.getElementById('asMotivo').value = '';
+
+      bootstrap.Modal.getOrCreateInstance(adjustEl).show();
+    });
     const titleEl = document.getElementById('pmTitle');
     const metaEl = document.getElementById('pmMeta');
     const priceEl = document.getElementById('pmPrice');
@@ -599,10 +671,13 @@ $estado = $filters['estado'] ?? '';
       document.getElementById('pfAction').value = 'create';
       document.getElementById('pfId').value = '';
       document.getElementById('productForm').reset();
+      document.getElementById('pfStock').readOnly = false;
+      document.getElementById('pfStock').classList.remove('bg-light');
+      document.getElementById('pfStock').value = 0;
       document.getElementById('pfEstado').value = '1';
       document.getElementById('pfExistingImagesWrap').style.display = 'none';
       document.getElementById('pfExistingImages').innerHTML = '';
-
+      if (btnAdjust) btnAdjust.style.display = 'none';
       m.show();
     }
 
@@ -641,6 +716,8 @@ $estado = $filters['estado'] ?? '';
         document.getElementById('pfPrecio').value = p.precio || 0;
         document.getElementById('pfMin').value = p.stock_min || 0;
         document.getElementById('pfStock').value = p.stock ?? 0;
+        document.getElementById('pfStock').readOnly = true;
+        document.getElementById('pfStock').classList.add('bg-light');
         document.getElementById('pfEstado').value = String(p.estado ?? 1);
         document.getElementById('pfDesc').value = p.descripcion || '';
 
@@ -668,7 +745,7 @@ $estado = $filters['estado'] ?? '';
             wrap.appendChild(item);
           });
         }
-
+        if (btnAdjust) btnAdjust.style.display = 'inline-block';
         m.show();
 
       } catch (err) {

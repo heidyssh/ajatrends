@@ -2481,3 +2481,22 @@ user-select:none;
   background: rgba(255,255,255,.70);
   border-color: rgba(12,20,32,.10);
 }
+html, body {
+  height: 100%;
+}
+
+.main-content {
+  min-height: 100vh;
+  background: #f1f5f9;
+}
+/* Dashboard: forzar texto oscuro en cards claras */
+.cardx,
+.cardx * {
+  color: #1e293b !important;
+}
+
+/* Excepto botones brand */
+.btn-brand,
+.btn-brand * {
+  color: #fff !important;
+}

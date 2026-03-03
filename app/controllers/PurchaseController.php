@@ -30,6 +30,7 @@ final class PurchaseController {
       'items' => [],
       'products' => Purchase::productosActivos(),
       'isAdmin' => is_admin(),
+      'proveedores' => Purchase::proveedores(),
     ];
      // ✅ AJAX: devolver detalle en JSON para modal "Ver"
     $actionGet = (string)($get['action'] ?? '');
@@ -56,6 +57,7 @@ final class PurchaseController {
         'id_compra' => (int)$compra['id_compra'],
         'fecha' => (string)($compra['fecha'] ?? ''),
         'usuario' => (string)($compra['usuario'] ?? ''),
+        'proveedor' => (string)($compra['proveedor'] ?? ''),
         'nota' => (string)($compra['nota'] ?? ''),
         'estado' => (string)($compra['estado'] ?? ''),
         'items' => array_map(static function($it){
@@ -118,6 +120,7 @@ final class PurchaseController {
           $ids = $post['id_producto'] ?? [];
           $cants = $post['cantidad'] ?? [];
           $cus = $post['costo_unit'] ?? [];
+          $idProveedor = (int)($post['id_proveedor'] ?? 0);
 
           $items = [];
           if (is_array($ids) && is_array($cants)) {
@@ -137,7 +140,7 @@ if ($idUser <= 0) $idUser = (int)($_SESSION['usuario']['id_usuario'] ?? 0);
 if ($idUser <= 0) $idUser = (int)($_SESSION['auth']['id_usuario'] ?? 0);
 if ($idUser <= 0) $idUser = (int)($_SESSION['user']['id'] ?? 0);
 
-$idCompra = Purchase::createCompra($idUser, $nota, $items);
+$idCompra = Purchase::createCompra($idUser, $idProveedor, $nota, $items);
           $_SESSION['flash_success'] = "Pedido #$idCompra registrado y stock actualizado.";
           self::redirectToPurchases($data['filters']);
         }

@@ -195,73 +195,82 @@ final class Product
       ->execute([':img' => $idImagen, ':id' => $idProducto]);
   }
   public static function stockActual(int $idProducto): int
-{
-  $st = db()->prepare("
+  {
+    $st = db()->prepare("
     SELECT imd.stock_despues
     FROM inventario_mov_detalle imd
     WHERE imd.id_producto = :p
     ORDER BY imd.id_mov_det DESC
     LIMIT 1
   ");
-  $st->execute([':p' => $idProducto]);
-  $r = $st->fetch();
-  return $r ? (int)$r['stock_despues'] : 0;
-}
+    $st->execute([':p' => $idProducto]);
+    $r = $st->fetch();
+    return $r ? (int) $r['stock_despues'] : 0;
+  }
 
-public static function setStock(int $idProducto, int $stockTarget, int $idUsuario, string $nota = ''): void
-{
-  if ($idProducto <= 0) throw new Exception('Producto inválido.');
-  if ($stockTarget < 0) throw new Exception('Stock inválido.');
+  public static function setStock(int $idProducto, int $stockTarget, int $idUsuario, string $nota = ''): void
+  {
+    if ($idProducto <= 0)
+      throw new Exception('Producto inválido.');
+    if ($stockTarget < 0)
+      throw new Exception('Stock inválido.');
 
-  $pdo = db();
-  $pdo->beginTransaction();
+    $pdo = db();
+    $pdo->beginTransaction();
 
-  try {
-    $stockAntes = self::stockActual($idProducto);
-    $diff = $stockTarget - $stockAntes;
+    try {
+      $stockAntes = self::stockActual($idProducto);
+      $diff = $stockTarget - $stockAntes;
 
-    if ($diff === 0) { $pdo->commit(); return; }
+      if ($diff === 0) {
+        $pdo->commit();
+        return;
+      }
 
-    if (trim($nota) === '') $nota = 'Ajuste de stock';
+      if (trim($nota) === '')
+        $nota = 'Ajuste de stock';
 
-    // 1) movimiento cabecera
-    $st = $pdo->prepare("
-      INSERT INTO inventario_movimientos (fecha, tipo, ref_tabla, ref_id, id_usuario, nota)
-      VALUES (NOW(), 'AJUSTE_STOCK', 'productos', :rid, :u, :nota)
-    ");
-    $st->execute([
-      ':rid' => $idProducto,
-      ':u'   => $idUsuario,
-      ':nota'=> $nota
-    ]);
-    $idMov = (int)$pdo->lastInsertId();
+      $tipoMov = ($diff > 0) ? 'AJUSTE_POSITIVO' : 'AJUSTE_NEGATIVO';
 
-    // 2) costo unit (tomamos costo del producto)
-    $stC = $pdo->prepare("SELECT costo FROM productos WHERE id_producto = :p LIMIT 1");
-    $stC->execute([':p' => $idProducto]);
-    $rowC = $stC->fetch();
-    $costoUnit = $rowC ? (float)$rowC['costo'] : 0.0;
+      // 1) movimiento cabecera
+      $st = $pdo->prepare("
+  INSERT INTO inventario_movimientos (fecha, tipo, ref_tabla, ref_id, id_usuario, nota)
+  VALUES (NOW(), :tipo, 'productos', :rid, :u, :nota)
+");
+      $st->execute([
+        ':tipo' => $tipoMov,
+        ':rid' => $idProducto,
+        ':u' => $idUsuario,
+        ':nota' => $nota
+      ]);
+      $idMov = (int) $pdo->lastInsertId();
 
-    // 3) detalle: diff puede ser + o -
-    $stockDespues = $stockTarget;
-    $stDet = $pdo->prepare("
+      // 2) costo unit (tomamos costo del producto)
+      $stC = $pdo->prepare("SELECT costo FROM productos WHERE id_producto = :p LIMIT 1");
+      $stC->execute([':p' => $idProducto]);
+      $rowC = $stC->fetch();
+      $costoUnit = $rowC ? (float) $rowC['costo'] : 0.0;
+
+      // 3) detalle: diff puede ser + o -
+      $stockDespues = $stockTarget;
+      $stDet = $pdo->prepare("
       INSERT INTO inventario_mov_detalle (id_mov, id_producto, cantidad, costo_unit, stock_antes, stock_despues)
       VALUES (:m, :p, :cant, :cu, :antes, :despues)
     ");
-    $stDet->execute([
-      ':m'       => $idMov,
-      ':p'       => $idProducto,
-      ':cant'    => $diff,
-      ':cu'      => $costoUnit,
-      ':antes'   => $stockAntes,
-      ':despues' => $stockDespues
-    ]);
+      $stDet->execute([
+        ':m' => $idMov,
+        ':p' => $idProducto,
+        ':cant' => $diff,
+        ':cu' => $costoUnit,
+        ':antes' => $stockAntes,
+        ':despues' => $stockDespues
+      ]);
 
-    $pdo->commit();
-  } catch (Throwable $e) {
-    $pdo->rollBack();
-    throw $e;
+      $pdo->commit();
+    } catch (Throwable $e) {
+      $pdo->rollBack();
+      throw $e;
+    }
   }
-}
 }
 

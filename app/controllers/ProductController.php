@@ -63,7 +63,7 @@ final class ProductController
       $action = (string) ($post['action'] ?? '');
 
       // Acciones que modifican requieren admin
-      $mutating = in_array($action, ['create', 'update', 'delete', 'delete_image', 'set_principal'], true);
+      $mutating = in_array($action, ['create', 'update', 'delete', 'delete_image', 'set_principal', 'adjust_stock'], true);
       if ($mutating)
         require_admin();
 
@@ -104,15 +104,36 @@ final class ProductController
           if ($idUser <= 0)
             $idUser = (int) ($_SESSION['user']['id'] ?? 0);
 
-          $stockTarget = (int) ($post['stock'] ?? -1);
-          if ($stockTarget >= 0) {
-            Product::setStock($id, $stockTarget, $idUser, 'Ajuste manual desde Productos');
-          }
           self::handleUploads($id, $files);
           $_SESSION['flash_success'] = 'Producto actualizado con éxito.';
           self::redirectToProducts($data['filters']);
         }
 
+        if ($action === 'adjust_stock') {
+          $id = (int) ($post['id_producto'] ?? 0);
+          if ($id <= 0)
+            throw new Exception('ID de producto inválido.');
+
+          $stockTarget = (int) ($post['stock_target'] ?? -1);
+          if ($stockTarget < 0)
+            throw new Exception('Stock objetivo inválido.');
+
+          $motivo = trim((string) ($post['motivo'] ?? ''));
+          if ($motivo === '')
+            throw new Exception('Motivo requerido para ajustar inventario.');
+
+          $idUser = (int) ($_SESSION['user']['id_usuario'] ?? 0);
+          if ($idUser <= 0)
+            $idUser = (int) ($_SESSION['usuario']['id_usuario'] ?? 0);
+          if ($idUser <= 0)
+            $idUser = (int) ($_SESSION['auth']['id_usuario'] ?? 0);
+          if ($idUser <= 0)
+            $idUser = (int) ($_SESSION['user']['id'] ?? 0);
+
+          Product::setStock($id, $stockTarget, $idUser, $motivo);
+          $_SESSION['flash_success'] = 'Inventario ajustado y registrado en Kardex.';
+          self::redirectToProducts($data['filters']);
+        }
         if ($action === 'delete') {
           $id = (int) ($post['id_producto'] ?? 0);
           if ($id <= 0)
@@ -244,66 +265,74 @@ final class ProductController
         $hasPrincipal = true;
     }
   }
-  public static function stockActual(int $idProducto): int {
-  $st = db()->prepare("
+  public static function stockActual(int $idProducto): int
+  {
+    $st = db()->prepare("
     SELECT imd.stock_despues
     FROM inventario_mov_detalle imd
     WHERE imd.id_producto = :p
     ORDER BY imd.id_mov_det DESC
     LIMIT 1
   ");
-  $st->execute([':p' => $idProducto]);
-  $r = $st->fetch();
-  return $r ? (int)$r['stock_despues'] : 0;
-}
+    $st->execute([':p' => $idProducto]);
+    $r = $st->fetch();
+    return $r ? (int) $r['stock_despues'] : 0;
+  }
 
-public static function setStock(int $idProducto, int $stockTarget, int $idUsuario, string $nota = ''): void {
-  if ($idProducto <= 0) throw new Exception('Producto inválido.');
-  if ($stockTarget < 0) throw new Exception('Stock inválido.');
+  public static function setStock(int $idProducto, int $stockTarget, int $idUsuario, string $nota = ''): void
+  {
+    if ($idProducto <= 0)
+      throw new Exception('Producto inválido.');
+    if ($stockTarget < 0)
+      throw new Exception('Stock inválido.');
 
-  $pdo = db();
-  $pdo->beginTransaction();
-  try {
-    $stockAntes = self::stockActual($idProducto);
-    $diff = $stockTarget - $stockAntes;
+    $pdo = db();
+    $pdo->beginTransaction();
+    try {
+      $stockAntes = self::stockActual($idProducto);
+      $diff = $stockTarget - $stockAntes;
 
-    if ($diff === 0) { $pdo->commit(); return; }
+      if ($diff === 0) {
+        $pdo->commit();
+        return;
+      }
 
-    if (trim($nota) === '') $nota = 'Ajuste de stock';
+      if (trim($nota) === '')
+        $nota = 'Ajuste de stock';
 
-    $st = $pdo->prepare("
+      $st = $pdo->prepare("
       INSERT INTO inventario_movimientos (fecha, tipo, ref_tabla, ref_id, id_usuario, nota)
       VALUES (NOW(), 'AJUSTE_STOCK', 'productos', :rid, :u, :nota)
     ");
-    $st->execute([
-      ':rid' => $idProducto,
-      ':u' => $idUsuario,
-      ':nota' => $nota
-    ]);
-    $idMov = (int)$pdo->lastInsertId();
+      $st->execute([
+        ':rid' => $idProducto,
+        ':u' => $idUsuario,
+        ':nota' => $nota
+      ]);
+      $idMov = (int) $pdo->lastInsertId();
 
-    // costo_unit: usar costo actual del producto (sirve para tus stats)
-    $stC = $pdo->prepare("SELECT costo FROM productos WHERE id_producto=:p LIMIT 1");
-    $stC->execute([':p' => $idProducto]);
-    $costoUnit = (float)($stC->fetch()['costo'] ?? 0);
+      // costo_unit: usar costo actual del producto (sirve para tus stats)
+      $stC = $pdo->prepare("SELECT costo FROM productos WHERE id_producto=:p LIMIT 1");
+      $stC->execute([':p' => $idProducto]);
+      $costoUnit = (float) ($stC->fetch()['costo'] ?? 0);
 
-    $stDet = $pdo->prepare("
+      $stDet = $pdo->prepare("
       INSERT INTO inventario_mov_detalle (id_mov, id_producto, cantidad, costo_unit, stock_antes, stock_despues)
       VALUES (:m, :p, :cant, :cu, :antes, :despues)
     ");
-    $stDet->execute([
-      ':m' => $idMov,
-      ':p' => $idProducto,
-      ':cant' => $diff,              // positivo sube, negativo baja
-      ':cu' => $costoUnit,
-      ':antes' => $stockAntes,
-      ':despues' => $stockTarget,
-    ]);
+      $stDet->execute([
+        ':m' => $idMov,
+        ':p' => $idProducto,
+        ':cant' => $diff,              // positivo sube, negativo baja
+        ':cu' => $costoUnit,
+        ':antes' => $stockAntes,
+        ':despues' => $stockTarget,
+      ]);
 
-    $pdo->commit();
-  } catch (Throwable $e) {
-    $pdo->rollBack();
-    throw $e;
+      $pdo->commit();
+    } catch (Throwable $e) {
+      $pdo->rollBack();
+      throw $e;
+    }
   }
-}
 }

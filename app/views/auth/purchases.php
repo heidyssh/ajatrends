@@ -4,6 +4,7 @@ $purchases = $viewData['purchases'] ?? [];
 $purchase = $viewData['purchase'] ?? null;
 $items = $viewData['items'] ?? [];
 $products = $viewData['products'] ?? [];
+$proveedores = $viewData['proveedores'] ?? [];
 
 function h($v)
 {
@@ -31,98 +32,126 @@ $estado = $filters['estado'] ?? 'TODOS';
 
     <div class="bd">
       <form class="purchases-filters filters-glass" method="get" action="index.php">
-  <input type="hidden" name="page" value="purchases">
+        <input type="hidden" name="page" value="purchases">
 
-  <div class="filter">
-    <label class="form-label">Buscar</label>
-    <div class="input-group input-group-sm">
-      <span class="input-group-text"><i class="bi bi-search"></i></span>
-      <input class="form-control form-control-sm" name="q" value="<?= h($q) ?>" placeholder="ID, nota, proveedor...">
-    </div>
-  </div>
+        <div class="filter">
+          <label class="form-label">Buscar</label>
+          <div class="input-group input-group-sm">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <input class="form-control form-control-sm" name="q" value="<?= h($q) ?>"
+              placeholder="ID, nota, proveedor...">
+          </div>
+        </div>
 
-  <div class="filter">
-    <label class="form-label">Estado</label>
-    <select class="form-select form-select-sm" name="estado">
-      <?php foreach (['TODOS', 'REGISTRADA', 'ANULADA'] as $op): ?>
-        <option value="<?= h($op) ?>" <?= $estado === $op ? 'selected' : '' ?>><?= h($op) ?></option>
-      <?php endforeach; ?>
-    </select>
-  </div>
+        <div class="filter">
+          <label class="form-label">Estado</label>
+          <select class="form-select form-select-sm" name="estado">
+            <?php foreach (['TODOS', 'REGISTRADA', 'ANULADA'] as $op): ?>
+              <option value="<?= h($op) ?>" <?= $estado === $op ? 'selected' : '' ?>><?= h($op) ?></option>
+            <?php endforeach; ?>
+          </select>
+        </div>
 
-  <div class="filter actions">
-    <div class="actions">
-      <button class="btn btn-brand btn-sm">
-        <i class="bi bi-funnel me-1"></i> Aplicar
-      </button>
-      <a class="btn btn-light btn-sm" href="index.php?page=purchases">
-        <i class="bi bi-x-lg me-1"></i> Limpiar
-      </a>
-    </div>
-  </div>
-</form>
+        <div class="filter actions">
+          <div class="actions">
+            <button class="btn btn-brand btn-sm">
+              <i class="bi bi-funnel me-1"></i> Aplicar
+            </button>
+            <a class="btn btn-light btn-sm" href="index.php?page=purchases">
+              <i class="bi bi-x-lg me-1"></i> Limpiar
+            </a>
+          </div>
+        </div>
+      </form>
     </div>
   </div>
 
   <div class="cardx">
-    <div class="bd p-0">
-      <div class="table-responsive">
-        <table class="table table-hover table-sm align-middle mb-0 purchases-table">
-          <thead>
-            <tr>
-              <th style="width:90px;">#</th>
-              <th>Fecha</th>
-              <th>Usuario</th>
-              <th>Nota</th>
-              <th class="text-end">Items</th>
-              <th class="text-end">Total</th>
-              <th style="width:160px;">Estado</th>
-              <th style="width:180px;" class="text-end">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <?php if (!$purchases): ?>
-              <tr>
-                <td colspan="8" class="text-center text-muted py-4">Sin registros.</td>
-              </tr>
-            <?php endif; ?>
-
-            <?php foreach ($purchases as $c): ?>
-              <tr>
-                <td class="fw-semibold">#<?= (int) $c['id_compra'] ?></td>
-                <td class="text-muted"><?= h($c['fecha']) ?></td>
-                <td><?= h($c['usuario'] ?? '') ?></td>
-                <td class="text-muted"><?= h($c['nota']) ?></td>
-                <td class="text-end"><?= (int) $c['items'] ?></td>
-                <td class="text-end">L. <?= number_format((float) $c['total'], 2) ?></td>
-                <td>
-                  <?php $st = (string) $c['estado'];
-                  $badge = ($st === 'ANULADA') ? 'bg-danger' : 'bg-success'; ?>
-                  <span class="badge <?= $badge ?>"><?= h($st) ?></span>
-                </td>
-                <td class="text-end">
-                  <div class="actions">
-                    <button type="button" class="btn btn-light btn-sm"
-                      onclick="openViewCompra(<?= (int) $c['id_compra'] ?>)">
-                      <i class="bi bi-eye"></i>
-                      <span class="d-none d-md-inline ms-1">Ver</span>
-                    </button>
-
-                    <?php if ((string) $c['estado'] !== 'ANULADA'): ?>
-                      <button type="button" class="btn btn-danger btn-sm"
-                        onclick="openDeleteCompra(<?= (int) $c['id_compra'] ?>)">
-                        <i class="bi bi-trash"></i>
-                        <span class="d-none d-md-inline ms-1">Eliminar</span>
-                      </button>
-                    <?php endif; ?>
-                  </div>
-                </td>
-              </tr>
-            <?php endforeach; ?>
-
-          </tbody>
-        </table>
+    <div class="hd d-flex align-items-center justify-content-between">
+      <div>
+        <div class="fw-bold">Compras</div>
+        <div class="small text-muted">Vista limpia tipo sistema pro.</div>
       </div>
+    </div>
+
+    <div class="bd">
+      <?php if (!$purchases): ?>
+        <div class="text-center text-muted py-4">Sin registros.</div>
+      <?php else: ?>
+        <div class="sales-list">
+          <?php foreach ($purchases as $c): ?>
+            <?php
+            $st = strtoupper(trim((string) ($c['estado'] ?? '')));
+            $cls = 'status-pill';
+            if ($st === 'ANULADA')
+              $cls .= ' st-danger';
+            else if ($st === 'REGISTRADA')
+              $cls .= ' st-ok';
+            else
+              $cls .= ' st-neutral';
+            ?>
+
+            <div class="sale-row">
+              <div class="sale-main">
+                <div class="sale-top">
+                  <div class="sale-id">#<?= (int) $c['id_compra'] ?></div>
+                  <div class="sale-date"><?= h($c['fecha']) ?></div>
+                </div>
+
+                <div class="sale-mid">
+                  <div class="sale-client">
+                    <i class="bi bi-person me-1"></i><?= h($c['usuario'] ?? '') ?>
+                  </div>
+                  <div class="sale-note">
+                    <strong><?= h($c['proveedor'] ?? 'Sin proveedor') ?></strong>
+                    <?= !empty($c['nota']) ? (' · ' . h($c['nota'])) : '' ?>
+                  </div>
+                </div>
+              </div>
+
+              <div class="sale-metrics">
+                <div class="metric">
+                  <div class="lbl">Items</div>
+                  <div class="val"><?= (int) $c['items'] ?></div>
+                </div>
+                <div class="metric">
+                  <div class="lbl">Total</div>
+                  <div class="val">L. <?= number_format((float) $c['total'], 2) ?></div>
+                </div>
+              </div>
+
+              <div class="sale-status">
+                <span class="<?= $cls ?>"><?= h($st) ?></span>
+              </div>
+
+              <div class="sale-actions text-end">
+                <div class="dropdown">
+                  <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    Acciones
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                      <button class="dropdown-item" type="button" onclick="openViewCompra(<?= (int) $c['id_compra'] ?>)">
+                        <i class="bi bi-eye me-2"></i> Ver
+                      </button>
+                    </li>
+
+                    <?php if ($st !== 'ANULADA'): ?>
+                      <li>
+                        <button class="dropdown-item text-danger" type="button"
+                          onclick="openDeleteCompra(<?= (int) $c['id_compra'] ?>)">
+                          <i class="bi bi-trash me-2"></i> Eliminar
+                        </button>
+                      </li>
+                    <?php endif; ?>
+                  </ul>
+                </div>
+              </div>
+
+            </div>
+          <?php endforeach; ?>
+        </div>
+      <?php endif; ?>
     </div>
   </div>
 </div>
@@ -130,19 +159,31 @@ $estado = $filters['estado'] ?? 'TODOS';
 <!-- MODAL CREAR COMPRA -->
 <div class="modal fade" id="modalCreate" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
-    <div class="modal-content product-modal">
+    <div class="modal-content product-modal sale-modal">
       <div class="modal-header">
         <h5 class="modal-title">Registrar compra</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
 
       <form method="post" action="index.php?page=purchases" id="frmCompra">
         <input type="hidden" name="action" value="create">
-
         <div class="modal-body">
-          <div class="mb-3">
-            <label class="form-label small text-muted">Nota / referencia</label>
-            <input class="form-control" name="nota" placeholder="Ej: Compra proveedor X, factura #...">
+
+          <div class="row g-2 mb-2">
+            <div class="col-md-6">
+              <label class="form-label small text-muted">Proveedor</label>
+              <select class="form-select" name="id_proveedor">
+                <option value="">Seleccionar proveedor</option>
+                <?php foreach (($proveedores ?? []) as $pr): ?>
+                  <option value="<?= (int) $pr['id_proveedor'] ?>"><?= h($pr['nombre']) ?></option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label small text-muted">Nota / referencia</label>
+              <input class="form-control" name="nota" placeholder="Ej: factura #..., detalle...">
+            </div>
           </div>
 
           <div class="d-flex flex-wrap gap-2 align-items-end mb-2">
@@ -171,7 +212,7 @@ $estado = $filters['estado'] ?? 'TODOS';
           </div>
 
           <div class="table-responsive">
-            <table class="table table-sm align-middle purchases-items-table" id="tblItems">
+            <table class="table table-sm align-middle purchases-items-table sale-table" id="tblItems">
               <thead>
                 <tr>
                   <th>Producto</th>
@@ -216,7 +257,7 @@ $estado = $filters['estado'] ?? 'TODOS';
 <!-- MODAL VER COMPRA -->
 <div class="modal fade" id="modalViewCompra" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
-    <div class="modal-content">
+    <div class="modal-content product-modal sale-modal">
       <div class="modal-header">
         <div>
           <h5 class="modal-title mb-0">Detalle de compra</h5>
@@ -230,9 +271,12 @@ $estado = $filters['estado'] ?? 'TODOS';
           <div class="fw-semibold">Nota</div>
           <div class="text-muted" id="viewNota">-</div>
         </div>
-
+        <div class="mb-2">
+          <div class="fw-semibold">Proveedor</div>
+          <div class="text-muted" id="viewProveedor">-</div>
+        </div>
         <div class="table-responsive">
-          <table class="table table-sm align-middle mb-0">
+          <table class="table table-sm align-middle mb-0 sale-table">
             <thead>
               <tr>
                 <th>SKU</th>
@@ -266,7 +310,7 @@ $estado = $filters['estado'] ?? 'TODOS';
 <!-- MODAL ELIMINAR COMPRA -->
 <div class="modal fade" id="modalDeleteCompra" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content product-modal">
+    <div class="modal-content product-modal sale-modal">
       <div class="modal-header">
         <h5 class="modal-title">Eliminar compra</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -418,10 +462,10 @@ $estado = $filters['estado'] ?? 'TODOS';
 
       // meta
       document.getElementById('viewMeta').textContent =
-        `Compra #${data.id_compra} · ${data.fecha} · ${data.usuario} · ${data.estado}`;
+        `Compra #${data.id_compra} · ${data.fecha} · Usuario: ${data.usuario} · Estado: ${data.estado}`;
 
       document.getElementById('viewNota').textContent = data.nota || '-';
-
+      document.getElementById('viewProveedor').textContent = (data.proveedor || '-');
       // items
       let total = 0;
       const rows = (data.items || []).map(it => {

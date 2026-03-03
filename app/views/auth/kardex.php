@@ -12,6 +12,27 @@ function money($n)
 {
     return 'L. ' . number_format((float) $n, 2);
 }
+function tipoLabel(string $tipo): string
+{
+    $map = [
+        'ENTRADA_COMPRA' => 'Entrada (Compra)',
+        'SALIDA_VENTA' => 'Salida (Venta)',
+        'ENTRADA_ANULACION_VE' => 'Entrada (Anulación de venta)',
+        'SALIDA_ANULA_COMPRA' => 'Salida (Anulación de compra)',
+        // por si después agregás más:
+        'AJUSTE_POSITIVO' => 'Ajuste (+)',
+        'AJUSTE_NEGATIVO' => 'Ajuste (−)',
+        'AJUSTE_STOCK' => 'Ajuste',
+    ];
+
+    $k = strtoupper(trim($tipo));
+    if (isset($map[$k]))
+        return $map[$k];
+
+    // fallback: "SALIDA_ALGO" -> "Salida algo"
+    $t = strtolower(str_replace('_', ' ', $k));
+    return ucfirst($t);
+}
 
 $q = $filters['q'] ?? '';
 $tipo = $filters['tipo'] ?? 'TODOS';
@@ -120,8 +141,13 @@ function tipoPillClass(string $tipo): string
                         <div>
                             <label class="form-label">Tipo</label>
                             <select class="form-select form-select-sm" name="tipo">
-                                <?php foreach (['TODOS', 'ENTRADA_COMPRA', 'SALIDA_VENTA', 'ENTRADA_ANULACION_VE', 'SALIDA_ANULA_COMPRA'] as $op): ?>
-                                    <option value="<?= h($op) ?>" <?= $tipo === $op ? 'selected' : '' ?>><?= h($op) ?></option>
+                                <?php
+                                $ops = ['TODOS', 'ENTRADA_COMPRA', 'SALIDA_VENTA', 'ENTRADA_ANULACION_VE', 'SALIDA_ANULA_COMPRA'];
+                                ?>
+                                <?php foreach ($ops as $op): ?>
+                                    <option value="<?= h($op) ?>" <?= $tipo === $op ? 'selected' : '' ?>>
+                                        <?= $op === 'TODOS' ? 'Todos' : h(tipoLabel($op)) ?>
+                                    </option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
@@ -183,38 +209,42 @@ function tipoPillClass(string $tipo): string
         </div>
     </div>
     <?php
-$entr = (int)($res['entradas'] ?? 0);
-$sal  = (int)($res['salidas'] ?? 0);
-$mx = max(1, $entr, $sal);
-$pe = min(100, ($entr / $mx) * 100);
-$ps = min(100, ($sal / $mx) * 100);
-?>
+    $entr = (int) ($res['entradas'] ?? 0);
+    $sal = (int) ($res['salidas'] ?? 0);
+    $mx = max(1, $entr, $sal);
+    $pe = min(100, ($entr / $mx) * 100);
+    $ps = min(100, ($sal / $mx) * 100);
+    ?>
 
-<div class="cardx mb-4">
-  <div class="hd d-flex align-items-center justify-content-between">
-    <div>
-      <div class="fw-bold">Resumen visual</div>
-      <div class="small text-muted">Entradas vs salidas (según filtros).</div>
+    <div class="cardx mb-4">
+        <div class="hd d-flex align-items-center justify-content-between">
+            <div>
+                <div class="fw-bold">Resumen visual</div>
+                <div class="small text-muted">Entradas vs salidas (según filtros).</div>
+            </div>
+            <span class="badge badge-soft">Mini chart</span>
+        </div>
+
+        <div class="bd">
+            <div class="kx-mini">
+                <div class="kx-mini-row">
+                    <div class="kx-mini-lbl">Entradas</div>
+                    <div class="kx-mini-bar">
+                        <div class="kx-mini-fill" style="width: <?= number_format($pe, 2) ?>%"></div>
+                    </div>
+                    <div class="kx-mini-val"><?= $entr ?></div>
+                </div>
+
+                <div class="kx-mini-row">
+                    <div class="kx-mini-lbl">Salidas</div>
+                    <div class="kx-mini-bar danger">
+                        <div class="kx-mini-fill" style="width: <?= number_format($ps, 2) ?>%"></div>
+                    </div>
+                    <div class="kx-mini-val"><?= $sal ?></div>
+                </div>
+            </div>
+        </div>
     </div>
-    <span class="badge badge-soft">Mini chart</span>
-  </div>
-
-  <div class="bd">
-    <div class="kx-mini">
-      <div class="kx-mini-row">
-        <div class="kx-mini-lbl">Entradas</div>
-        <div class="kx-mini-bar"><div class="kx-mini-fill" style="width: <?= number_format($pe,2) ?>%"></div></div>
-        <div class="kx-mini-val"><?= $entr ?></div>
-      </div>
-
-      <div class="kx-mini-row">
-        <div class="kx-mini-lbl">Salidas</div>
-        <div class="kx-mini-bar danger"><div class="kx-mini-fill" style="width: <?= number_format($ps,2) ?>%"></div></div>
-        <div class="kx-mini-val"><?= $sal ?></div>
-      </div>
-    </div>
-  </div>
-</div>
     <div class="cardx">
         <div class="hd d-flex align-items-center justify-content-between">
             <div>
@@ -230,8 +260,10 @@ $ps = min(100, ($sal / $mx) * 100);
                 <div class="accordion" id="kardexAcc">
                     <?php foreach ($movs as $m):
                         $mid = (int) $m['id_mov'];
-                        $tipoTxt = (string) ($m['tipo'] ?? '');
-                        $pill = tipoPillClass($tipoTxt);
+                        $tipoRaw = (string) ($m['tipo'] ?? '');
+                        $tipoTxt = tipoLabel($tipoRaw);
+
+                        $pill = tipoPillClass($tipoRaw);
                         $hdrId = 'kxH' . $mid;
                         $colId = 'kxC' . $mid;
 
@@ -302,7 +334,8 @@ $ps = min(100, ($sal / $mx) * 100);
                                                         <td class="text-muted"><?= h($it['sku'] ?? '') ?></td>
                                                         <td><?= h($it['nombre'] ?? '') ?></td>
                                                         <td class="text-end <?= $isIn ? 'text-success' : 'text-danger' ?> fw-bold">
-                                                            <?= $cant ?></td>
+                                                            <?= $cant ?>
+                                                        </td>
                                                         <td class="text-end"><?= money($it['costo_unit'] ?? 0) ?></td>
                                                         <td class="text-end"><?= (int) ($it['stock_antes'] ?? 0) ?></td>
                                                         <td class="text-end"><?= (int) ($it['stock_despues'] ?? 0) ?></td>
