@@ -19,7 +19,23 @@ $k = $stats['kpis'] ?? [];
 $serie = $stats['serie'] ?? [];
 $top = $stats['top'] ?? [];
 $cats = $stats['cats'] ?? [];
+$maxTopIngreso = 0;
+if (!empty($top)) {
+  foreach ($top as $t)
+    $maxTopIngreso = max($maxTopIngreso, (float) ($t['ingreso'] ?? 0));
+}
 
+$maxCatIngreso = 0;
+if (!empty($cats)) {
+  foreach ($cats as $c)
+    $maxCatIngreso = max($maxCatIngreso, (float) ($c['ingreso'] ?? 0));
+}
+
+$maxSerieTotal = 0;
+if (!empty($serie)) {
+  foreach ($serie as $s)
+    $maxSerieTotal = max($maxSerieTotal, (float) ($s['total'] ?? 0));
+}
 function money($n)
 {
   return 'L. ' . number_format((float) $n, 2);
@@ -43,12 +59,16 @@ function money($n)
     </div>
 
     <div class="bd">
-      <form class="purchases-filters" method="get" action="index.php">
+      <form class="purchases-filters filters-glass" method="get" action="index.php">
         <input type="hidden" name="page" value="sales">
 
         <div class="filter">
           <label class="form-label">Buscar</label>
-          <input class="form-control form-control-sm" name="q" value="<?= h($q) ?>" placeholder="ID, nota, cliente...">
+          <div class="input-group input-group-sm">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <input class="form-control form-control-sm" name="q" value="<?= h($q) ?>"
+              placeholder="ID, cliente, nota...">
+          </div>
         </div>
 
         <div class="filter">
@@ -60,20 +80,35 @@ function money($n)
           </select>
         </div>
 
-        <div class="filter">
-          <label class="form-label">Desde</label>
-          <input type="date" class="form-control form-control-sm" name="from" value="<?= h($from) ?>">
-        </div>
-
-        <div class="filter">
-          <label class="form-label">Hasta</label>
-          <input type="date" class="form-control form-control-sm" name="to" value="<?= h($to) ?>">
-        </div>
-
         <div class="filter actions">
-          <button class="btn btn-brand btn-sm w-100">
-            <i class="bi bi-search me-1"></i> Filtrar
-          </button>
+          <div class="actions">
+            <button class="btn btn-brand btn-sm">
+              <i class="bi bi-funnel me-1"></i> Aplicar
+            </button>
+
+            <button class="btn btn-light btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#salesMore"
+              aria-expanded="false" aria-controls="salesMore">
+              <i class="bi bi-sliders me-1"></i> Más
+            </button>
+
+            <a class="btn btn-light btn-sm" href="index.php?page=sales">
+              <i class="bi bi-x-lg me-1"></i> Limpiar
+            </a>
+          </div>
+        </div>
+
+        <div class="collapse filters-more" id="salesMore">
+          <div class="more-grid">
+            <div>
+              <label class="form-label">Desde</label>
+              <input type="date" class="form-control form-control-sm" name="from" value="<?= h($from) ?>">
+            </div>
+            <div>
+              <label class="form-label">Hasta</label>
+              <input type="date" class="form-control form-control-sm" name="to" value="<?= h($to) ?>">
+            </div>
+            <div></div>
+          </div>
         </div>
       </form>
     </div>
@@ -116,227 +151,259 @@ function money($n)
     <div class="col-12 col-md-6 col-xl-3">
       <div class="cardx">
         <div class="bd">
-          <div class="small text-muted">Utilidad estimada*</div>
+          <div class="small text-muted">Utilidad estimada</div>
           <div class="fw-bold" style="font-size:1.35rem;"><?= money($k['util_est'] ?? 0) ?></div>
           <div class="small text-muted">Margen est: <?= number_format(((float) ($k['margen_est'] ?? 0)) * 100, 1) ?>%
           </div>
         </div>
       </div>
     </div>
-    <div class="col-12">
-      <div class="small text-muted">
-        * Utilidad estimada usando el último costo de compra registrado por producto (ENTRADA_COMPRA).
+
+  </div>
+
+  <!-- Analítica (compacta y elegante) -->
+  <div class="cardx mb-4 sales-analytics">
+    <div class="hd d-flex align-items-center justify-content-between">
+      <div>
+        <div class="fw-bold">Analítica</div>
+        <div class="small text-muted">Top productos, categorías y serie diaria (sin tablas amontonadas).</div>
+      </div>
+
+      <button class="btn btn-light btn-sm" type="button" data-bs-toggle="collapse"
+        data-bs-target="#salesAnalyticsCollapse" aria-expanded="false" aria-controls="salesAnalyticsCollapse">
+        <i class="bi bi-bar-chart-line me-1"></i> Ver / Ocultar
+      </button>
+    </div>
+
+    <div class="bd pt-2 collapse show" id="salesAnalyticsCollapse">
+      <div class="row g-3">
+
+        <!-- TOP PRODUCTOS -->
+        <div class="col-12 col-xl-6">
+          <div class="sales-panel">
+            <div class="sales-panel-hd">
+              <div class="fw-semibold">Top productos</div>
+              <div class="small text-muted">Más ingreso según filtros.</div>
+            </div>
+
+            <div class="sales-panel-bd">
+              <?php if (!$top): ?>
+                <div class="text-center text-muted py-3">Sin datos.</div>
+              <?php else: ?>
+                <div class="stat-list">
+                  <?php foreach ($top as $t):
+                    $ing = (float) ($t['ingreso'] ?? 0);
+                    $pct = $maxTopIngreso > 0 ? min(100, ($ing / $maxTopIngreso) * 100) : 0;
+                    ?>
+                    <div class="stat-item">
+                      <div class="stat-left">
+                        <div class="fw-semibold"><?= h($t['nombre']) ?></div>
+                        <div class="small text-muted"><?= h($t['sku']) ?> · <?= (int) $t['unidades'] ?> unid.</div>
+                      </div>
+
+                      <div class="stat-right">
+                        <div class="fw-bold"><?= money($ing) ?></div>
+                        <div class="small text-muted">Util est: <?= money($t['util_est'] ?? 0) ?></div>
+                      </div>
+
+                      <div class="stat-bar">
+                        <div class="stat-fill" style="width: <?= number_format($pct, 2) ?>%"></div>
+                      </div>
+                    </div>
+                  <?php endforeach; ?>
+                </div>
+              <?php endif; ?>
+            </div>
+          </div>
+        </div>
+
+        <!-- CATEGORIAS -->
+        <div class="col-12 col-xl-6">
+          <div class="sales-panel">
+            <div class="sales-panel-hd">
+              <div class="fw-semibold">Ventas por categoría</div>
+              <div class="small text-muted">Qué área mueve más inventario.</div>
+            </div>
+
+            <div class="sales-panel-bd">
+              <?php if (!$cats): ?>
+                <div class="text-center text-muted py-3">Sin datos.</div>
+              <?php else: ?>
+                <div class="stat-list">
+                  <?php foreach ($cats as $c):
+                    $ing = (float) ($c['ingreso'] ?? 0);
+                    $pct = $maxCatIngreso > 0 ? min(100, ($ing / $maxCatIngreso) * 100) : 0;
+                    ?>
+                    <div class="stat-item">
+                      <div class="stat-left">
+                        <div class="fw-semibold"><?= h($c['categoria'] ?? 'Sin categoría') ?></div>
+                        <div class="small text-muted"><?= (int) $c['unidades'] ?> unid.</div>
+                      </div>
+
+                      <div class="stat-right">
+                        <div class="fw-bold"><?= money($ing) ?></div>
+                      </div>
+
+                      <div class="stat-bar">
+                        <div class="stat-fill" style="width: <?= number_format($pct, 2) ?>%"></div>
+                      </div>
+                    </div>
+                  <?php endforeach; ?>
+                </div>
+              <?php endif; ?>
+            </div>
+          </div>
+        </div>
+
+        <!-- SERIE DIARIA -->
+        <div class="col-12">
+          <div class="sales-panel">
+            <div class="sales-panel-hd d-flex align-items-center justify-content-between">
+              <div>
+                <div class="fw-semibold">Serie diaria</div>
+                <div class="small text-muted">Totales por día (según filtros o últimos 14 días).</div>
+              </div>
+              <span class="badge badge-soft">Resumen</span>
+            </div>
+
+            <div class="sales-panel-bd">
+              <?php if (!$serie): ?>
+                <div class="text-center text-muted py-3">Sin datos.</div>
+              <?php else: ?>
+                <div class="serie-grid">
+                  <?php foreach ($serie as $s):
+                    $tot = (float) ($s['total'] ?? 0);
+                    $pct = $maxSerieTotal > 0 ? min(100, ($tot / $maxSerieTotal) * 100) : 0;
+                    ?>
+                    <div class="serie-item">
+                      <div class="serie-left">
+                        <div class="small text-muted"><?= h($s['dia']) ?></div>
+                        <div class="fw-bold"><?= money($tot) ?></div>
+                      </div>
+                      <div class="serie-bar">
+                        <div class="serie-fill" style="width: <?= number_format($pct, 2) ?>%"></div>
+                      </div>
+                    </div>
+                  <?php endforeach; ?>
+                </div>
+              <?php endif; ?>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
 
-  <!-- Tablas estadísticas: Top productos / Categorías / Serie diaria -->
-  <div class="row g-3 mb-4">
-    <div class="col-12 col-xl-6">
-      <div class="cardx">
-        <div class="hd d-flex align-items-center justify-content-between">
-          <div>
-            <div class="fw-bold">Top productos</div>
-            <div class="small text-muted">Los que más ingresan (según filtros).</div>
-          </div>
-          <span class="badge badge-soft">Estadística</span>
-        </div>
-        <div class="bd p-0">
-          <div class="table-responsive">
-            <table class="table table-hover table-sm align-middle mb-0">
-              <thead>
-                <tr>
-                  <th>Producto</th>
-                  <th class="text-end">Unid.</th>
-                  <th class="text-end">Ingreso</th>
-                  <th class="text-end">Util est</th>
-                </tr>
-              </thead>
-              <tbody>
-                <?php if (!$top): ?>
-                  <tr>
-                    <td colspan="4" class="text-center text-muted py-4">Sin datos.</td>
-                  </tr>
-                <?php endif; ?>
-                <?php foreach ($top as $t): ?>
-                  <tr>
-                    <td>
-                      <div class="fw-semibold"><?= h($t['nombre']) ?></div>
-                      <div class="small text-muted"><?= h($t['sku']) ?></div>
-                    </td>
-                    <td class="text-end"><?= (int) $t['unidades'] ?></td>
-                    <td class="text-end"><?= money($t['ingreso']) ?></td>
-                    <td class="text-end"><?= money($t['util_est']) ?></td>
-                  </tr>
-                <?php endforeach; ?>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-12 col-xl-6">
-      <div class="cardx">
-        <div class="hd d-flex align-items-center justify-content-between">
-          <div>
-            <div class="fw-bold">Ventas por categoría</div>
-            <div class="small text-muted">Qué área mueve más inventario.</div>
-          </div>
-          <span class="badge badge-soft">Estadística</span>
-        </div>
-        <div class="bd p-0">
-          <div class="table-responsive">
-            <table class="table table-hover table-sm align-middle mb-0">
-              <thead>
-                <tr>
-                  <th>Categoría</th>
-                  <th class="text-end">Unid.</th>
-                  <th class="text-end">Ingreso</th>
-                </tr>
-              </thead>
-              <tbody>
-                <?php if (!$cats): ?>
-                  <tr>
-                    <td colspan="3" class="text-center text-muted py-4">Sin datos.</td>
-                  </tr>
-                <?php endif; ?>
-                <?php foreach ($cats as $c): ?>
-                  <tr>
-                    <td class="fw-semibold"><?= h($c['categoria'] ?? 'Sin categoría') ?></td>
-                    <td class="text-end"><?= (int) $c['unidades'] ?></td>
-                    <td class="text-end"><?= money($c['ingreso']) ?></td>
-                  </tr>
-                <?php endforeach; ?>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-12">
-      <div class="cardx">
-        <div class="hd d-flex align-items-center justify-content-between">
-          <div>
-            <div class="fw-bold">Serie diaria</div>
-            <div class="small text-muted">Totales por día (según filtros o últimos 14 días).</div>
-          </div>
-          <span class="badge badge-soft">Estadística</span>
-        </div>
-        <div class="bd p-0">
-          <div class="table-responsive">
-            <table class="table table-sm align-middle mb-0">
-              <thead>
-                <tr>
-                  <th>Día</th>
-                  <th class="text-end">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                <?php if (!$serie): ?>
-                  <tr>
-                    <td colspan="2" class="text-center text-muted py-4">Sin datos.</td>
-                  </tr>
-                <?php endif; ?>
-                <?php foreach ($serie as $s): ?>
-                  <tr>
-                    <td class="text-muted"><?= h($s['dia']) ?></td>
-                    <td class="text-end"><?= money($s['total']) ?></td>
-                  </tr>
-                <?php endforeach; ?>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- Listado de ventas -->
+  <!-- Listado de ventas (moderno, sin tabla pesada) -->
   <div class="cardx">
-    <div class="bd p-0">
-      <div class="table-responsive">
-        <table class="table table-hover table-sm align-middle mb-0 purchases-table">
-          <thead>
-            <tr>
-              <th style="width:90px;">#</th>
-              <th>Fecha</th>
-              <th>Cliente</th>
-              <th>Nota</th>
-              <th class="text-end">Items</th>
-              <th class="text-end">Total</th>
-              <th style="width:160px;">Estado</th>
-              <th style="width:200px;" class="text-end">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <?php if (!$sales): ?>
-              <tr>
-                <td colspan="8" class="text-center text-muted py-4">Sin registros.</td>
-              </tr>
-            <?php endif; ?>
+    <div class="hd d-flex align-items-center justify-content-between">
+      <div>
+        <div class="fw-bold">Ventas</div>
+        <div class="small text-muted">Vista limpia tipo sistema pro.</div>
+      </div>
+    </div>
 
-            <?php foreach ($sales as $v): ?>
-              <tr>
-                <td class="fw-semibold">#<?= (int) $v['id_venta'] ?></td>
-                <td class="text-muted"><?= h($v['fecha']) ?></td>
-                <td><?= h($v['cliente'] ?? '') ?></td>
-                <td class="text-muted"><?= h($v['nota'] ?? '') ?></td>
-                <td class="text-end"><?= (int) $v['items'] ?></td>
-                <td class="text-end"><?= money($v['total'] ?? 0) ?></td>
-                <td>
-                  <?php
-                  $st = strtoupper(trim((string) ($v['estado'] ?? '')));
-                  $cls = 'status-pill'; // base (igual que compras)
-                
-                  if ($st === 'ANULADA')
-                    $cls .= ' st-danger';              // ROJO
-                  else if ($st === 'PENDIENTE')
-                    $cls .= ' st-blue';         // AZUL
-                  else if ($st === 'PAGADA' || $st === 'ENTREGADA')
-                    $cls .= ' st-ok'; // VERDE
-                  else
-                    $cls .= ' st-neutral';                               // GRIS
-                  ?>
-                  <span class="<?= $cls ?>"><?= h($st) ?></span>
-                </td>
-                <td class="text-end">
-                  <div class="actions">
-                    <button type="button" class="btn btn-light btn-sm"
-                      onclick="openViewVenta(<?= (int) $v['id_venta'] ?>)">
-                      <i class="bi bi-eye"></i><span class="d-none d-md-inline ms-1">Ver</span>
-                    </button>
+    <div class="bd">
+      <?php if (!$sales): ?>
+        <div class="text-center text-muted py-4">Sin registros.</div>
+      <?php else: ?>
+        <div class="sales-list">
+          <?php foreach ($sales as $v): ?>
+            <?php
+            $st = strtoupper(trim((string) ($v['estado'] ?? '')));
+            $cls = 'status-pill';
+            if ($st === 'ANULADA')
+              $cls .= ' st-danger';
+            else if ($st === 'PENDIENTE')
+              $cls .= ' st-blue';
+            else if ($st === 'PAGADA' || $st === 'ENTREGADA')
+              $cls .= ' st-ok';
+            else
+              $cls .= ' st-neutral';
+            ?>
+
+            <div class="sale-row">
+              <div class="sale-main">
+                <div class="sale-top">
+                  <div class="sale-id">#<?= (int) $v['id_venta'] ?></div>
+                  <div class="sale-date"><?= h($v['fecha']) ?></div>
+                </div>
+
+                <div class="sale-mid">
+                  <div class="sale-client">
+                    <i class="bi bi-person me-1"></i><?= h($v['cliente'] ?? '') ?>
+                  </div>
+                  <div class="sale-note">
+                    <?= h($v['nota'] ?? '') ?>
+                  </div>
+                </div>
+              </div>
+
+              <div class="sale-metrics">
+                <div class="metric">
+                  <div class="lbl">Items</div>
+                  <div class="val"><?= (int) $v['items'] ?></div>
+                </div>
+                <div class="metric">
+                  <div class="lbl">Total</div>
+                  <div class="val"><?= money($v['total'] ?? 0) ?></div>
+                </div>
+              </div>
+
+              <div class="sale-status">
+                <span class="<?= $cls ?>"><?= h($st) ?></span>
+              </div>
+
+              <div class="sale-actions text-end">
+                <div class="dropdown">
+                  <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                    aria-expanded="false">
+                    <i class="bi bi-three-dots-vertical"></i>
+                  </button>
+
+                  <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                    <li>
+                      <button class="dropdown-item" type="button" onclick="openViewVenta(<?= (int) $v['id_venta'] ?>)">
+                        <i class="bi bi-eye me-2"></i> Ver
+                      </button>
+                    </li>
 
                     <?php if ((string) $v['estado'] !== 'ANULADA'): ?>
-                      <button type="button" class="btn btn-danger btn-sm"
-                        onclick="openCancelVenta(<?= (int) $v['id_venta'] ?>)">
-                        <i class="bi bi-x-circle"></i><span class="d-none d-md-inline ms-1">Anular</span>
-                      </button>
+                      <li>
+                        <button class="dropdown-item text-danger" type="button"
+                          onclick="openCancelVenta(<?= (int) $v['id_venta'] ?>)">
+                          <i class="bi bi-x-circle me-2"></i> Anular
+                        </button>
+                      </li>
                     <?php endif; ?>
 
                     <?php if ((string) $v['estado'] !== 'ANULADA' && (string) $v['estado'] !== 'ENTREGADA'): ?>
-                      <button type="button" class="btn btn-success btn-sm"
-                        onclick="openCompleteVenta(<?= (int) $v['id_venta'] ?>)">
-                        <i class="bi bi-check2-circle"></i><span class="d-none d-md-inline ms-1">Completada</span>
-                      </button>
+                      <li>
+                        <button class="dropdown-item text-success" type="button"
+                          onclick="openCompleteVenta(<?= (int) $v['id_venta'] ?>)">
+                          <i class="bi bi-check2-circle me-2"></i> Completada
+                        </button>
+                      </li>
                     <?php endif; ?>
 
                     <?php if ((string) $v['estado'] === 'ANULADA'): ?>
-                      <button type="button" class="btn btn-outline-dark btn-sm"
-                        onclick="openDeleteVenta(<?= (int) $v['id_venta'] ?>)">
-                        <i class="bi bi-trash"></i><span class="d-none d-md-inline ms-1">Eliminar</span>
-                      </button>
+                      <li>
+                        <hr class="dropdown-divider">
+                      </li>
+                      <li>
+                        <button class="dropdown-item" type="button" onclick="openDeleteVenta(<?= (int) $v['id_venta'] ?>)">
+                          <i class="bi bi-trash me-2"></i> Eliminar
+                        </button>
+                      </li>
                     <?php endif; ?>
-                  </div>
-                </td>
-              </tr>
-            <?php endforeach; ?>
-
-          </tbody>
-        </table>
-      </div>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          <?php endforeach; ?>
+        </div>
+      <?php endif; ?>
     </div>
   </div>
 
@@ -808,15 +875,15 @@ function money($n)
     document.getElementById('cancelVentaId').value = id;
     new bootstrap.Modal(document.getElementById('modalCancelVenta')).show();
   }
-  function openCompleteVenta(id){
-  document.getElementById('completeVentaId').value = id;
-  new bootstrap.Modal(document.getElementById('modalCompleteVenta')).show();
-}
+  function openCompleteVenta(id) {
+    document.getElementById('completeVentaId').value = id;
+    new bootstrap.Modal(document.getElementById('modalCompleteVenta')).show();
+  }
 
-function openDeleteVenta(id){
-  document.getElementById('deleteVentaId').value = id;
-  new bootstrap.Modal(document.getElementById('modalDeleteVenta')).show();
-}
+  function openDeleteVenta(id) {
+    document.getElementById('deleteVentaId').value = id;
+    new bootstrap.Modal(document.getElementById('modalDeleteVenta')).show();
+  }
 
   async function openViewVenta(id) {
     // limpiar

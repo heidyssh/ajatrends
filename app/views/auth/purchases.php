@@ -30,30 +30,37 @@ $estado = $filters['estado'] ?? 'TODOS';
     </div>
 
     <div class="bd">
-      <form class="purchases-filters" method="get" action="index.php">
-        <input type="hidden" name="page" value="purchases">
+      <form class="purchases-filters filters-glass" method="get" action="index.php">
+  <input type="hidden" name="page" value="purchases">
 
-        <div class="filter">
-          <label class="form-label">Buscar</label>
-          <input class="form-control form-control-sm" name="q" value="<?= h($q) ?>"
-            placeholder="ID, nota, proveedor...">
-        </div>
+  <div class="filter">
+    <label class="form-label">Buscar</label>
+    <div class="input-group input-group-sm">
+      <span class="input-group-text"><i class="bi bi-search"></i></span>
+      <input class="form-control form-control-sm" name="q" value="<?= h($q) ?>" placeholder="ID, nota, proveedor...">
+    </div>
+  </div>
 
-        <div class="filter">
-          <label class="form-label">Estado</label>
-          <select class="form-select form-select-sm" name="estado">
-            <?php foreach (['TODOS', 'REGISTRADA', 'ANULADA'] as $op): ?>
-              <option value="<?= h($op) ?>" <?= $estado === $op ? 'selected' : '' ?>><?= h($op) ?></option>
-            <?php endforeach; ?>
-          </select>
-        </div>
+  <div class="filter">
+    <label class="form-label">Estado</label>
+    <select class="form-select form-select-sm" name="estado">
+      <?php foreach (['TODOS', 'REGISTRADA', 'ANULADA'] as $op): ?>
+        <option value="<?= h($op) ?>" <?= $estado === $op ? 'selected' : '' ?>><?= h($op) ?></option>
+      <?php endforeach; ?>
+    </select>
+  </div>
 
-        <div class="filter actions">
-          <button class="btn btn-brand btn-sm w-100">
-            <i class="bi bi-search me-1"></i> Filtrar
-          </button>
-        </div>
-      </form>
+  <div class="filter actions">
+    <div class="actions">
+      <button class="btn btn-brand btn-sm">
+        <i class="bi bi-funnel me-1"></i> Aplicar
+      </button>
+      <a class="btn btn-light btn-sm" href="index.php?page=purchases">
+        <i class="bi bi-x-lg me-1"></i> Limpiar
+      </a>
+    </div>
+  </div>
+</form>
     </div>
   </div>
 
@@ -236,7 +243,9 @@ $estado = $filters['estado'] ?? 'TODOS';
               </tr>
             </thead>
             <tbody id="viewItems">
-              <tr><td colspan="5" class="text-center text-muted py-3">Cargando...</td></tr>
+              <tr>
+                <td colspan="5" class="text-center text-muted py-3">Cargando...</td>
+              </tr>
             </tbody>
             <tfoot>
               <tr>
@@ -387,62 +396,62 @@ $estado = $filters['estado'] ?? 'TODOS';
   }
 </script>
 <script>
-async function openViewCompra(id){
-  const modalEl = document.getElementById('modalViewCompra');
-  const modal = new bootstrap.Modal(modalEl);
+  async function openViewCompra(id) {
+    const modalEl = document.getElementById('modalViewCompra');
+    const modal = new bootstrap.Modal(modalEl);
 
-  // UI loading
-  document.getElementById('viewMeta').textContent = 'Cargando...';
-  document.getElementById('viewNota').textContent = '-';
-  document.getElementById('viewItems').innerHTML =
-    '<tr><td colspan="5" class="text-center text-muted py-3">Cargando...</td></tr>';
-  document.getElementById('viewTotal').textContent = 'L. 0.00';
+    // UI loading
+    document.getElementById('viewMeta').textContent = 'Cargando...';
+    document.getElementById('viewNota').textContent = '-';
+    document.getElementById('viewItems').innerHTML =
+      '<tr><td colspan="5" class="text-center text-muted py-3">Cargando...</td></tr>';
+    document.getElementById('viewTotal').textContent = 'L. 0.00';
 
-  modal.show();
+    modal.show();
 
-  try{
-    const res = await fetch(`index.php?page=purchases&action=view_json&id=${id}`, {
-      headers: { 'X-Requested-With': 'XMLHttpRequest' }
-    });
-    if(!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
+    try {
+      const res = await fetch(`index.php?page=purchases&action=view_json&id=${id}`, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
 
-    // meta
-    document.getElementById('viewMeta').textContent =
-      `Compra #${data.id_compra} · ${data.fecha} · ${data.usuario} · ${data.estado}`;
+      // meta
+      document.getElementById('viewMeta').textContent =
+        `Compra #${data.id_compra} · ${data.fecha} · ${data.usuario} · ${data.estado}`;
 
-    document.getElementById('viewNota').textContent = data.nota || '-';
+      document.getElementById('viewNota').textContent = data.nota || '-';
 
-    // items
-    let total = 0;
-    const rows = (data.items || []).map(it => {
-      total += parseFloat(it.subtotal || 0);
-      return `
+      // items
+      let total = 0;
+      const rows = (data.items || []).map(it => {
+        total += parseFloat(it.subtotal || 0);
+        return `
         <tr>
           <td class="text-muted">${escapeHtml(it.sku || '')}</td>
           <td>${escapeHtml(it.nombre || '')}</td>
-          <td class="text-end">${parseInt(it.cantidad || 0,10)}</td>
+          <td class="text-end">${parseInt(it.cantidad || 0, 10)}</td>
           <td class="text-end">L. ${Number(it.costo_unit || 0).toFixed(2)}</td>
           <td class="text-end">L. ${Number(it.subtotal || 0).toFixed(2)}</td>
         </tr>
       `;
-    }).join('');
+      }).join('');
 
-    document.getElementById('viewItems').innerHTML =
-      rows || '<tr><td colspan="5" class="text-center text-muted py-3">Sin items.</td></tr>';
+      document.getElementById('viewItems').innerHTML =
+        rows || '<tr><td colspan="5" class="text-center text-muted py-3">Sin items.</td></tr>';
 
-    document.getElementById('viewTotal').textContent = 'L. ' + total.toFixed(2);
+      document.getElementById('viewTotal').textContent = 'L. ' + total.toFixed(2);
 
-  }catch(err){
-    document.getElementById('viewMeta').textContent = 'Error cargando detalle';
-    document.getElementById('viewItems').innerHTML =
-      '<tr><td colspan="5" class="text-center text-danger py-3">No se pudo cargar el detalle.</td></tr>';
+    } catch (err) {
+      document.getElementById('viewMeta').textContent = 'Error cargando detalle';
+      document.getElementById('viewItems').innerHTML =
+        '<tr><td colspan="5" class="text-center text-danger py-3">No se pudo cargar el detalle.</td></tr>';
+    }
   }
-}
 
-function escapeHtml(str){
-  return String(str).replace(/[&<>"']/g, s => ({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-  }[s]));
-}
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, s => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[s]));
+  }
 </script>

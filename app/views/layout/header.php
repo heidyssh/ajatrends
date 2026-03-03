@@ -65,18 +65,18 @@ $userName = $_SESSION['user']['nombre'] ?? 'Admin';
             <div class="side-sep"></div>
 
             <a class="nav-item <?= $page === 'products' ? 'active' : '' ?>" href="index.php?page=products">
-                <div class="ic"><i class="bi bi-bag-heart"></i></div>
-                <span class="lbl">Productos</span>
-              </a>
-  <a class="nav-item <?= $page === 'purchases' ? 'active' : '' ?>" href="index.php?page=purchases">
-  <div class="ic"><i class="bi bi-truck"></i></div>
-  <span class="lbl">Compras</span>
-</a>
+              <div class="ic"><i class="bi bi-bag-heart"></i></div>
+              <span class="lbl">Productos</span>
+            </a>
+            <a class="nav-item <?= $page === 'purchases' ? 'active' : '' ?>" href="index.php?page=purchases">
+              <div class="ic"><i class="bi bi-truck"></i></div>
+              <span class="lbl">Compras</span>
+            </a>
             <a class="nav-item <?= $page === 'sales' ? 'active' : '' ?>" href="index.php?page=sales">
-  <div class="ic"><i class="bi bi-receipt"></i></div>
-  <span class="lbl">Ventas</span>
-</a>
-            <a class="nav-item disabled-link" href="#">
+              <div class="ic"><i class="bi bi-receipt"></i></div>
+              <span class="lbl">Ventas</span>
+            </a>
+            <a class="nav-item <?= $page === 'kardex' ? 'active' : '' ?>" href="index.php?page=kardex">
               <div class="ic"><i class="bi bi-box-seam"></i></div>
               <span class="lbl">Kardex</span>
             </a>
@@ -110,7 +110,7 @@ $userName = $_SESSION['user']['nombre'] ?? 'Admin';
             </div>
 
             <div class="right d-flex align-items-center gap-2 gap-sm-3">
-              
+
               <span class="pill d-none d-lg-inline-flex">
                 <i class="bi bi-shield-lock"></i> Admin
               </span>

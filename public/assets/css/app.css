@@ -1853,3 +1853,631 @@ user-select:none;
   border-color:#5c636a !important;
   color:#fff !important;
 }
+/* =========================
+   SALES - UI PRO (SIN TABLAS PESADAS)
+   ========================= */
+
+.sales-analytics .bd { padding-top: 14px; }
+
+.sales-panel{
+  border: 1px solid rgba(12,20,32,.08);
+  background: rgba(255,255,255,.60);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.sales-panel-hd{
+  padding: 14px 14px 10px;
+  border-bottom: 1px solid rgba(12,20,32,.06);
+}
+.sales-panel-bd{ padding: 14px; }
+
+.stat-list{ display:grid; gap:12px; }
+
+.stat-item{
+  border: 1px solid rgba(12,20,32,.08);
+  background: rgba(255,255,255,.70);
+  border-radius: 14px;
+  padding: 12px 12px 10px;
+}
+.stat-item .stat-left{ margin-bottom: 6px; }
+.stat-item .stat-right{
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+  gap:10px;
+  margin-bottom: 10px;
+}
+.stat-bar{
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(31,111,92,.10); /* usa la paleta verde */
+  overflow:hidden;
+  border: 1px solid rgba(31,111,92,.14);
+}
+.stat-fill{
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--aja-green), var(--aja-green-soft));
+}
+
+/* Serie diaria */
+.serie-grid{ display:grid; gap:10px; }
+.serie-item{
+  display:grid;
+  grid-template-columns: 220px 1fr;
+  gap: 12px;
+  align-items:center;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.70);
+  border: 1px solid rgba(12,20,32,.08);
+}
+.serie-bar{
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(31,111,92,.10);
+  overflow:hidden;
+  border: 1px solid rgba(31,111,92,.14);
+}
+.serie-fill{
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--aja-green), var(--aja-green-soft));
+}
+@media (max-width: 768px){
+  .serie-item{ grid-template-columns: 1fr; }
+}
+
+/* Listado de ventas tipo “cards” */
+.sales-list{ display:grid; gap: 12px; }
+
+.sale-row{
+  display:grid;
+  grid-template-columns: 1.5fr .7fr auto auto;
+  gap: 14px;
+  align-items:center;
+  padding: 14px 14px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.75);
+  border: 1px solid rgba(12,20,32,.08);
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.sale-row:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 18px 50px rgba(0,0,0,.08);
+}
+
+.sale-top{
+  display:flex;
+  align-items:baseline;
+  gap:10px;
+}
+.sale-id{ font-weight: 900; font-size: 1.02rem; }
+.sale-date{ color: var(--muted); font-size: .9rem; }
+
+.sale-mid{
+  margin-top: 6px;
+  display:grid;
+  gap: 2px;
+}
+.sale-client{ font-weight: 700; }
+.sale-note{
+  color: var(--muted);
+  font-size: .92rem;
+  overflow:hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.sale-metrics{
+  display:flex;
+  gap: 12px;
+  justify-content:flex-end;
+}
+.metric{
+  border: 1px solid rgba(12,20,32,.08);
+  background: rgba(255,255,255,.65);
+  border-radius: 14px;
+  padding: 10px 12px;
+  min-width: 120px;
+  text-align:center;
+}
+.metric .lbl{ font-size: .78rem; color: var(--muted); }
+.metric .val{ font-weight: 900; }
+
+.sale-status{ display:flex; justify-content:center; }
+
+@media (max-width: 992px){
+  .sale-row{
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .sale-metrics{ justify-content:flex-start; }
+  .sale-status{ justify-content:flex-start; }
+}
+/* ===== SALES OVERRIDES (arregla negro + agrega sombras) ===== */
+
+/* Fallbacks por si tu tema no tiene estas variables */
+:root{
+  --aja-green: var(--brand, #1f6f5c);
+  --aja-green-soft: rgba(31,111,92,.55);
+  --muted: var(--text-muted, rgba(255,255,255,.72));
+  --sales-surface: rgba(255,255,255,.92);
+  --sales-border: rgba(255,255,255,.10);
+}
+
+/* Si tu layout es oscuro, esto asegura contraste */
+.sales-analytics,
+.sales-analytics *{
+  color: var(--text, rgba(255,255,255,.92));
+}
+
+.sales-panel,
+.stat-item,
+.serie-item,
+.sale-row{
+  background: var(--sales-surface) !important;
+  border: 1px solid rgba(0,0,0,.06) !important;
+  box-shadow: 0 16px 45px rgba(0,0,0,.10) !important;
+}
+
+/* Texto muted consistente */
+.sale-date,
+.sale-note,
+.metric .lbl,
+.sales-panel-hd .small,
+.stat-item .small,
+.serie-left .small{
+  color: rgba(0,0,0,.55) !important;
+}
+
+/* Barras: evita que caigan en negro si faltan vars */
+.stat-bar,
+.serie-bar{
+  background: rgba(31,111,92,.12) !important;
+  border: 1px solid rgba(31,111,92,.18) !important;
+}
+
+.stat-fill,
+.serie-fill{
+  background: linear-gradient(90deg, var(--aja-green, #1f6f5c), rgba(31,111,92,.35)) !important;
+}
+/* ===== Filtros verticales (Sales) ===== */
+.sales-filters{
+  display: grid;
+  gap: 10px;
+  max-width: 340px;
+}
+
+.sales-filters .input-group-text{
+  background: rgba(255,255,255,.85);
+  border: 1px solid rgba(0,0,0,.08);
+}
+
+.sf-label{
+  display:block;
+  margin-bottom: 4px;
+  color: rgba(0,0,0,.55);
+}
+
+.sf-grid2{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.sf-actions{ margin-top: 2px; }
+
+@media (max-width: 992px){
+  .sales-filters{ max-width: 100%; }
+}
+/* ===== Sales filterbar PRO (compacto, moderno) ===== */
+.sales-page .sales-filterbar{
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.55);
+  border: 1px solid rgba(12,20,32,.08);
+  box-shadow: 0 14px 40px rgba(0,0,0,.08);
+}
+
+.sales-page .sales-filterbar .form-control,
+.sales-page .sales-filterbar .form-select,
+.sales-page .sales-filterbar .input-group-text{
+  border-radius: 12px;
+}
+
+.sales-page .sales-filterbar .form-label{
+  font-size:.78rem;
+  font-weight:900;
+  letter-spacing:.2px;
+  color: rgba(12,20,32,.55);
+}
+
+.sales-page .sales-filterbar .filter.actions{
+  flex: 0 0 auto !important; /* evita que se vaya raro */
+}
+
+/* Botones más “finos” */
+.sales-page .sales-filterbar .btn{
+  border-radius: 12px;
+}
+/* =========================
+   KARDEX (UI PRO)
+   ========================= */
+.kardex-page .kardex-filterbar{
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.55);
+  border: 1px solid rgba(12,20,32,.08);
+  box-shadow: 0 14px 40px rgba(0,0,0,.08);
+}
+.kardex-page .kardex-filterbar .form-label{
+  font-size:.78rem;
+  font-weight:900;
+  letter-spacing:.2px;
+  color: rgba(12,20,32,.55);
+}
+.kardex-page .kardex-item{
+  border: 1px solid rgba(12,20,32,.08);
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(255,255,255,.75);
+  box-shadow: 0 16px 45px rgba(0,0,0,.08);
+  margin-bottom: 12px;
+}
+.kardex-page .accordion-button{ background: transparent; }
+.kardex-page .accordion-button:focus{ box-shadow: none; }
+.kardex-page .krow{
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1.2fr .8fr;
+  gap: 14px;
+  align-items: center;
+}
+.kardex-page .kid{ font-weight: 900; }
+.kardex-page .kdate{ color: rgba(12,20,32,.55); font-size: .9rem; }
+.kardex-page .knote{ margin-top: 4px; }
+.kardex-page .kmeta{ display:flex; flex-direction:column; gap:8px; align-items:flex-end; }
+.kardex-page .kref{
+  text-decoration: none;
+  font-weight: 800;
+  font-size: .9rem;
+  color: var(--aja-green, #1f6f5c);
+}
+.kardex-page .knums{ display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; }
+.kardex-page .kchip{
+  display:inline-flex;
+  gap:6px;
+  align-items:center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(12,20,32,.10);
+  background: rgba(255,255,255,.65);
+  font-size: .85rem;
+}
+.kardex-page .kardex-table thead th{
+  color: rgba(12,20,32,.65);
+  font-weight: 900;
+  font-size: .82rem;
+}
+@media (max-width: 992px){
+  .kardex-page .krow{ grid-template-columns: 1fr; }
+  .kardex-page .kmeta{ align-items:flex-start; }
+  .kardex-page .knums{ justify-content:flex-start; }
+}
+/* =========================
+   KARDEX TOPBAR (PRO)
+   ========================= */
+
+.kardex-page .kardex-topbar{
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.55);
+  border: 1px solid rgba(12,20,32,.08);
+  box-shadow: 0 14px 40px rgba(0,0,0,.08);
+}
+
+.kardex-page .kx-row{
+  display:grid;
+  grid-template-columns: 1.6fr 1.2fr auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.kardex-page .kx-actions{
+  display:flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.kardex-page .kx-quick{
+  margin-top: 10px;
+  display:flex;
+  flex-wrap:wrap;
+  gap: 8px;
+  align-items:center;
+}
+
+.kardex-page .kx-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(12,20,32,.10);
+  background: rgba(255,255,255,.70);
+  text-decoration:none;
+  color: rgba(12,20,32,.80);
+  font-weight: 800;
+  font-size: .85rem;
+}
+
+.kardex-page .kx-chip:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 10px 30px rgba(0,0,0,.10);
+}
+
+.kardex-page .kx-sep{
+  width: 1px;
+  height: 18px;
+  background: rgba(12,20,32,.18);
+  margin: 0 4px;
+}
+
+.kardex-page .kx-more{
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(12,20,32,.08);
+}
+
+.kardex-page .kx-more-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+}
+
+.kardex-page .kardex-topbar .form-label{
+  font-size:.78rem;
+  font-weight:900;
+  letter-spacing:.2px;
+  color: rgba(12,20,32,.55);
+}
+
+@media (max-width: 992px){
+  .kardex-page .kx-row{
+    grid-template-columns: 1fr;
+  }
+  .kardex-page .kx-actions{
+    justify-content: stretch;
+  }
+  .kardex-page .kx-actions .btn{
+    width: 100%;
+  }
+  .kardex-page .kx-more-grid{
+    grid-template-columns: 1fr;
+  }
+}
+/* ===== Kardex mini chart ===== */
+.kardex-page .kx-mini{
+  display:grid;
+  gap: 12px;
+}
+
+.kardex-page .kx-mini-row{
+  display:grid;
+  grid-template-columns: 110px 1fr 60px;
+  gap: 12px;
+  align-items:center;
+}
+
+.kardex-page .kx-mini-lbl{
+  font-weight: 900;
+  color: rgba(12,20,32,.70);
+}
+
+.kardex-page .kx-mini-bar{
+  height: 10px;
+  border-radius: 999px;
+  overflow:hidden;
+  border: 1px solid rgba(31,111,92,.18);
+  background: rgba(31,111,92,.10);
+}
+
+.kardex-page .kx-mini-bar.danger{
+  border: 1px solid rgba(220,53,69,.20);
+  background: rgba(220,53,69,.08);
+}
+
+.kardex-page .kx-mini-fill{
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--aja-green, #1f6f5c), rgba(31,111,92,.35));
+}
+
+.kardex-page .kx-mini-bar.danger .kx-mini-fill{
+  background: linear-gradient(90deg, rgba(220,53,69,.95), rgba(220,53,69,.35));
+}
+
+.kardex-page .kx-mini-val{
+  text-align:right;
+  font-weight: 900;
+}
+/* =========================
+   FILTERBAR PRO (reutilizable)
+   ========================= */
+.filterbar-pro{
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.55);
+  border: 1px solid rgba(12,20,32,.08);
+  box-shadow: 0 14px 40px rgba(0,0,0,.08);
+}
+
+.filterbar-pro .fb-row{
+  display:grid;
+  grid-template-columns: 1.6fr 1.2fr auto;
+  gap: 10px;
+  align-items:center;
+}
+
+.filterbar-pro .fb-actions{
+  display:flex;
+  gap: 10px;
+  justify-content:flex-end;
+}
+
+.filterbar-pro .fb-quick{
+  margin-top: 10px;
+  display:flex;
+  flex-wrap:wrap;
+  gap: 8px;
+  align-items:center;
+}
+
+.filterbar-pro .fb-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(12,20,32,.10);
+  background: rgba(255,255,255,.70);
+  text-decoration:none;
+  color: rgba(12,20,32,.80);
+  font-weight: 800;
+  font-size: .85rem;
+}
+
+.filterbar-pro .fb-chip:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 10px 30px rgba(0,0,0,.10);
+}
+
+.filterbar-pro .fb-sep{
+  width: 1px;
+  height: 18px;
+  background: rgba(12,20,32,.18);
+  margin: 0 4px;
+}
+
+.filterbar-pro .fb-more{
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(12,20,32,.08);
+}
+
+.filterbar-pro .fb-more-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+}
+
+.filterbar-pro .form-label{
+  font-size:.78rem;
+  font-weight:900;
+  letter-spacing:.2px;
+  color: rgba(12,20,32,.55);
+}
+
+@media (max-width: 992px){
+  .filterbar-pro .fb-row{ grid-template-columns: 1fr; }
+  .filterbar-pro .fb-actions{ justify-content: stretch; }
+  .filterbar-pro .fb-actions .btn{ width: 100%; }
+  .filterbar-pro .fb-more-grid{ grid-template-columns: 1fr; }
+}
+/* =========================
+   FILTERS GLASS (igual estética Kardex)
+   ========================= */
+.filters-glass{
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.55);
+  border: 1px solid rgba(12,20,32,.08);
+  box-shadow: 0 14px 40px rgba(0,0,0,.08);
+}
+
+.filters-glass.purchases-filters{
+  display:flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: end;
+}
+
+.filters-glass .filter{
+  min-width: 220px;
+  flex: 1 1 220px;
+}
+
+.filters-glass .filter.actions{
+  flex: 0 0 auto;
+  min-width: auto;
+}
+
+.filters-glass .form-label{
+  font-size: .78rem;
+  font-weight: 900;
+  letter-spacing: .2px;
+  color: rgba(12,20,32,.55);
+}
+
+.filters-glass .input-group-text{
+  background: rgba(255,255,255,.85);
+  border: 1px solid rgba(0,0,0,.10);
+}
+
+.filters-glass .form-control,
+.filters-glass .form-select{
+  border-radius: 12px;
+}
+
+.filters-glass .actions{
+  display:flex;
+  gap: 10px;
+  justify-content:flex-end;
+}
+
+.filters-glass .filters-more{
+  width: 100%;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(12,20,32,.08);
+}
+
+.filters-glass .more-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+}
+
+@media (max-width: 992px){
+  .filters-glass .filter{ min-width: 100%; }
+  .filters-glass .actions{ width: 100%; }
+  .filters-glass .actions .btn{ width: 100%; }
+  .filters-glass .more-grid{ grid-template-columns: 1fr; }
+}
+/* ==== FIX: filtros glass siempre legibles (evita texto blanco heredado) ==== */
+.filters-glass{
+  color: rgba(12,20,32,.88);
+}
+
+.filters-glass .form-label{
+  color: rgba(12,20,32,.60) !important;
+}
+
+.filters-glass .form-control,
+.filters-glass .form-select,
+.filters-glass .input-group-text{
+  color: rgba(12,20,32,.88) !important;
+  background: rgba(255,255,255,.82) !important;
+  border-color: rgba(12,20,32,.10) !important;
+}
+
+.filters-glass .form-control::placeholder{
+  color: rgba(12,20,32,.40) !important;
+}
+
+.filters-glass .btn.btn-light{
+  background: rgba(255,255,255,.70);
+  border-color: rgba(12,20,32,.10);
+}
