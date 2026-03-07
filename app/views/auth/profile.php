@@ -16,16 +16,18 @@ $idAvatar = (int)($perfil['id_avatar'] ?? 0);
 <div class="container">
   <div class="d-flex align-items-center justify-content-between mb-3">
     <div>
-      <h3 class="mb-0 fw-bold">Configuración</h3>
-      <small class="text-muted">Cuenta · Avatar · Seguridad</small>
+      <h3 class="mb-0 fw-bold text-white">Configuración</h3>
     </div>
-    <a href="index.php?page=dashboard" class="btn btn-outline-dark btn-sm rounded-pill px-3">
+    <a href="index.php?page=dashboard" class="btn btn-soft-back btn-sm rounded-pill px-3">
       <i class="bi bi-arrow-left me-1"></i> Volver
     </a>
   </div>
 
-  <?php if ($err): ?><div class="alert alert-danger"><?= htmlspecialchars($err) ?></div><?php endif; ?>
-  <?php if ($ok): ?><div class="alert alert-success"><?= htmlspecialchars($ok) ?></div><?php endif; ?>
+    <a href="index.php?page=dashboard" class="btn btn-soft-back btn-sm rounded-pill px-3">
+      <i class="bi bi-arrow-left me-1"></i> Volver
+    </a>
+  </div>
+  <br>
 
   <div class="row g-4">
     <!-- Preview -->
@@ -208,4 +210,25 @@ $idAvatar = (int)($perfil['id_avatar'] ?? 0);
     </div>
 
   </div>
+  <script>
+document.addEventListener('DOMContentLoaded', function () {
+  const toast = document.querySelector('.app-toast');
+  if (!toast) return;
+
+  const closeBtn = toast.querySelector('.app-toast-close');
+
+  const hideToast = () => {
+    toast.classList.remove('is-visible');
+    setTimeout(() => {
+      if (toast) toast.remove();
+    }, 250);
+  };
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', hideToast);
+  }
+
+  setTimeout(hideToast, 3200);
+});
+</script>
 </div>

@@ -3,7 +3,7 @@ if (session_status() === PHP_SESSION_NONE)
   session_start();
 $nombre = $_SESSION['user']['nombre'] ?? 'Admin';
 require_once __DIR__ . '/../../models/Agenda.php'; // si tu dashboard.php está en app/views/auth/
-$idUser = (int) ($_SESSION['user']['id_usuario'] ?? 0);
+$idUser = (int) ($_SESSION['user']['id'] ?? 0);
 $events = Agenda::upcoming($idUser, 8);
 ?>
 <div class="dash-layout">
@@ -147,20 +147,23 @@ $events = Agenda::upcoming($idUser, 8);
           <?php if (!$events): ?>
             <div class="text-muted small">Sin eventos próximos.</div>
           <?php else: ?>
-            <?php foreach ($events as $e): ?>
-              <div class="agenda-item">
-                <div class="dot"></div>
-                <div class="content">
-                  <div class="title"><?= htmlspecialchars($e['titulo']) ?></div>
-                  <div class="meta">
-                    <?= htmlspecialchars($e['fecha']) ?>
-                    <?php if (!empty($e['hora'])): ?> ·
-                      <?= htmlspecialchars(substr((string) $e['hora'], 0, 5)) ?>     <?php endif; ?>
-                  </div>
-                </div>
-                <span class="pill"><?= htmlspecialchars($e['modulo']) ?></span>
-              </div>
-            <?php endforeach; ?>
+           <?php foreach ($events as $e): ?>
+  <a href="index.php?page=agenda&date=<?= urlencode((string)$e['fecha']) ?>#evento-<?= (int)$e['id_evento'] ?>" class="agenda-item-link">
+    <div class="agenda-item">
+      <div class="dot"></div>
+      <div class="content">
+        <div class="title"><?= htmlspecialchars($e['titulo']) ?></div>
+        <div class="meta">
+          <?= htmlspecialchars($e['fecha']) ?>
+          <?php if (!empty($e['hora'])): ?> ·
+            <?= htmlspecialchars(substr((string) $e['hora'], 0, 5)) ?>
+          <?php endif; ?>
+        </div>
+      </div>
+      <span class="pill"><?= htmlspecialchars($e['modulo']) ?></span>
+    </div>
+  </a>
+<?php endforeach; ?>
           <?php endif; ?>
         </div>
 

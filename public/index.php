@@ -9,6 +9,7 @@ require_once __DIR__ . '/../app/controllers/PurchaseController.php';
 require_once __DIR__ . '/../app/controllers/AgendaController.php';
 require_once __DIR__ . '/../app/controllers/SaleController.php';
 require_once __DIR__ . '/../app/controllers/KardexController.php';
+require_once __DIR__ . '/../app/controllers/NotificationController.php';
 start_session();
 
 $page = $_GET['page'] ?? 'login';
@@ -54,7 +55,7 @@ if ($page === 'purchases') {
   require_auth();
   $viewData = PurchaseController::handle($_POST, $_GET);
 }
-$allowed = ['login','register','dashboard','profile','change_password','products','purchases','sales','kardex','agenda'];
+$allowed = ['login','register','dashboard','profile','change_password','products','purchases','sales','kardex','agenda','delete_notification'];
 if (!in_array($page, $allowed, true)) $page = 'login';
 if ($page === 'agenda') require_auth();
 if ($page === 'dashboard') require_auth();
@@ -74,6 +75,10 @@ if ($page === 'kardex') {
   require_auth();
   $viewData = KardexController::handle($_GET);
 }
+if ($page === 'delete_notification') {
+  NotificationController::delete($_POST);
+  exit;
+}
 
 require __DIR__ . '/../app/views/layout/header.php';
 require __DIR__ . "/../app/views/auth/$page.php";
@@ -86,4 +91,5 @@ if (!empty($viewData['error'])) {
   $_SESSION['flash_error'] = (string)$viewData['error'];
   unset($viewData['error']);
 }
+
 require __DIR__ . '/../app/views/layout/footer.php';

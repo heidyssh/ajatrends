@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../helpers/auth.php';
 require_once __DIR__ . '/../models/Sale.php';
+require_once __DIR__ . '/../helpers/Notifier.php';
 
 final class SaleController
 {
@@ -181,6 +182,20 @@ final class SaleController
           }
 
           $idVenta = Sale::createVenta($idUser, $idCliente, $idDireccion, $descuento, $nota, $clienteTxt, $direccionTxt, $items);
+          Notifier::notify(
+  $idUser,
+  'sale_create',
+  'Ventas',
+  'Venta registrada',
+  'Se registró la venta #' . $idVenta . '.',
+  'ventas',
+  $idVenta,
+  [
+    'cliente' => $clienteTxt,
+    'direccion' => $direccionTxt,
+    'total' => $post['total'] ?? ''
+  ]
+);
           $_SESSION['flash_success'] = "Venta #$idVenta registrada. Stock actualizado.";
           self::redirectToSales($filtersBack);
         }
@@ -201,6 +216,15 @@ final class SaleController
             $direccionTxt = 'SIN DIRECCION';
 
           Sale::updateLibre($idVenta, $clienteTxt, $direccionTxt, $nota);
+          Notifier::notify(
+  $idUser,
+  'sale_update',
+  'Ventas',
+  'Venta actualizada',
+  'Se actualizó la venta #' . $idVenta . '.',
+  'ventas',
+  $idVenta
+);
           $_SESSION['flash_success'] = "Venta #$idVenta actualizada.";
           self::redirectToSales($filtersBack);
         }
@@ -210,6 +234,15 @@ final class SaleController
           if ($idVenta <= 0)
             throw new Exception('ID inválido.');
           Sale::cancel($idVenta, $idUser, 'Venta anulada y stock devuelto');
+          Notifier::notify(
+  $idUser,
+  'sale_cancel',
+  'Ventas',
+  'Venta anulada',
+  'Se anuló la venta #' . $idVenta . ' y se devolvió stock.',
+  'ventas',
+  $idVenta
+);
           $_SESSION['flash_success'] = "Venta #$idVenta anulada. Stock devuelto.";
           self::redirectToSales($filters);
         }
@@ -218,6 +251,15 @@ final class SaleController
           if ($idVenta <= 0)
             throw new Exception('ID inválido.');
           Sale::complete($idVenta);
+          Notifier::notify(
+  $idUser,
+  'sale_complete',
+  'Ventas',
+  'Venta entregada',
+  'La venta #' . $idVenta . ' fue marcada como ENTREGADA.',
+  'ventas',
+  $idVenta
+);
           $_SESSION['flash_success'] = "Venta #$idVenta marcada como ENTREGADA.";
           self::redirectToSales($filters);
         }
@@ -227,6 +269,15 @@ final class SaleController
           if ($idVenta <= 0)
             throw new Exception('ID inválido.');
           Sale::deleteVenta($idVenta);
+          Notifier::notify(
+  $idUser,
+  'sale_delete',
+  'Ventas',
+  'Venta eliminada',
+  'Se eliminó la venta #' . $idVenta . '.',
+  'ventas',
+  $idVenta
+);
           $_SESSION['flash_success'] = "Venta #$idVenta eliminada.";
           self::redirectToSales($filters);
         }

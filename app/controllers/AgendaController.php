@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../helpers/auth.php';
 require_once __DIR__ . '/../models/Agenda.php';
+require_once __DIR__ . '/../helpers/Notifier.php';
 
 final class AgendaController
 {
@@ -21,7 +22,22 @@ final class AgendaController
 
     try {
       if ($action === 'create') {
-        Agenda::createEvent($idUser, $post);
+        $idEvento = Agenda::createEvent($idUser, $post);
+
+Notifier::notify(
+  $idUser,
+  'agenda_create',
+  'Agenda',
+  'Nuevo evento agendado',
+  'Se creó el evento "' . ($post['titulo'] ?? '') . '".',
+  'agenda_eventos',
+  $idEvento,
+  [
+    'fecha' => $post['fecha'] ?? '',
+    'hora' => $post['hora'] ?? '',
+    'modulo' => $post['modulo'] ?? 'General'
+  ]
+);
         $_SESSION['flash_success'] = 'Evento guardado ✅';
         header('Location: index.php?page=agenda&date=' . urlencode($date));
         exit;
@@ -29,6 +45,15 @@ final class AgendaController
 
       if ($action === 'update') {
         Agenda::updateEvent($idUser, (int)($post['id_evento'] ?? 0), $post);
+        Notifier::notify(
+  $idUser,
+  'agenda_update',
+  'Agenda',
+  'Evento actualizado',
+  'Se actualizó el evento "' . ($post['titulo'] ?? '') . '".',
+  'agenda_eventos',
+  (int)($post['id_evento'] ?? 0)
+);
         $_SESSION['flash_success'] = 'Evento actualizado ✅';
         header('Location: index.php?page=agenda&date=' . urlencode($date));
         exit;
@@ -36,6 +61,15 @@ final class AgendaController
 
       if ($action === 'done') {
         Agenda::setEstado($idUser, (int)($post['id_evento'] ?? 0), 'HECHO');
+        Notifier::notify(
+  $idUser,
+  'agenda_done',
+  'Agenda',
+  'Evento marcado como hecho',
+  'Se marcó un evento como HECHO.',
+  'agenda_eventos',
+  (int)($post['id_evento'] ?? 0)
+);
         $_SESSION['flash_success'] = 'Marcado como HECHO ✅';
         header('Location: index.php?page=agenda&date=' . urlencode($date));
         exit;
@@ -43,6 +77,15 @@ final class AgendaController
 
       if ($action === 'delete') {
         Agenda::deleteEvent($idUser, (int)($post['id_evento'] ?? 0));
+        Notifier::notify(
+  $idUser,
+  'agenda_delete',
+  'Agenda',
+  'Evento eliminado',
+  'Se eliminó un evento de la agenda.',
+  'agenda_eventos',
+  (int)($post['id_evento'] ?? 0)
+);
         $_SESSION['flash_success'] = 'Evento eliminado 🗑️';
         header('Location: index.php?page=agenda&date=' . urlencode($date));
         exit;

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../models/Kardex.php';
 
+
 final class KardexController
 {
   public static function handle(array $get): array

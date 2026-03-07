@@ -4,6 +4,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../helpers/auth.php';
 require_once __DIR__ . '/../models/Product.php';
 require_once __DIR__ . '/../models/Category.php';
+require_once __DIR__ . '/../helpers/Notifier.php';
 
 final class ProductController
 {
@@ -23,6 +24,7 @@ final class ProductController
 
     return ["ok" => true, "product" => $p, "images" => $imgs];
   }
+  
 
   private static function redirectToProducts(array $filters): void
   {
@@ -105,6 +107,15 @@ final class ProductController
             $idUser = (int) ($_SESSION['user']['id'] ?? 0);
 
           self::handleUploads($id, $files);
+          Notifier::notify(
+  $idUser,
+  'product_update',
+  'Productos',
+  'Producto actualizado',
+  'Se actualizó el producto "' . ($payload['nombre'] ?? '') . '".',
+  'productos',
+  $id
+);
           $_SESSION['flash_success'] = 'Producto actualizado con éxito.';
           self::redirectToProducts($data['filters']);
         }
@@ -148,6 +159,15 @@ final class ProductController
           if ($idImagen <= 0)
             throw new Exception('ID de imagen inválido.');
           Product::deleteImage($idImagen);
+          Notifier::notify(
+  $idUser,
+  'product_delete',
+  'Productos',
+  'Producto eliminado',
+  'Se eliminó un producto del catálogo.',
+  'productos',
+  $id
+);
           $_SESSION['flash_success'] = 'Imagen eliminada.';
           self::redirectToProducts($data['filters']);
         }
@@ -166,6 +186,20 @@ final class ProductController
         $_SESSION['flash_error'] = $e->getMessage();
         self::redirectToProducts($data['filters']);
       }
+      Notifier::notify(
+  $idUser,
+  'product_create',
+  'Productos',
+  'Producto agregado',
+  'Se agregó el producto "' . ($payload['nombre'] ?? '') . '".',
+  'productos',
+  $id,
+  [
+    'sku' => $payload['sku'] ?? '',
+    'precio' => $payload['precio'] ?? 0,
+    'stock_inicial' => (int)($post['stock'] ?? 0)
+  ]
+);
     }
 
     // Data para UI
@@ -299,6 +333,19 @@ final class ProductController
 
       if (trim($nota) === '')
         $nota = 'Ajuste de stock';
+      Notifier::notify(
+  $idUser,
+  'stock_adjust',
+  'Productos',
+  'Stock ajustado',
+  'Se realizó un ajuste manual de stock.',
+  'productos',
+  $idProducto,
+  [
+    'nuevo_stock' => $stockTarget,
+    'nota' => $nota
+  ]
+);
 
       $st = $pdo->prepare("
       INSERT INTO inventario_movimientos (fecha, tipo, ref_tabla, ref_id, id_usuario, nota)

@@ -47,7 +47,7 @@ function h($v)
             </thead>
             <tbody>
               <?php foreach ($dayEvents as $e): ?>
-                <tr>
+  <tr id="evento-<?= (int) ($e['id_evento'] ?? 0) ?>" class="agenda-row">
                   <td><?= h($e['hora'] ?? '') ?></td>
                   <td>
                     <div class="fw-semibold"><?= h($e['titulo'] ?? '') ?></div>

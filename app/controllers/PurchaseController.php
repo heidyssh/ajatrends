@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../helpers/auth.php';
 require_once __DIR__ . '/../models/Purchase.php';
+require_once __DIR__ . '/../helpers/Notifier.php';
 
 final class PurchaseController {
 
@@ -43,6 +44,19 @@ final class PurchaseController {
       }
 
       $compra = Purchase::find($id);
+      Notifier::notify(
+  $idUser,
+  'purchase_create',
+  'Compras',
+  'Compra registrada',
+  'Se registró la compra #' . $idCompra . '.',
+  'compras',
+  $idCompra,
+  [
+    'proveedor_id' => $idProveedor,
+    'nota' => $nota
+  ]
+);
       if (!$compra) {
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode(['ok' => false, 'message' => 'Compra no encontrada']);
@@ -150,7 +164,15 @@ if ($action === 'delete') {
   if ($idCompra <= 0) throw new Exception('ID inválido.');
 
   Purchase::deleteHard($idCompra);
-
+Notifier::notify(
+  $idUser,
+  'purchase_delete',
+  'Compras',
+  'Compra eliminada',
+  'Se eliminó la compra #' . $idCompra . '.',
+  'compras',
+  $idCompra
+);
   $_SESSION['flash_success'] = 'Compra eliminada.';
   self::redirectToPurchases($data['filters']);
 }

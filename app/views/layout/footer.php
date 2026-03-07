@@ -81,5 +81,67 @@ document.addEventListener('DOMContentLoaded', () => {
   <?php if ($fi): ?> showToast('info',    <?= json_encode($fi) ?>); <?php endif; ?>
 });
 </script>
+<script>
+document.addEventListener("click", async function(e){
+  const btn = e.target.closest(".notif-delete");
+  if(!btn) return;
+
+  e.preventDefault();
+  e.stopPropagation();
+
+  const id = btn.dataset.id;
+  const item = btn.closest(".notif-item");
+  const badge = document.getElementById("notifBadge");
+  const dropdown = document.getElementById("notifDropdown");
+
+  try {
+    const res = await fetch("index.php?page=delete_notification", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: "id=" + encodeURIComponent(id)
+    });
+
+    const data = await res.json();
+
+    if (data.ok) {
+      if (item) item.remove();
+
+      if (badge) {
+        let count = parseInt((badge.textContent || "0").trim(), 10);
+        count = Math.max(0, count - 1);
+
+        if (count <= 0) {
+          badge.textContent = "0";
+          badge.classList.add("d-none");
+        } else {
+          badge.textContent = String(count);
+          badge.classList.remove("d-none");
+        }
+      }
+
+      const remaining = dropdown ? dropdown.querySelectorAll(".notif-item").length : 0;
+      let emptyMsg = document.getElementById("notifEmpty");
+
+      if (remaining === 0 && dropdown) {
+        if (!emptyMsg) {
+          emptyMsg = document.createElement("div");
+          emptyMsg.id = "notifEmpty";
+          emptyMsg.className = "px-2 py-2 text-muted small";
+          emptyMsg.textContent = "No hay notificaciones.";
+          dropdown.appendChild(emptyMsg);
+        }
+      }
+
+      showToast('success', 'Notificación eliminada');
+    } else {
+      showToast('error', 'No se pudo eliminar la notificación');
+    }
+  } catch (err) {
+    showToast('error', 'Error al eliminar la notificación');
+  }
+});
+</script>
 </body>
 </html>

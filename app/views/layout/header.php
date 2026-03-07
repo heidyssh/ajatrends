@@ -20,6 +20,13 @@ $userName = $_SESSION['user']['nombre'] ?? 'Admin';
 </head>
 
 <body>
+  <?php
+require_once __DIR__ . '/../../models/Notification.php';
+$idNotifUser = (int)($_SESSION['user']['id'] ?? 0);
+$notifCount = Notification::unreadCount($idNotifUser);
+$notifItems = Notification::latest($idNotifUser, 8);
+?>
+
 
   <?php if ($isAuthPage || !$isLogged): ?>
     <!-- Auth topbar: ultra minimal -->
@@ -110,6 +117,84 @@ $userName = $_SESSION['user']['nombre'] ?? 'Admin';
             </div>
 
             <div class="right d-flex align-items-center gap-2 gap-sm-3">
+              <div class="dropdown">
+<button class="icon-btn position-relative" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Notificaciones">
+  <i class="bi bi-bell"></i>
+  <span id="notifBadge"
+        class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger <?= $notifCount > 0 ? '' : 'd-none' ?>">
+    <?= (int)$notifCount ?>
+  </span>
+</button>
+
+  <div id="notifDropdown" class="dropdown-menu dropdown-menu-end shadow-sm p-2" style="width:360px; max-height:420px; overflow:auto;">
+    <div class="fw-bold px-2 py-1">Notificaciones</div>
+    <hr class="my-2">
+
+<?php if (!$notifItems): ?>
+  <div id="notifEmpty" class="px-2 py-2 text-muted small">No hay notificaciones.</div>
+
+<?php else: ?>
+
+  <?php foreach ($notifItems as $n): 
+
+  $link = "#";
+
+  switch ($n['ref_tabla']) {
+
+    case 'agenda_eventos':
+      $link = "index.php?page=agenda";
+    break;
+
+    case 'productos':
+      $link = "index.php?page=products";
+    break;
+
+    case 'ventas':
+      $link = "index.php?page=sales";
+    break;
+
+    case 'compras':
+      $link = "index.php?page=purchases";
+    break;
+
+    case 'usuarios':
+      $link = "index.php?page=profile";
+    break;
+
+  }
+  ?>
+
+  <div class="notif-item d-flex justify-content-between align-items-start px-2 py-2 border-bottom">
+
+    <a href="<?= $link ?>" class="text-decoration-none flex-grow-1">
+
+      <div class="fw-semibold" style="font-size:.92rem;">
+        <?= htmlspecialchars($n['titulo']) ?>
+      </div>
+
+      <div class="small text-muted">
+        <?= htmlspecialchars($n['mensaje']) ?>
+      </div>
+
+      <div class="small text-secondary mt-1">
+        <?= htmlspecialchars($n['modulo']) ?> · <?= htmlspecialchars($n['created_at']) ?>
+      </div>
+
+    </a>
+
+    <button 
+      class="btn btn-sm btn-light notif-delete ms-2"
+      data-id="<?= (int)$n['id_notificacion'] ?>">
+      <i class="bi bi-x"></i>
+    </button>
+
+  </div>
+
+  <?php endforeach; ?>
+
+<?php endif; ?>
+  </div>
+</div>
 
               <span class="pill d-none d-lg-inline-flex">
                 <i class="bi bi-shield-lock"></i> Admin
@@ -153,3 +238,34 @@ $userName = $_SESSION['user']['nombre'] ?? 'Admin';
 
           <main class="pt-4">
           <?php endif; ?>
+
+          <script>
+
+document.addEventListener("click", async function(e){
+
+  const btn = e.target.closest(".notif-delete");
+  if(!btn) return;
+
+  e.preventDefault();
+  e.stopPropagation();
+
+  const id = btn.dataset.id;
+
+  const res = await fetch("index.php?page=delete_notification",{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/x-www-form-urlencoded"
+    },
+    body:"id="+id
+  });
+
+  const data = await res.json();
+
+  if(data.ok){
+    btn.closest(".notif-item").remove();
+  }
+
+});
+
+</script>
+          
