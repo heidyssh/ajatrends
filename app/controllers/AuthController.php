@@ -33,13 +33,14 @@ final class AuthController
       ? $perfil['foto_archivo']
       : ($perfil['avatar_archivo'] ?? 'assets/img/avatars/avatar1.jpg');
 
-    $_SESSION['user'] = [
-      'id' => (int)$user['id_usuario'],
-      'nombre' => $user['nombre'],
-      'rol' => (int)$user['id_rol'],
-      'email' => $user['email'],
-      'avatar' => $avatar
-    ];
+$_SESSION['user'] = [
+  'id' => (int)$user['id_usuario'],
+  'nombre' => $user['nombre'],
+  'rol' => (int)$user['id_rol'],
+  'rol_nombre' => ((int)$user['id_rol'] === 1 ? 'ADMIN' : 'LOGISTICA'),
+  'email' => $user['email'],
+  'avatar' => $avatar
+];
     Notifier::notify(
   (int)$user['id_usuario'],
   'login',

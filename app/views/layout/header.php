@@ -92,6 +92,12 @@ $notifItems = Notification::latest($idNotifUser, 8);
               <span class="lbl">Reportes</span>
             </a>
           </nav>
+          <?php if ((int)($_SESSION['user']['rol'] ?? 0) === 1): ?>
+  <a class="nav-item <?= $page === 'users' ? 'active' : '' ?>" href="index.php?page=users">
+    <div class="ic"><i class="bi bi-people"></i></div>
+    <span class="lbl">Usuarios</span>
+  </a>
+<?php endif; ?>
 
           <div class="sidebar-bottom mt-auto">
             <div class="mini-note">
@@ -197,8 +203,9 @@ $notifItems = Notification::latest($idNotifUser, 8);
 </div>
 
               <span class="pill d-none d-lg-inline-flex">
-                <i class="bi bi-shield-lock"></i> Admin
-              </span>
+  <i class="bi bi-shield-lock"></i>
+  <?= ((int)($_SESSION['user']['rol'] ?? 0) === 1) ? 'Admin' : 'Logística' ?>
+</span>
 
               <span class="pill d-none d-lg-inline-flex" id="clock">
                 <i class="bi bi-clock"></i> --

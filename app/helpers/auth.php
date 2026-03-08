@@ -23,9 +23,15 @@ function is_admin(): bool {
   return $rol === 1;
 }
 
-function require_admin(): void {
-  if (!is_admin()) {
-    header('Location: /index.php?page=dashboard');
+function require_admin(): void
+{
+  start_session();
+  require_auth();
+
+  if ((int)($_SESSION['user']['rol'] ?? 0) !== 1) {
+    $_SESSION['flash_error'] = 'No tenés permiso para entrar a Usuarios.';
+    header('Location: /ajatrends/public/index.php?page=dashboard');
     exit;
   }
 }
+

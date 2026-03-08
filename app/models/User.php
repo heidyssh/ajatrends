@@ -26,4 +26,20 @@ public static function updatePassword(int $id, string $hash): void {
     $st = db()->prepare("UPDATE usuarios SET pass_hash=? WHERE id_usuario=?");
     $st->execute([$hash, $id]);
 }
+public static function all(): array {
+    $st = db()->query("
+        SELECT u.id_usuario, u.nombre, u.email, u.estado, u.creado_en, r.nombre AS rol_nombre
+        FROM usuarios u
+        INNER JOIN roles r ON r.id_rol = u.id_rol
+        ORDER BY u.id_usuario DESC
+    ");
+    return $st->fetchAll() ?: [];
 }
+
+public static function deleteById(int $id): void {
+    $st = db()->prepare("DELETE FROM usuarios WHERE id_usuario = ?");
+    $st->execute([$id]);
+}
+}
+
+

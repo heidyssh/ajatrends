@@ -10,6 +10,7 @@ require_once __DIR__ . '/../app/controllers/AgendaController.php';
 require_once __DIR__ . '/../app/controllers/SaleController.php';
 require_once __DIR__ . '/../app/controllers/KardexController.php';
 require_once __DIR__ . '/../app/controllers/NotificationController.php';
+require_once __DIR__ . '/../app/controllers/UserController.php';
 start_session();
 
 $page = $_GET['page'] ?? 'login';
@@ -55,7 +56,7 @@ if ($page === 'purchases') {
   require_auth();
   $viewData = PurchaseController::handle($_POST, $_GET);
 }
-$allowed = ['login','register','dashboard','profile','change_password','products','purchases','sales','kardex','agenda','delete_notification'];
+$allowed = ['login','register','dashboard','profile','change_password','products','purchases','sales','kardex','agenda','delete_notification','users'];
 if (!in_array($page, $allowed, true)) $page = 'login';
 if ($page === 'agenda') require_auth();
 if ($page === 'dashboard') require_auth();
@@ -78,6 +79,10 @@ if ($page === 'kardex') {
 if ($page === 'delete_notification') {
   NotificationController::delete($_POST);
   exit;
+}
+if ($page === 'users') {
+  require_auth();
+  $viewData = UserController::handle($_POST);
 }
 
 require __DIR__ . '/../app/views/layout/header.php';
