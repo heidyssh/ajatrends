@@ -10,14 +10,11 @@ return [
   'secure' => 'tls',
 
   // correo que enviará
-  'username' => 'tu_correo_empresarial@gmail.com',
-  'password' => 'AQUI_VA_TU_APP_PASSWORD',
+  'username' => 'ajatrends.notificaciones@gmail.com',
+  'password' => 'ktohbmevesnqhowp',
 
-  'from_email' => 'tu_correo_empresarial@gmail.com',
-  'from_name'  => 'AJA Trends Notificaciones',
+  'from_email' => 'ajatrends.notificaciones@gmail.com',
+  'from_name'  => 'Sistema AJA TRENDS',
+  'notify_to' => [ ]
 
-  // correos que recibirán TODO
-  'notify_to' => [
-    'tu_gmail@gmail.com'
-  ],
 ];

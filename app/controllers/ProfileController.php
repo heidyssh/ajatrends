@@ -46,7 +46,7 @@ final class ProfileController
       }
 
       Profile::updateEmail($idUsuario, $new);
-      Notifier::notify(
+      Notifier::notifyUser(
   $idUsuario,
   'profile_email',
   'Perfil',
@@ -67,7 +67,7 @@ final class ProfileController
 
 /* 2) Cambiar contraseña */
 if ($action === 'change_password') {
-  Notifier::notify(
+  Notifier::notifyUser(
   $idUsuario,
   'profile_password',
   'Perfil',
@@ -128,7 +128,7 @@ if ($action === 'change_password') {
 
     // Guardar datos básicos
     Profile::updateBasic($id, $idAvatar, $telefono, $bio);
-    Notifier::notify(
+    Notifier::notifyUser(
   $idUsuario,
   'profile_avatar',
   'Perfil',

@@ -63,7 +63,7 @@ $notifItems = Notification::latest($idNotifUser, 8);
 
           <div class="side-sec small text-white-50 mt-2 mb-2">MENÚ</div>
 
-          <nav class="navs">
+                    <nav class="navs">
             <a class="nav-item <?= $page === 'dashboard' ? 'active' : '' ?>" href="index.php?page=dashboard">
               <div class="ic"><i class="bi bi-grid-1x2"></i></div>
               <span class="lbl">Dashboard</span>
@@ -75,36 +75,34 @@ $notifItems = Notification::latest($idNotifUser, 8);
               <div class="ic"><i class="bi bi-bag-heart"></i></div>
               <span class="lbl">Productos</span>
             </a>
+
             <a class="nav-item <?= $page === 'purchases' ? 'active' : '' ?>" href="index.php?page=purchases">
               <div class="ic"><i class="bi bi-truck"></i></div>
               <span class="lbl">Compras</span>
             </a>
+
             <a class="nav-item <?= $page === 'sales' ? 'active' : '' ?>" href="index.php?page=sales">
               <div class="ic"><i class="bi bi-receipt"></i></div>
               <span class="lbl">Ventas</span>
             </a>
+
             <a class="nav-item <?= $page === 'kardex' ? 'active' : '' ?>" href="index.php?page=kardex">
               <div class="ic"><i class="bi bi-box-seam"></i></div>
               <span class="lbl">Kardex</span>
             </a>
+
             <a class="nav-item disabled-link" href="#">
               <div class="ic"><i class="bi bi-graph-up"></i></div>
               <span class="lbl">Reportes</span>
             </a>
-          </nav>
-          <?php if ((int)($_SESSION['user']['rol'] ?? 0) === 1): ?>
-  <a class="nav-item <?= $page === 'users' ? 'active' : '' ?>" href="index.php?page=users">
-    <div class="ic"><i class="bi bi-people"></i></div>
-    <span class="lbl">Usuarios</span>
-  </a>
-<?php endif; ?>
 
-          <div class="sidebar-bottom mt-auto">
-            <div class="mini-note">
-              <div class="small text-white-50">Tip:</div>
-              <div class="text-white-50 small">Revisá “Stock bajo” para saber qué pedir al proveedor.</div>
-            </div>
-          </div>
+            <?php if ((int)($_SESSION['user']['rol'] ?? 0) === 1): ?>
+              <a class="nav-item <?= $page === 'users' ? 'active' : '' ?>" href="index.php?page=users">
+                <div class="ic"><i class="bi bi-people"></i></div>
+                <span class="lbl">Usuarios</span>
+              </a>
+            <?php endif; ?>
+          </nav>
         </aside>
 
         <!-- Content -->
@@ -164,8 +162,12 @@ $notifItems = Notification::latest($idNotifUser, 8);
     break;
 
     case 'usuarios':
-      $link = "index.php?page=profile";
-    break;
+  if (((int)($_SESSION['user']['rol'] ?? 0) === 1) && (($n['modulo'] ?? '') === 'Usuarios')) {
+    $link = "index.php?page=users";
+  } else {
+    $link = "index.php?page=profile";
+  }
+break;
 
   }
   ?>

@@ -24,7 +24,7 @@ final class ProductController
 
     return ["ok" => true, "product" => $p, "images" => $imgs];
   }
-  
+
 
   private static function redirectToProducts(array $filters): void
   {
@@ -88,6 +88,19 @@ final class ProductController
           }
 
           self::handleUploads($id, $files);
+          Notifier::notifyShared(
+            'product_create',
+            'Productos',
+            'Producto agregado',
+            'Se agregó el producto "' . ($payload['nombre'] ?? '') . '".',
+            'productos',
+            $id,
+            [
+              'sku' => $payload['sku'] ?? '',
+              'precio' => $payload['precio'] ?? 0,
+              'stock_inicial' => (int) ($post['stock'] ?? 0)
+            ]
+          );
           $_SESSION['flash_success'] = 'Producto creado con éxito.';
           self::redirectToProducts($data['filters']);
         }
@@ -107,15 +120,14 @@ final class ProductController
             $idUser = (int) ($_SESSION['user']['id'] ?? 0);
 
           self::handleUploads($id, $files);
-          Notifier::notify(
-  $idUser,
-  'product_update',
-  'Productos',
-  'Producto actualizado',
-  'Se actualizó el producto "' . ($payload['nombre'] ?? '') . '".',
-  'productos',
-  $id
-);
+          Notifier::notifyShared(
+            'product_update',
+            'Productos',
+            'Producto actualizado',
+            'Se actualizó el producto "' . ($payload['nombre'] ?? '') . '".',
+            'productos',
+            $id
+          );
           $_SESSION['flash_success'] = 'Producto actualizado con éxito.';
           self::redirectToProducts($data['filters']);
         }
@@ -141,7 +153,24 @@ final class ProductController
           if ($idUser <= 0)
             $idUser = (int) ($_SESSION['user']['id'] ?? 0);
 
+          $producto = Product::find($id);
           Product::setStock($id, $stockTarget, $idUser, $motivo);
+
+          Notifier::notifyShared(
+            'stock_adjust',
+            'Productos',
+            'Inventario ajustado',
+            'Se ajustó el inventario del producto "' . ($producto['nombre'] ?? '') . '" a ' . $stockTarget . ' unidades.',
+            'productos',
+            $id,
+            [
+              'producto' => $producto['nombre'] ?? '',
+              'sku' => $producto['sku'] ?? '',
+              'nuevo_stock' => $stockTarget,
+              'motivo' => $motivo
+            ]
+          );
+
           $_SESSION['flash_success'] = 'Inventario ajustado y registrado en Kardex.';
           self::redirectToProducts($data['filters']);
         }
@@ -159,15 +188,16 @@ final class ProductController
           if ($idImagen <= 0)
             throw new Exception('ID de imagen inválido.');
           Product::deleteImage($idImagen);
-          Notifier::notify(
-  $idUser,
-  'product_delete',
-  'Productos',
-  'Producto eliminado',
-  'Se eliminó un producto del catálogo.',
-  'productos',
-  $id
-);
+          $id = (int) ($post['id_producto'] ?? 0);
+
+          Notifier::notifyShared(
+            'product_image_delete',
+            'Productos',
+            'Imagen eliminada',
+            'Se eliminó una imagen del producto.',
+            'productos',
+            $id
+          );
           $_SESSION['flash_success'] = 'Imagen eliminada.';
           self::redirectToProducts($data['filters']);
         }
@@ -186,20 +216,6 @@ final class ProductController
         $_SESSION['flash_error'] = $e->getMessage();
         self::redirectToProducts($data['filters']);
       }
-      Notifier::notify(
-  $idUser,
-  'product_create',
-  'Productos',
-  'Producto agregado',
-  'Se agregó el producto "' . ($payload['nombre'] ?? '') . '".',
-  'productos',
-  $id,
-  [
-    'sku' => $payload['sku'] ?? '',
-    'precio' => $payload['precio'] ?? 0,
-    'stock_inicial' => (int)($post['stock'] ?? 0)
-  ]
-);
     }
 
     // Data para UI
@@ -333,19 +349,18 @@ final class ProductController
 
       if (trim($nota) === '')
         $nota = 'Ajuste de stock';
-      Notifier::notify(
-  $idUser,
-  'stock_adjust',
-  'Productos',
-  'Stock ajustado',
-  'Se realizó un ajuste manual de stock.',
-  'productos',
-  $idProducto,
-  [
-    'nuevo_stock' => $stockTarget,
-    'nota' => $nota
-  ]
-);
+      Notifier::notifyShared(
+        'stock_adjust',
+        'Productos',
+        'Stock ajustado',
+        'Se realizó un ajuste manual de stock.',
+        'productos',
+        $idProducto,
+        [
+          'nuevo_stock' => $stockTarget,
+          'nota' => $nota
+        ]
+      );
 
       $st = $pdo->prepare("
       INSERT INTO inventario_movimientos (fecha, tipo, ref_tabla, ref_id, id_usuario, nota)

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-require_once __DIR__ . '/../../vendor/autoload.php';
+require_once dirname(__DIR__, 2) . '/vendor/autoload.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -13,11 +13,13 @@ final class Mailer
     $cfg = require __DIR__ . '/../config/mail.php';
 
     if (empty($cfg['enabled'])) {
+      error_log('Mailer: envio deshabilitado en mail.php');
       return false;
     }
 
     $destinos = $to ?: ($cfg['notify_to'] ?? []);
     if (!$destinos) {
+      error_log('Mailer: no hay destinatarios');
       return false;
     }
 
@@ -29,14 +31,25 @@ final class Mailer
       $mail->SMTPAuth   = true;
       $mail->Username   = (string)$cfg['username'];
       $mail->Password   = (string)$cfg['password'];
-      $mail->SMTPSecure = (string)$cfg['secure'];
+      $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
       $mail->Port       = (int)$cfg['port'];
       $mail->CharSet    = 'UTF-8';
+
+      $mail->SMTPOptions = [
+        'ssl' => [
+          'verify_peer' => false,
+          'verify_peer_name' => false,
+          'allow_self_signed' => true,
+        ],
+      ];
 
       $mail->setFrom((string)$cfg['from_email'], (string)$cfg['from_name']);
 
       foreach ($destinos as $correo) {
-        $mail->addAddress((string)$correo);
+        $correo = trim((string)$correo);
+        if ($correo !== '') {
+          $mail->addAddress($correo);
+        }
       }
 
       $mail->isHTML(true);
@@ -44,9 +57,13 @@ final class Mailer
       $mail->Body    = $html;
       $mail->AltBody = trim(strip_tags(str_replace(['<br>', '<br/>', '<br />'], "\n", $html)));
 
-      return $mail->send();
+      $ok = $mail->send();
+      error_log('Mailer OK: enviado a ' . implode(', ', $destinos));
+      return $ok;
+
     } catch (Exception $e) {
-      error_log('Mailer error: ' . $e->getMessage());
+      error_log('Mailer error: ' . $mail->ErrorInfo);
+      error_log('Mailer exception: ' . $e->getMessage());
       return false;
     }
   }

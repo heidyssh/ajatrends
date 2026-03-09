@@ -11,12 +11,12 @@ final class UserController
     require_admin();
 
     if (!empty($post['action']) && $post['action'] === 'delete') {
-      $id = (int)($post['id_usuario'] ?? 0);
+      $id = (int) ($post['id_usuario'] ?? 0);
 
       if ($id > 0) {
         User::deleteById($id);
         return [
-          'success' => 'Usuario eliminado.',
+          'success' => 'Usuario desactivado.',
           'users' => User::all()
         ];
       }

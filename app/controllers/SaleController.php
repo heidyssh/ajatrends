@@ -182,12 +182,11 @@ final class SaleController
           }
 
           $idVenta = Sale::createVenta($idUser, $idCliente, $idDireccion, $descuento, $nota, $clienteTxt, $direccionTxt, $items);
-          Notifier::notify(
-  $idUser,
+          Notifier::notifyShared(
   'sale_create',
   'Ventas',
   'Venta registrada',
-  'Se registró la venta #' . $idVenta . '.',
+  'Se registró la venta #' . $idVenta . ' correctamente en el sistema.',
   'ventas',
   $idVenta,
   [
@@ -216,8 +215,7 @@ final class SaleController
             $direccionTxt = 'SIN DIRECCION';
 
           Sale::updateLibre($idVenta, $clienteTxt, $direccionTxt, $nota);
-          Notifier::notify(
-  $idUser,
+          Notifier::notifyShared(
   'sale_update',
   'Ventas',
   'Venta actualizada',
@@ -234,8 +232,7 @@ final class SaleController
           if ($idVenta <= 0)
             throw new Exception('ID inválido.');
           Sale::cancel($idVenta, $idUser, 'Venta anulada y stock devuelto');
-          Notifier::notify(
-  $idUser,
+          Notifier::notifyShared(
   'sale_cancel',
   'Ventas',
   'Venta anulada',
@@ -251,8 +248,7 @@ final class SaleController
           if ($idVenta <= 0)
             throw new Exception('ID inválido.');
           Sale::complete($idVenta);
-          Notifier::notify(
-  $idUser,
+          Notifier::notifyShared(
   'sale_complete',
   'Ventas',
   'Venta entregada',
@@ -269,12 +265,11 @@ final class SaleController
           if ($idVenta <= 0)
             throw new Exception('ID inválido.');
           Sale::deleteVenta($idVenta);
-          Notifier::notify(
-  $idUser,
+          Notifier::notifyShared(
   'sale_delete',
   'Ventas',
   'Venta eliminada',
-  'Se eliminó la venta #' . $idVenta . '.',
+  'La venta #' . $idVenta . ' fue eliminada del sistema.',
   'ventas',
   $idVenta
 );

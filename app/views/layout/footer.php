@@ -6,6 +6,13 @@ $isLogged = isset($_SESSION['user']);
 <?php if ($isAuthPage || !$isLogged): ?>
   </main>
 <?php else: ?>
+        <footer class="app-footer">
+          <div class="app-footer-inner">
+            <span>© <?= date('Y') ?> AJA Trends. Todos los derechos reservados.</span>
+            <span class="app-footer-dot">•</span>
+            <span>Sistema de inventario y ventas</span>
+          </div>
+        </footer>
       </main>
     </div>
   </div>

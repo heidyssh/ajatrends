@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../models/Notification.php';
+require_once __DIR__ . '/../models/User.php';
 require_once __DIR__ . '/Mailer.php';
 
 final class Notifier
@@ -14,7 +15,8 @@ final class Notifier
     string $mensaje,
     string $refTabla = '',
     int $refId = 0,
-    array $meta = []
+    array $meta = [],
+    array $emailTo = []
   ): void {
     try {
       $idNotif = Notification::create(
@@ -32,7 +34,8 @@ final class Notifier
 
       $sent = Mailer::send(
         '[AJA Trends] ' . $titulo,
-        $html
+        $html,
+        $emailTo
       );
 
       if ($sent) {
@@ -43,14 +46,82 @@ final class Notifier
     }
   }
 
+  public static function notifyShared(
+    string $tipo,
+    string $modulo,
+    string $titulo,
+    string $mensaje,
+    string $refTabla = '',
+    int $refId = 0,
+    array $meta = []
+  ): void {
+    self::notify(
+      null,
+      $tipo,
+      $modulo,
+      $titulo,
+      $mensaje,
+      $refTabla,
+      $refId,
+      $meta,
+      User::activeEmails()
+    );
+  }
+
+  public static function notifyAdmins(
+    ?int $idUsuario,
+    string $tipo,
+    string $modulo,
+    string $titulo,
+    string $mensaje,
+    string $refTabla = '',
+    int $refId = 0,
+    array $meta = []
+  ): void {
+    self::notify(
+      $idUsuario,
+      $tipo,
+      $modulo,
+      $titulo,
+      $mensaje,
+      $refTabla,
+      $refId,
+      $meta,
+      User::adminEmails()
+    );
+  }
+
+  public static function notifyUser(
+    int $idUsuario,
+    string $tipo,
+    string $modulo,
+    string $titulo,
+    string $mensaje,
+    string $refTabla = '',
+    int $refId = 0,
+    array $meta = []
+  ): void {
+    self::notify(
+      $idUsuario,
+      $tipo,
+      $modulo,
+      $titulo,
+      $mensaje,
+      $refTabla,
+      $refId,
+      $meta,
+      User::emailById($idUsuario)
+    );
+  }
+
   private static function buildEmailHtml(string $modulo, string $titulo, string $mensaje, array $meta = []): string
   {
     $extra = '';
 
     foreach ($meta as $k => $v) {
-      $extra .= '<li><strong>' . htmlspecialchars((string)$k) . ':</strong> ' .
-                htmlspecialchars((string)$v) . '</li>';
-    }
+  $label = ucwords(str_replace('_', ' ', $k));
+  $html .= "<li><strong>{$label}:</strong> {$v}</li>";
+}
 
     return '
       <div style="font-family:Arial,sans-serif;font-size:14px;color:#222">

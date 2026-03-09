@@ -41,7 +41,7 @@ $_SESSION['user'] = [
   'email' => $user['email'],
   'avatar' => $avatar
 ];
-    Notifier::notify(
+    Notifier::notifyUser(
   (int)$user['id_usuario'],
   'login',
   'Seguridad',
@@ -87,7 +87,7 @@ $_SESSION['user'] = [
     $idRol = 1;
     $hash = password_hash($pass, PASSWORD_BCRYPT);
     User::create($idRol, $nombre, $email, $hash);
-    Notifier::notify(
+    Notifier::notifyAdmins(
   null,
   'user_register',
   'Usuarios',
@@ -95,7 +95,7 @@ $_SESSION['user'] = [
   'Se registró un nuevo usuario: ' . $nombre,
   'usuarios',
   0,
-  ['email'=>$email]
+  ['email' => $email]
 );
 
     $_SESSION['flash_success'] = 'Usuario creado. Ya podés iniciar sesión.';
@@ -110,8 +110,8 @@ $_SESSION['user'] = [
     $idUser = $_SESSION['user']['id'] ?? null;
 $nombre = $_SESSION['user']['nombre'] ?? '';
 
-Notifier::notify(
-  $idUser,
+Notifier::notifyUser(
+  (int)$idUser,
   'logout',
   'Seguridad',
   'Cierre de sesión',

@@ -24,8 +24,7 @@ final class AgendaController
       if ($action === 'create') {
         $idEvento = Agenda::createEvent($idUser, $post);
 
-Notifier::notify(
-  $idUser,
+Notifier::notifyShared(
   'agenda_create',
   'Agenda',
   'Nuevo evento agendado',
@@ -45,8 +44,7 @@ Notifier::notify(
 
       if ($action === 'update') {
         Agenda::updateEvent($idUser, (int)($post['id_evento'] ?? 0), $post);
-        Notifier::notify(
-  $idUser,
+        Notifier::notifyShared(
   'agenda_update',
   'Agenda',
   'Evento actualizado',
@@ -61,12 +59,11 @@ Notifier::notify(
 
       if ($action === 'done') {
         Agenda::setEstado($idUser, (int)($post['id_evento'] ?? 0), 'HECHO');
-        Notifier::notify(
-  $idUser,
+        Notifier::notifyShared(
   'agenda_done',
   'Agenda',
   'Evento marcado como hecho',
-  'Se marcó un evento como HECHO.',
+  'El evento de agenda fue marcado como completado.',
   'agenda_eventos',
   (int)($post['id_evento'] ?? 0)
 );
@@ -77,12 +74,11 @@ Notifier::notify(
 
       if ($action === 'delete') {
         Agenda::deleteEvent($idUser, (int)($post['id_evento'] ?? 0));
-        Notifier::notify(
-  $idUser,
+        Notifier::notifyShared(
   'agenda_delete',
   'Agenda',
   'Evento eliminado',
-  'Se eliminó un evento de la agenda.',
+  'Un evento fue eliminado de la agenda del sistema.',
   'agenda_eventos',
   (int)($post['id_evento'] ?? 0)
 );
