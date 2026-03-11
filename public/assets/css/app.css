@@ -3563,3 +3563,23 @@ main.pt-4{
     text-align: center;
   }
 }
+.ring-highlight{
+  animation: notifPulse 2s ease;
+  box-shadow: 0 0 0 3px rgba(111, 66, 193, .18), 0 16px 32px rgba(111, 66, 193, .22) !important;
+  border-radius: 20px;
+}
+
+@keyframes notifPulse{
+  0%{
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(111, 66, 193, .35);
+  }
+  50%{
+    transform: scale(1.01);
+    box-shadow: 0 0 0 8px rgba(111, 66, 193, .10);
+  }
+  100%{
+    transform: scale(1);
+    box-shadow: 0 0 0 3px rgba(111, 66, 193, .18), 0 16px 32px rgba(111, 66, 193, .22);
+  }
+}

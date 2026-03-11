@@ -499,3 +499,13 @@ $estado = $filters['estado'] ?? 'TODOS';
     }[s]));
   }
 </script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const viewId = params.get('view');
+
+  if (viewId) {
+    openViewCompra(viewId);
+  }
+});
+</script>

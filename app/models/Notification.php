@@ -97,9 +97,37 @@ final class Notification
     $st = db()->prepare("UPDATE notificaciones SET enviada_email = 1 WHERE id_notificacion = :id");
     $st->execute([':id' => $idNotificacion]);
   }
-  public static function delete(int $id): void
-{
-  $st = db()->prepare("DELETE FROM notificaciones WHERE id_notificacion=:id");
-  $st->execute([':id'=>$id]);
-}
+
+  public static function delete(int $id, ?int $idUsuario = null): void
+  {
+    if ($idUsuario && $idUsuario > 0) {
+      $st = db()->prepare("
+        DELETE FROM notificaciones
+        WHERE id_notificacion = :id
+          AND (id_usuario IS NULL OR id_usuario = :u)
+      ");
+      $st->execute([
+        ':id' => $id,
+        ':u' => $idUsuario
+      ]);
+      return;
+    }
+
+    $st = db()->prepare("DELETE FROM notificaciones WHERE id_notificacion = :id");
+    $st->execute([':id' => $id]);
+  }
+
+  public static function deleteAll(?int $idUsuario = null): void
+  {
+    if ($idUsuario && $idUsuario > 0) {
+      $st = db()->prepare("
+        DELETE FROM notificaciones
+        WHERE id_usuario IS NULL OR id_usuario = :u
+      ");
+      $st->execute([':u' => $idUsuario]);
+      return;
+    }
+
+    db()->exec("DELETE FROM notificaciones");
+  }
 }

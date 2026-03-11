@@ -853,3 +853,19 @@ $estado = $filters['estado'] ?? '';
   })();
 
 </script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const highlightId = params.get('highlight');
+
+  if (!highlightId) return;
+
+  const card = document.querySelector(`.product-card[data-product-id="${highlightId}"]`);
+  if (card) {
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    card.classList.add('ring-highlight');
+    setTimeout(() => card.classList.remove('ring-highlight'), 2500);
+    card.click();
+  }
+});
+</script>

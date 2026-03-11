@@ -56,8 +56,7 @@ if ($page === 'purchases') {
   require_auth();
   $viewData = PurchaseController::handle($_POST, $_GET);
 }
-$allowed = ['login','register','dashboard','profile','change_password','products','purchases','sales','kardex','agenda','delete_notification','users'];
-if (!in_array($page, $allowed, true)) $page = 'login';
+$allowed = ['login','register','dashboard','profile','change_password','products','purchases','sales','kardex','agenda','delete_notification','clear_all_notifications','users'];if (!in_array($page, $allowed, true)) $page = 'login';
 if ($page === 'agenda') require_auth();
 if ($page === 'dashboard') require_auth();
 if ($page === 'profile') require_auth();
@@ -80,6 +79,11 @@ if ($page === 'delete_notification') {
   NotificationController::delete($_POST);
   exit;
 }
+if ($page === 'clear_all_notifications') {
+  NotificationController::clearAll();
+  exit;
+}
+
 if ($page === 'users') {
   require_auth();
   $viewData = UserController::handle($_POST);

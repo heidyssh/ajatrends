@@ -948,3 +948,13 @@ function money($n)
     }[s]));
   }
 </script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const viewId = params.get('view');
+
+  if (viewId) {
+    openViewVenta(viewId);
+  }
+});
+</script>

@@ -20,6 +20,7 @@ $isLogged = isset($_SESSION['user']);
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="assets/js/app.js"></script>
+
 <script>
 document.addEventListener('click', function(e){
   const btn = e.target.closest('[data-toggle-pw]');
@@ -38,6 +39,7 @@ document.addEventListener('click', function(e){
     icon.classList.toggle('bi-eye-slash');
   }
 });
+
 document.addEventListener('change', function(e){
   const r = e.target;
   if(!r.matches('.avatar-item input[type="radio"][name="id_avatar"]')) return;
@@ -47,7 +49,7 @@ document.addEventListener('change', function(e){
   if(label) label.classList.add('active');
 });
 </script>
-<!-- Contenedor global de toasts -->
+
 <div class="toast-stack" id="toastStack"></div>
 
 <?php
@@ -83,72 +85,129 @@ window.showToast = function(type, message, ms = 3500){
 
 document.addEventListener('DOMContentLoaded', () => {
   <?php if ($fs): ?> showToast('success', <?= json_encode($fs) ?>); <?php endif; ?>
-  <?php if ($fe): ?> showToast('error',   <?= json_encode($fe) ?>); <?php endif; ?>
-  <?php if ($fw): ?> showToast('warn',    <?= json_encode($fw) ?>); <?php endif; ?>
-  <?php if ($fi): ?> showToast('info',    <?= json_encode($fi) ?>); <?php endif; ?>
+  <?php if ($fe): ?> showToast('error', <?= json_encode($fe) ?>); <?php endif; ?>
+  <?php if ($fw): ?> showToast('warn', <?= json_encode($fw) ?>); <?php endif; ?>
+  <?php if ($fi): ?> showToast('info', <?= json_encode($fi) ?>); <?php endif; ?>
 });
 </script>
+
 <script>
 document.addEventListener("click", async function(e){
-  const btn = e.target.closest(".notif-delete");
-  if(!btn) return;
+  const btnDelete = e.target.closest(".notif-delete");
+  const btnClearAll = e.target.closest("#btnClearAllNotifications");
 
-  e.preventDefault();
-  e.stopPropagation();
+  if (btnDelete) {
+    e.preventDefault();
+    e.stopPropagation();
 
-  const id = btn.dataset.id;
-  const item = btn.closest(".notif-item");
-  const badge = document.getElementById("notifBadge");
-  const dropdown = document.getElementById("notifDropdown");
+    const id = btnDelete.dataset.id;
+    const item = btnDelete.closest(".notif-item");
+    const badge = document.getElementById("notifBadge");
+    const dropdown = document.getElementById("notifDropdown");
 
-  try {
-    const res = await fetch("index.php?page=delete_notification", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
-      },
-      body: "id=" + encodeURIComponent(id)
-    });
+    try {
+      const res = await fetch("index.php?page=delete_notification", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: "id=" + encodeURIComponent(id)
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (data.ok) {
-      if (item) item.remove();
+      if (data.ok) {
+        if (item) item.remove();
 
-      if (badge) {
-        let count = parseInt((badge.textContent || "0").trim(), 10);
-        count = Math.max(0, count - 1);
+        if (badge) {
+          let count = parseInt((badge.textContent || "0").trim(), 10);
+          count = Math.max(0, count - 1);
 
-        if (count <= 0) {
-          badge.textContent = "0";
-          badge.classList.add("d-none");
-        } else {
-          badge.textContent = String(count);
-          badge.classList.remove("d-none");
+          if (count <= 0) {
+            badge.textContent = "0";
+            badge.classList.add("d-none");
+          } else {
+            badge.textContent = String(count);
+            badge.classList.remove("d-none");
+          }
         }
+
+        const remaining = dropdown ? dropdown.querySelectorAll(".notif-item").length : 0;
+        let emptyMsg = document.getElementById("notifEmpty");
+        const clearBtn = document.getElementById("btnClearAllNotifications");
+
+        if (remaining === 0 && dropdown) {
+          if (clearBtn) clearBtn.remove();
+
+          if (!emptyMsg) {
+            emptyMsg = document.createElement("div");
+            emptyMsg.id = "notifEmpty";
+            emptyMsg.className = "px-2 py-2 text-muted small";
+            emptyMsg.textContent = "No hay notificaciones.";
+            dropdown.appendChild(emptyMsg);
+          }
+        }
+
+        showToast('success', 'Notificación eliminada');
+      } else {
+        showToast('error', 'No se pudo eliminar la notificación');
       }
+    } catch (err) {
+      showToast('error', 'Error al eliminar la notificación');
+    }
 
-      const remaining = dropdown ? dropdown.querySelectorAll(".notif-item").length : 0;
-      let emptyMsg = document.getElementById("notifEmpty");
+    return;
+  }
 
-      if (remaining === 0 && dropdown) {
-        if (!emptyMsg) {
+  if (btnClearAll) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const dropdown = document.getElementById("notifDropdown");
+    const badge = document.getElementById("notifBadge");
+
+    try {
+      const res = await fetch("index.php?page=clear_all_notifications", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: ""
+      });
+
+      const data = await res.json();
+
+      if (data.ok) {
+        if (dropdown) {
+          dropdown.querySelectorAll(".notif-item").forEach(el => el.remove());
+        }
+
+        btnClearAll.remove();
+
+        let emptyMsg = document.getElementById("notifEmpty");
+        if (!emptyMsg && dropdown) {
           emptyMsg = document.createElement("div");
           emptyMsg.id = "notifEmpty";
           emptyMsg.className = "px-2 py-2 text-muted small";
           emptyMsg.textContent = "No hay notificaciones.";
           dropdown.appendChild(emptyMsg);
         }
-      }
 
-      showToast('success', 'Notificación eliminada');
-    } else {
-      showToast('error', 'No se pudo eliminar la notificación');
+        if (badge) {
+          badge.textContent = "0";
+          badge.classList.add("d-none");
+        }
+
+        showToast('success', 'Se limpiaron todas las notificaciones');
+      } else {
+        showToast('error', 'No se pudieron limpiar las notificaciones');
+      }
+    } catch (err) {
+      showToast('error', 'Error al limpiar las notificaciones');
     }
-  } catch (err) {
-    showToast('error', 'Error al eliminar la notificación');
   }
 });
 </script>
+
 </body>
 </html>
