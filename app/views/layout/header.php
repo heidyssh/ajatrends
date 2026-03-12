@@ -109,6 +109,7 @@ $notifItems = Notification::latest($idNotifUser, 8);
             <button id="sidebarToggle" class="icon-btn" type="button" title="Colapsar sidebar">
               <i class="bi bi-list"></i>
             </button>
+            
 
             <div class="search d-none d-md-flex">
               <i class="bi bi-search"></i>
@@ -118,6 +119,13 @@ $notifItems = Notification::latest($idNotifUser, 8);
 
           <div class="right d-flex align-items-center gap-2 gap-sm-3">
 
+<a href="https://www.instagram.com/aja_trends?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
+   target="_blank"
+   rel="noopener noreferrer"
+   class="icon-btn"
+   title="Instagram AJA Trends">
+  <i class="bi bi-instagram" style="color:#000;"></i>
+</a>
             <div class="dropdown">
               <button class="icon-btn position-relative" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Notificaciones">
                 <i class="bi bi-bell"></i>
@@ -126,6 +134,8 @@ $notifItems = Notification::latest($idNotifUser, 8);
                   <?= (int)$notifCount ?>
                 </span>
               </button>
+
+              
 
               <div id="notifDropdown" class="dropdown-menu dropdown-menu-end shadow-sm p-2" style="width:360px; max-height:420px; overflow:auto;">
                 <div class="d-flex align-items-center justify-content-between px-2 py-1">
