@@ -11,6 +11,7 @@ require_once __DIR__ . '/../app/controllers/SaleController.php';
 require_once __DIR__ . '/../app/controllers/KardexController.php';
 require_once __DIR__ . '/../app/controllers/NotificationController.php';
 require_once __DIR__ . '/../app/controllers/UserController.php';
+require_once __DIR__ . '/../app/controllers/ReportController.php';
 start_session();
 
 $page = $_GET['page'] ?? 'login';
@@ -56,10 +57,14 @@ if ($page === 'purchases') {
   require_auth();
   $viewData = PurchaseController::handle($_POST, $_GET);
 }
-$allowed = ['login','register','dashboard','profile','change_password','products','purchases','sales','kardex','agenda','delete_notification','clear_all_notifications','users'];if (!in_array($page, $allowed, true)) $page = 'login';
+$allowed = ['login','register','dashboard','profile','change_password','products','purchases','sales','kardex','agenda','delete_notification','clear_all_notifications','users','reports'];if (!in_array($page, $allowed, true)) $page = 'login';
 if ($page === 'agenda') require_auth();
 if ($page === 'dashboard') require_auth();
 if ($page === 'profile') require_auth();
+if ($page === 'reports') {
+  require_auth();
+  $viewData = ReportController::handle($_GET);
+}
 if ($page === 'products') {
   require_auth();
   $viewData = ProductController::handle($_POST, $_FILES, $_GET);
