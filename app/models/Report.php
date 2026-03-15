@@ -337,7 +337,7 @@ final class Report
   }
 
   public static function reportPack(array $filters): array
-  {
+{
     return [
       'filters' => $filters,
       'years' => self::years(),
@@ -349,6 +349,32 @@ final class Report
       'salesRows' => self::salesTable($filters),
       'purchaseRows' => self::purchasesTable($filters),
       'inventoryRows' => self::inventoryTable($filters),
+      'lowStockRows' => self::lowStockProducts(),
     ];
-  }
+}
+  public static function lowStockProducts(): array
+{
+  $pdo = db();
+
+  $sql = "
+    SELECT
+      p.id_producto,
+      p.sku,
+      p.nombre,
+      c.nombre AS categoria,
+      COALESCE(SUM(imd.stock_despues), 0) AS stock_actual,
+      p.stock_min
+    FROM productos p
+    INNER JOIN categorias c ON c.id_categoria = p.id_categoria
+    LEFT JOIN inventario_mov_detalle imd ON imd.id_producto = p.id_producto
+    WHERE p.estado = 1
+    GROUP BY p.id_producto, p.sku, p.nombre, c.nombre, p.stock_min
+    HAVING stock_actual <= p.stock_min
+    ORDER BY stock_actual ASC, p.nombre ASC
+    LIMIT 20
+  ";
+
+  $st = $pdo->query($sql);
+  return $st->fetchAll() ?: [];
+}
 }

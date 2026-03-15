@@ -9,7 +9,11 @@ $inventoryByType = $viewData['inventoryByType'] ?? [];
 $salesRows = $viewData['salesRows'] ?? [];
 $purchaseRows = $viewData['purchaseRows'] ?? [];
 $inventoryRows = $viewData['inventoryRows'] ?? [];
-
+$lowStockRows = $viewData['lowStockRows'] ?? [];
+$selectedModule = $filters['module'] ?? 'TODOS';
+$showSales = $selectedModule === 'TODOS' || $selectedModule === 'VENTAS';
+$showPurchases = $selectedModule === 'TODOS' || $selectedModule === 'COMPRAS';
+$showInventory = $selectedModule === 'TODOS' || $selectedModule === 'INVENTARIO';
 function h($v)
 {
     return htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
@@ -18,7 +22,20 @@ function money($n)
 {
     return 'L. ' . number_format((float) $n, 2);
 }
+function prettyType($type)
+{
+    $map = [
+        'ENTRADA_COMPRA' => 'Entrada por compra',
+        'SALIDA_VENTA' => 'Salida por venta',
+        'SALIDA_ANULA_COMPRA' => 'Salida por anulación de compra',
+        'ENTRADA_ANULACION_VE' => 'Entrada por anulación de venta',
+        'AJUSTE_STOCK' => 'Ajuste de stock',
+        'AJUSTE_POSITIVO' => 'Ajuste positivo',
+        'AJUSTE_NEGATIVO' => 'Ajuste negativo'
+    ];
 
+    return $map[$type] ?? ucwords(strtolower(str_replace('_', ' ', $type)));
+}
 $monthNames = [
     1 => 'Enero',
     2 => 'Febrero',
@@ -37,10 +54,37 @@ $monthNames = [
 
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/file-saver/dist/FileSaver.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+<script>
+    const REPORT_LOGO_URL = 'assets/img/logo.jpeg';
+</script>
+<script>
+    async function loadImageAsDataURL(url) {
+        const res = await fetch(url);
+        if (!res.ok) {
+            throw new Error(`No se pudo cargar la imagen: ${url}`);
+        }
 
+        const blob = await res.blob();
+
+        const dataUrl = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        });
+
+        const extension = blob.type.includes('png') ? 'png' : 'jpeg';
+
+        return {
+            dataUrl,
+            extension
+        };
+    }
+</script>
 <div class="reports-page page-fade">
     <div class="cardx mb-4 report-hero">
         <div class="hd reports-toolbar">
@@ -49,7 +93,6 @@ $monthNames = [
                 <div class="subtitle">Visualiza el rendimiento del negocio, controla inventario y exporta reportes
                     ejecutivos con una vista más clara, estética y profesional.</div>
             </div>
-
             <div class="reports-actions">
                 <button type="button" class="btn btn-light btn-sm" id="btnExportPdf">
                     <i class="bi bi-filetype-pdf me-1"></i> PDF
@@ -197,32 +240,6 @@ $monthNames = [
         </div>
     </div>
 
-    <div class="row g-3 mb-4">
-        <div class="col-12 col-xl-8">
-            <div class="cardx report-panel">
-                <div class="hd">
-                    <div class="fw-bold">Rendimiento mensual del negocio</div>
-                    <small>Comparativa estratégica entre ventas y compras del año seleccionado</small>
-                </div>
-                <div class="bd">
-                    <canvas id="chartMonthly" height="120"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-12 col-xl-4">
-            <div class="cardx report-panel">
-                <div class="hd">
-                    <div class="fw-bold">Composición de ingresos por categoría</div>
-                    <small>Qué línea de producto aporta más al negocio</small>
-                </div>
-                <div class="bd">
-                    <canvas id="chartCategory" height="220"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div class="cardx mb-4 report-slider-card">
         <div class="hd d-flex align-items-center justify-content-between flex-wrap gap-2">
             <div>
@@ -329,27 +346,36 @@ $monthNames = [
     </div>
 
     <div class="cardx mb-4 report-table-card">
-        <div class="hd d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <div class="hd d-flex align-items-center justify-content-between flex-wrap gap-3">
             <div>
                 <div class="fw-bold">Detalle del período</div>
                 <small>Tablas listas para exportación</small>
             </div>
-            <?php $activeModule = $filters['module'] ?? 'TODOS'; ?>
-            <ul class="nav nav-pills report-tabs" id="reportTabs" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button
-                        class="nav-link <?= $activeModule === 'COMPRAS' || $activeModule === 'INVENTARIO' ? '' : 'active' ?>"
-                        data-bs-toggle="pill" data-bs-target="#tabVentas" type="button">Ventas</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link <?= $activeModule === 'COMPRAS' ? 'active' : '' ?>" data-bs-toggle="pill"
-                        data-bs-target="#tabCompras" type="button">Compras</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link <?= $activeModule === 'INVENTARIO' ? 'active' : '' ?>" data-bs-toggle="pill"
-                        data-bs-target="#tabInventario" type="button">Inventario</button>
-                </li>
-            </ul>
+
+            <div class="d-flex align-items-center flex-wrap gap-2 reports-actions reports-actions-detail">
+                <?php $activeModule = $filters['module'] ?? 'TODOS'; ?>
+                <ul class="nav nav-pills report-tabs me-2" id="reportTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button
+                            class="nav-link <?= $activeModule === 'COMPRAS' || $activeModule === 'INVENTARIO' ? '' : 'active' ?>"
+                            data-bs-toggle="pill" data-bs-target="#tabVentas" type="button">Ventas</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link <?= $activeModule === 'COMPRAS' ? 'active' : '' ?>"
+                            data-bs-toggle="pill" data-bs-target="#tabCompras" type="button">Compras</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link <?= $activeModule === 'INVENTARIO' ? 'active' : '' ?>"
+                            data-bs-toggle="pill" data-bs-target="#tabInventario" type="button">Inventario</button>
+                    </li>
+                </ul>
+                <button type="button" class="btn btn-light btn-sm" id="btnDetailPdf">
+                    <i class="bi bi-filetype-pdf me-1"></i> PDF detalle
+                </button>
+                <button type="button" class="btn btn-brand btn-sm" id="btnDetailExcel">
+                    <i class="bi bi-file-earmark-excel me-1"></i> Excel detalle
+                </button>
+            </div>
         </div>
 
         <div class="bd">
@@ -371,7 +397,8 @@ $monthNames = [
                             <tbody>
                                 <?php if (!$salesRows): ?>
                                     <tr>
-                                        <td colspan="6" class="text-center text-muted py-4">Sin ventas en este período.</td>
+                                        <td colspan="6" class="text-center text-muted py-4">Sin ventas en este período.
+                                        </td>
                                     </tr>
                                 <?php else: ?>
                                     <?php foreach ($salesRows as $r): ?>
@@ -389,7 +416,6 @@ $monthNames = [
                         </table>
                     </div>
                 </div>
-
                 <div class="tab-pane fade <?= $activeModule === 'COMPRAS' ? 'show active' : '' ?>" id="tabCompras">
                     <div class="table-responsive">
                         <table class="table align-middle report-table">
@@ -445,7 +471,8 @@ $monthNames = [
                             <tbody>
                                 <?php if (!$inventoryRows): ?>
                                     <tr>
-                                        <td colspan="8" class="text-center text-muted py-4">Sin movimientos en este período.
+                                        <td colspan="8" class="text-center text-muted py-4">Sin movimientos en este
+                                            período.
                                         </td>
                                     </tr>
                                 <?php else: ?>
@@ -453,7 +480,7 @@ $monthNames = [
                                         <tr>
                                             <td>#<?= (int) $r['id_mov'] ?></td>
                                             <td><?= h($r['fecha']) ?></td>
-                                            <td><span class="badge badge-soft"><?= h($r['tipo']) ?></span></td>
+                                            <td><span class="badge badge-soft"><?= h(prettyType($r['tipo'])) ?></span></td>
                                             <td><?= h($r['producto']) ?></td>
                                             <td><?= (int) $r['cantidad'] ?></td>
                                             <td><?= (int) $r['stock_antes'] ?></td>
@@ -469,6 +496,50 @@ $monthNames = [
             </div>
         </div>
     </div>
+    <div class="cardx report-table-card report-alert-card mt-4">
+        <div class="hd d-flex align-items-center justify-content-between">
+            <div>
+                <div class="fw-bold">Productos con stock crítico</div>
+                <small>Inventario que necesita reposición prioritaria</small>
+            </div>
+            <span class="badge badge-soft"><?= count($lowStockRows) ?> alerta(s)</span>
+        </div>
+
+        <div class="bd">
+            <div class="table-responsive">
+                <table class="table report-table align-middle">
+                    <thead>
+                        <tr>
+                            <th>SKU</th>
+                            <th>Producto</th>
+                            <th>Categoría</th>
+                            <th>Stock actual</th>
+                            <th>Stock mínimo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (!$lowStockRows): ?>
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-4">No hay productos en stock
+                                    crítico.</td>
+                            </tr>
+                        <?php else: ?>
+                            <?php foreach ($lowStockRows as $r): ?>
+                                <tr>
+                                    <td><?= h($r['sku']) ?></td>
+                                    <td><?= h($r['nombre']) ?></td>
+                                    <td><?= h($r['categoria']) ?></td>
+                                    <td><span class="badge bg-danger-subtle text-danger"><?= (int) $r['stock_actual'] ?></span>
+                                    </td>
+                                    <td><?= (int) $r['stock_min'] ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -481,6 +552,7 @@ $monthNames = [
         const salesRows = <?= json_encode($salesRows, JSON_UNESCAPED_UNICODE) ?>;
         const purchaseRows = <?= json_encode($purchaseRows, JSON_UNESCAPED_UNICODE) ?>;
         const inventoryRows = <?= json_encode($inventoryRows, JSON_UNESCAPED_UNICODE) ?>;
+        const lowStockRows = <?= json_encode($lowStockRows, JSON_UNESCAPED_UNICODE) ?>;
         const kpis = <?= json_encode($kpis, JSON_UNESCAPED_UNICODE) ?>;
         const filters = <?= json_encode($filters, JSON_UNESCAPED_UNICODE) ?>;
 
@@ -508,6 +580,74 @@ $monthNames = [
             dark: '#18352e',
             grid: 'rgba(31, 111, 92, 0.10)',
             line2: '#7aa79c'
+        };
+        const prettyInventoryType = (type) => {
+            const map = {
+                ENTRADA_COMPRA: 'Entrada por compra',
+                SALIDA_VENTA: 'Salida por venta',
+                SALIDA_ANULA_COMPRA: 'Salida por anulación de compra',
+                ENTRADA_ANULACION_VE: 'Entrada por anulación de venta',
+                AJUSTE_STOCK: 'Ajuste de stock',
+                AJUSTE_POSITIVO: 'Ajuste positivo',
+                AJUSTE_NEGATIVO: 'Ajuste negativo'
+            };
+
+            return map[type] || String(type || '')
+                .replaceAll('_', ' ')
+                .toLowerCase()
+                .replace(/\b\w/g, l => l.toUpperCase());
+        };
+        const getActiveDetailTab = () => {
+            const activePane = document.querySelector('.tab-content .tab-pane.show.active');
+            return activePane ? activePane.id : 'tabVentas';
+        };
+        const getActiveDetailData = () => {
+            const activeTab = getActiveDetailTab();
+
+            if (activeTab === 'tabCompras') {
+                return {
+                    title: 'Detalle de Compras',
+                    headers: ['#', 'Fecha', 'Proveedor', 'Estado', 'Total', 'Nota'],
+                    rows: purchaseRows.map(x => [
+                        x.id_compra,
+                        x.fecha,
+                        x.proveedor,
+                        x.estado,
+                        Number(x.total || 0),
+                        x.nota || ''
+                    ])
+                };
+            }
+
+            if (activeTab === 'tabInventario') {
+                return {
+                    title: 'Detalle de Inventario',
+                    headers: ['#', 'Fecha', 'Tipo', 'Producto', 'Cantidad', 'Antes', 'Después', 'Nota'],
+                    rows: inventoryRows.map(x => [
+                        x.id_mov,
+                        x.fecha,
+                        prettyInventoryType(x.tipo),
+                        x.producto,
+                        Number(x.cantidad || 0),
+                        Number(x.stock_antes || 0),
+                        Number(x.stock_despues || 0),
+                        x.nota || ''
+                    ])
+                };
+            }
+
+            return {
+                title: 'Detalle de Ventas',
+                headers: ['#', 'Fecha', 'Cliente', 'Estado', 'Total', 'Nota'],
+                rows: salesRows.map(x => [
+                    x.id_venta,
+                    x.fecha,
+                    x.cliente,
+                    x.estado,
+                    Number(x.total || 0),
+                    x.nota || ''
+                ])
+            };
         };
         new Chart(document.getElementById('chartMonthly'), {
             type: 'line',
@@ -646,7 +786,7 @@ $monthNames = [
             new Chart(inventoryCanvas, {
                 type: 'bar',
                 data: {
-                    labels: inventoryByType.map(x => x.tipo),
+                    labels: inventoryByType.map(x => prettyInventoryType(x.tipo)),
                     datasets: [{
                         label: 'Cantidad de movimientos',
                         data: inventoryByType.map(x => Number(x.movimientos || 0)),
@@ -688,256 +828,287 @@ $monthNames = [
             document.getElementById('inventoryEmpty')?.classList.remove('d-none');
         }
 
-        document.getElementById('btnExportExcel')?.addEventListener('click', () => {
-            if (typeof XLSX === 'undefined') {
-                alert('No se pudo cargar la librería de Excel. Revisa el script de xlsx.');
-                return;
-            }
+        document.getElementById('btnExportExcel')?.addEventListener('click', async () => {
+            try {
+                const workbook = new ExcelJS.Workbook();
+                workbook.creator = 'AJA Trends';
+                workbook.created = new Date();
 
-            const wb = XLSX.utils.book_new();
+                let logoImage = null;
 
-            const moneyFmt = '"L." #,##0.00';
-            const borderColor = 'D9E5E1';
-
-            const styles = {
-                title: {
-                    font: { bold: true, sz: 16, color: { rgb: '18352E' } },
-                    fill: { fgColor: { rgb: 'EEF6F3' } },
-                    alignment: { horizontal: 'center', vertical: 'center' }
-                },
-                subtitle: {
-                    font: { italic: true, sz: 10, color: { rgb: '5F6B73' } },
-                    alignment: { horizontal: 'center' }
-                },
-                section: {
-                    font: { bold: true, sz: 12, color: { rgb: '18352E' } },
-                    fill: { fgColor: { rgb: 'F6FAF8' } },
-                    alignment: { horizontal: 'left', vertical: 'center' },
-                    border: {
-                        top: { style: 'thin', color: { rgb: borderColor } },
-                        bottom: { style: 'thin', color: { rgb: borderColor } }
-                    }
-                },
-                head: {
-                    font: { bold: true, color: { rgb: 'FFFFFF' } },
-                    fill: { fgColor: { rgb: '1F6F5C' } },
-                    alignment: { horizontal: 'center', vertical: 'center' },
-                    border: {
-                        top: { style: 'thin', color: { rgb: '1F6F5C' } },
-                        bottom: { style: 'thin', color: { rgb: '1F6F5C' } },
-                        left: { style: 'thin', color: { rgb: '1F6F5C' } },
-                        right: { style: 'thin', color: { rgb: '1F6F5C' } }
-                    }
-                },
-                cell: {
-                    alignment: { vertical: 'center' },
-                    border: {
-                        top: { style: 'thin', color: { rgb: borderColor } },
-                        bottom: { style: 'thin', color: { rgb: borderColor } },
-                        left: { style: 'thin', color: { rgb: borderColor } },
-                        right: { style: 'thin', color: { rgb: borderColor } }
-                    }
-                },
-                money: {
-                    numFmt: moneyFmt,
-                    alignment: { vertical: 'center', horizontal: 'right' },
-                    border: {
-                        top: { style: 'thin', color: { rgb: borderColor } },
-                        bottom: { style: 'thin', color: { rgb: borderColor } },
-                        left: { style: 'thin', color: { rgb: borderColor } },
-                        right: { style: 'thin', color: { rgb: borderColor } }
-                    }
-                },
-                totalLabel: {
-                    font: { bold: true, color: { rgb: '18352E' } },
-                    fill: { fgColor: { rgb: 'EEF6F3' } },
-                    alignment: { horizontal: 'right' },
-                    border: {
-                        top: { style: 'thin', color: { rgb: borderColor } },
-                        bottom: { style: 'thin', color: { rgb: borderColor } },
-                        left: { style: 'thin', color: { rgb: borderColor } },
-                        right: { style: 'thin', color: { rgb: borderColor } }
-                    }
-                },
-                totalMoney: {
-                    font: { bold: true, color: { rgb: '18352E' } },
-                    fill: { fgColor: { rgb: 'EEF6F3' } },
-                    numFmt: moneyFmt,
-                    alignment: { horizontal: 'right' },
-                    border: {
-                        top: { style: 'thin', color: { rgb: borderColor } },
-                        bottom: { style: 'thin', color: { rgb: borderColor } },
-                        left: { style: 'thin', color: { rgb: borderColor } },
-                        right: { style: 'thin', color: { rgb: borderColor } }
-                    }
+                try {
+                    logoImage = await loadImageAsDataURL(REPORT_LOGO_URL);
+                } catch (e) {
+                    console.warn('No se pudo cargar el logo para Excel', e);
                 }
-            };
 
-            const ws = XLSX.utils.aoa_to_sheet([]);
+                const addHeader = (sheet, title, subtitle = '') => {
+                    sheet.properties.defaultRowHeight = 20;
+                    sheet.views = [{ state: 'frozen', ySplit: 6 }];
 
-            ws['!cols'] = [
-                { wch: 22 },
-                { wch: 22 },
-                { wch: 18 },
-                { wch: 18 },
-                { wch: 18 },
-                { wch: 18 }
-            ];
+                    if (logoImage?.dataUrl) {
+                        const imageId = workbook.addImage({
+                            base64: logoImage.dataUrl,
+                            extension: logoImage.extension
+                        });
 
-            ws['!merges'] = [
-                XLSX.utils.decode_range('A1:F1'),
-                XLSX.utils.decode_range('A2:F2'),
-                XLSX.utils.decode_range('A4:F4'),
-                XLSX.utils.decode_range('A11:F11'),
-                XLSX.utils.decode_range('A17:F17'),
-                XLSX.utils.decode_range('A33:F33'),
-                XLSX.utils.decode_range('A50:H50'),
-                XLSX.utils.decode_range('A67:H67')
-            ];
+                        sheet.addImage(imageId, {
+                            tl: { col: 0.2, row: 0.2 },
+                            ext: { width: 90, height: 90 }
+                        });
+                    }
 
-            XLSX.utils.sheet_add_aoa(ws, [
-                ['AJA Trends · Reporte Ejecutivo'],
-                [`Período: ${filters.year} · ${currentMonthLabel} · Módulo: ${currentModuleLabel}`],
-                [],
-                ['Resumen ejecutivo'],
-                ['Indicador', 'Valor'],
-                ['Ingresos del período', Number(kpis.total_vendido || 0)],
-                ['Inversión en reposición', Number(kpis.total_comprado || 0)],
-                ['Margen estimado', Number(kpis.utilidad_estimada || 0)],
-                ['Actividad de stock', Number(kpis.movimientos || 0)],
-                ['Ticket promedio', Number(kpis.ticket_promedio || 0)],
-                ['Serie mensual'],
-                ['Mes', 'Ventas', 'Compras', 'Balance'],
-                ...monthly.map((x, idx) => [
-                    monthNamesFull[idx],
-                    Number(x.ventas || 0),
-                    Number(x.compras || 0),
-                    null
-                ]),
-                ['Totales', null, null, null],
-                [],
-                ['Detalle de ventas'],
-                ['# Venta', 'Fecha', 'Cliente', 'Estado', 'Total', 'Nota'],
-                ...salesRows.map(x => [
-                    Number(x.id_venta || 0),
-                    x.fecha || '',
-                    x.cliente || '',
-                    x.estado || '',
-                    Number(x.total || 0),
-                    x.nota || ''
-                ]),
-                ['Total ventas', '', '', '', null, ''],
-                [],
-                ['Detalle de compras'],
-                ['# Compra', 'Fecha', 'Proveedor', 'Estado', 'Total', 'Nota'],
-                ...purchaseRows.map(x => [
-                    Number(x.id_compra || 0),
-                    x.fecha || '',
-                    x.proveedor || '',
-                    x.estado || '',
-                    Number(x.total || 0),
-                    x.nota || ''
-                ]),
-                ['Total compras', '', '', '', null, ''],
-                [],
-                ['Detalle de inventario'],
-                ['# Movimiento', 'Fecha', 'Tipo', 'Producto', 'Cantidad', 'Stock antes', 'Stock después', 'Nota'],
-                ...inventoryRows.map(x => [
-                    Number(x.id_mov || 0),
-                    x.fecha || '',
-                    x.tipo || '',
-                    x.producto || '',
-                    Number(x.cantidad || 0),
-                    Number(x.stock_antes || 0),
-                    Number(x.stock_despues || 0),
-                    x.nota || ''
-                ])
-            ], { origin: 'A1' });
+                    sheet.mergeCells('C1:H1');
+                    sheet.getCell('C1').value = 'AJA Trends';
+                    sheet.getCell('C1').font = { bold: true, size: 20, color: { argb: '18352E' } };
 
-            const setStyle = (cell, style) => {
-                if (ws[cell]) ws[cell].s = style;
-            };
+                    sheet.mergeCells('C2:H2');
+                    sheet.getCell('C2').value = 'Sistema de inventario, ventas y análisis comercial';
+                    sheet.getCell('C2').font = { size: 11, color: { argb: '5F6B73' } };
 
-            const range = XLSX.utils.decode_range(ws['!ref']);
+                    sheet.mergeCells('C3:H3');
+                    sheet.getCell('C3').value = title;
+                    sheet.getCell('C3').font = { bold: true, size: 14, color: { argb: '1F6F5C' } };
 
-            for (let r = range.s.r; r <= range.e.r; r++) {
-                for (let c = range.s.c; c <= range.e.c; c++) {
-                    const cellRef = XLSX.utils.encode_cell({ r, c });
-                    if (ws[cellRef] && !ws[cellRef].s) ws[cellRef].s = styles.cell;
-                }
-            }
+                    sheet.mergeCells('C4:H4');
+                    sheet.getCell('C4').value = subtitle || `Período: ${filters.year} · ${currentMonthLabel} · Módulo: ${currentModuleLabel}`;
 
-            setStyle('A1', styles.title);
-            setStyle('A2', styles.subtitle);
-            setStyle('A4', styles.section);
-            setStyle('A11', styles.section);
-            setStyle('A17', styles.section);
-            setStyle('A33', styles.section);
-            setStyle('A50', styles.section);
-            setStyle('A67', styles.section);
-
-            ['A5', 'B5'].forEach(c => setStyle(c, styles.head));
-            ['A12', 'B12', 'C12', 'D12'].forEach(c => setStyle(c, styles.head));
-            ['A18', 'B18', 'C18', 'D18', 'E18', 'F18'].forEach(c => setStyle(c, styles.head));
-            ['A34', 'B34', 'C34', 'D34', 'E34', 'F34'].forEach(c => setStyle(c, styles.head));
-            ['A51', 'B51', 'C51', 'D51', 'E51', 'F51', 'G51', 'H51'].forEach(c => setStyle(c, styles.head));
-
-            ['B6', 'B7', 'B8', 'B9', 'B10'].forEach(c => setStyle(c, styles.money));
-
-            const monthlyStart = 13;
-            monthly.forEach((_, idx) => {
-                const row = monthlyStart + idx;
-                setStyle(`B${row}`, styles.money);
-                setStyle(`C${row}`, styles.money);
-                ws[`D${row}`] = {
-                    t: 'n',
-                    f: `B${row}-C${row}`,
-                    s: styles.money
+                    sheet.mergeCells('C5:H5');
+                    sheet.getCell('C5').value = `Generado: ${new Date().toLocaleString()}`;
                 };
+
+                const styleHeaderRow = (row) => {
+                    row.font = { bold: true, color: { argb: 'FFFFFF' } };
+                    row.alignment = { vertical: 'middle', horizontal: 'center' };
+                    row.fill = {
+                        type: 'pattern',
+                        pattern: 'solid',
+                        fgColor: { argb: '1F6F5C' }
+                    };
+                    row.height = 22;
+                };
+
+                const styleMoneyColumn = (sheet, col, start, end) => {
+                    for (let i = start; i <= end; i++) {
+                        sheet.getCell(`${col}${i}`).numFmt = '"L." #,##0.00';
+                    }
+                };
+
+                const autoFit = (sheet, widths = {}) => {
+                    Object.entries(widths).forEach(([col, width]) => {
+                        const colRef = /^\d+$/.test(col) ? Number(col) : col;
+                        sheet.getColumn(colRef).width = width;
+                    });
+                };
+
+                // HOJA 1 RESUMEN
+                const ws1 = workbook.addWorksheet('Resumen Ejecutivo');
+                addHeader(ws1, 'Resumen Ejecutivo');
+
+                ws1.getRow(7).values = ['Indicador', 'Valor'];
+                styleHeaderRow(ws1.getRow(7));
+
+                ws1.addRow(['Ingresos del período', Number(kpis.total_vendido || 0)]);
+                ws1.addRow(['Inversión en reposición', Number(kpis.total_comprado || 0)]);
+                ws1.addRow(['Margen estimado', Number(kpis.utilidad_estimada || 0)]);
+                ws1.addRow(['Actividad de stock', Number(kpis.movimientos || 0)]);
+                ws1.addRow(['Ticket promedio', Number(kpis.ticket_promedio || 0)]);
+
+                autoFit(ws1, { 1: 34, 2: 20 });
+                styleMoneyColumn(ws1, 'B', 8, 12);
+
+                // HOJA 2 VENTAS
+                const ws2 = workbook.addWorksheet('Ventas');
+                addHeader(ws2, 'Detalle de Ventas');
+
+                ws2.getRow(7).values = ['#', 'Fecha', 'Cliente', 'Estado', 'Total', 'Nota'];
+                styleHeaderRow(ws2.getRow(7));
+
+                if (salesRows.length) {
+                    salesRows.forEach(x => ws2.addRow([
+                        x.id_venta,
+                        x.fecha,
+                        x.cliente,
+                        x.estado,
+                        Number(x.total || 0),
+                        x.nota
+                    ]));
+                    styleMoneyColumn(ws2, 'E', 8, 7 + salesRows.length);
+                }
+
+                autoFit(ws2, { 1: 10, 2: 16, 3: 28, 4: 18, 5: 16, 6: 40 });
+
+                // HOJA 3 COMPRAS
+                const ws3 = workbook.addWorksheet('Compras');
+                addHeader(ws3, 'Detalle de Compras');
+
+                ws3.getRow(7).values = ['#', 'Fecha', 'Proveedor', 'Estado', 'Total', 'Nota'];
+                styleHeaderRow(ws3.getRow(7));
+
+                if (purchaseRows.length) {
+                    purchaseRows.forEach(x => ws3.addRow([
+                        x.id_compra,
+                        x.fecha,
+                        x.proveedor,
+                        x.estado,
+                        Number(x.total || 0),
+                        x.nota
+                    ]));
+                    styleMoneyColumn(ws3, 'E', 8, 7 + purchaseRows.length);
+                }
+
+                autoFit(ws3, { 1: 10, 2: 16, 3: 28, 4: 18, 5: 16, 6: 40 });
+
+                // HOJA 4 INVENTARIO
+                const ws4 = workbook.addWorksheet('Inventario');
+                addHeader(ws4, 'Movimientos de Inventario');
+
+                ws4.getRow(7).values = ['#', 'Fecha', 'Tipo', 'Producto', 'Cantidad', 'Antes', 'Después', 'Nota'];
+                styleHeaderRow(ws4.getRow(7));
+
+                if (inventoryRows.length) {
+                    inventoryRows.forEach(x => ws4.addRow([
+                        x.id_mov,
+                        x.fecha,
+                        prettyInventoryType(x.tipo),
+                        x.producto,
+                        Number(x.cantidad || 0),
+                        Number(x.stock_antes || 0),
+                        Number(x.stock_despues || 0),
+                        x.nota
+                    ]));
+                }
+
+                autoFit(ws4, { 1: 10, 2: 16, 3: 24, 4: 28, 5: 12, 6: 12, 7: 12, 8: 34 });
+
+                // HOJA 5 STOCK CRÍTICO
+                const ws5 = workbook.addWorksheet('Stock Crítico');
+                addHeader(ws5, 'Productos con Stock Crítico');
+
+                ws5.getRow(7).values = ['SKU', 'Producto', 'Categoría', 'Stock actual', 'Stock mínimo'];
+                styleHeaderRow(ws5.getRow(7));
+
+                if (lowStockRows.length) {
+                    lowStockRows.forEach(x => ws5.addRow([
+                        x.sku,
+                        x.nombre,
+                        x.categoria,
+                        Number(x.stock_actual || 0),
+                        Number(x.stock_min || 0)
+                    ]));
+                }
+
+                autoFit(ws5, { 1: 18, 2: 34, 3: 24, 4: 16, 5: 16 });
+
+                const buffer = await workbook.xlsx.writeBuffer();
+                const excelBlob = new Blob([buffer], {
+                    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                });
+
+                if (window.saveAs) {
+                    window.saveAs(excelBlob, `AJA_Reportes_${filters.year}_${currentMonthNumber || 'ALL'}.xlsx`);
+                } else {
+                    const url = window.URL.createObjectURL(excelBlob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `AJA_Reportes_${filters.year}_${currentMonthNumber || 'ALL'}.xlsx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                }
+                if (typeof window.showToast === 'function') {
+                    window.showToast('success', 'Excel general descargado correctamente.');
+                }
+            } catch (error) {
+                console.error('Error exportando Excel general:', error);
+                if (typeof window.showToast === 'function') {
+                    window.showToast('error', 'No se pudo generar el Excel general.');
+                }
+            }
+
+        });
+        document.getElementById('btnDetailExcel')?.addEventListener('click', async () => {
+            const detail = getActiveDetailData();
+            const workbook = new ExcelJS.Workbook();
+            workbook.creator = 'AJA Trends';
+            workbook.created = new Date();
+
+            const sheet = workbook.addWorksheet('Detalle');
+            sheet.properties.defaultRowHeight = 20;
+            sheet.views = [{ state: 'frozen', ySplit: 7 }];
+
+            let logoImage = null;
+            try {
+                logoImage = await loadImageAsDataURL(REPORT_LOGO_URL);
+            } catch (e) {
+                console.warn('No se pudo cargar el logo para Excel detalle', e);
+            }
+
+            if (logoImage?.dataUrl) {
+                const imageId = workbook.addImage({
+                    base64: logoImage.dataUrl,
+                    extension: logoImage.extension
+                });
+
+                sheet.addImage(imageId, {
+                    tl: { col: 0.2, row: 0.2 },
+                    ext: { width: 90, height: 90 }
+                });
+            }
+
+            sheet.mergeCells('C1:H1');
+            sheet.getCell('C1').value = 'AJA Trends';
+            sheet.getCell('C1').font = { bold: true, size: 18, color: { argb: '18352E' } };
+
+            sheet.mergeCells('C2:H2');
+            sheet.getCell('C2').value = detail.title;
+            sheet.getCell('C2').font = { bold: true, size: 13, color: { argb: '1F6F5C' } };
+
+            sheet.mergeCells('C3:H3');
+            sheet.getCell('C3').value = `Período: ${filters.year} · ${currentMonthLabel} · Módulo: ${currentModuleLabel}`;
+
+            sheet.getRow(7).values = detail.headers;
+            sheet.getRow(7).font = { bold: true, color: { argb: 'FFFFFF' } };
+            sheet.getRow(7).fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: '1F6F5C' }
+            };
+
+            detail.rows.forEach(r => sheet.addRow(r));
+            if (detail.title === 'Detalle de Ventas' || detail.title === 'Detalle de Compras') {
+                for (let i = 8; i < 8 + detail.rows.length; i++) {
+                    sheet.getCell(`E${i}`).numFmt = '"L." #,##0.00';
+                }
+            }
+            sheet.columns.forEach(col => {
+                col.width = 18;
             });
 
-            const monthlyTotalRow = monthlyStart + monthly.length;
-            ws[`B${monthlyTotalRow}`] = { t: 'n', f: `SUM(B${monthlyStart}:B${monthlyTotalRow - 1})`, s: styles.totalMoney };
-            ws[`C${monthlyTotalRow}`] = { t: 'n', f: `SUM(C${monthlyStart}:C${monthlyTotalRow - 1})`, s: styles.totalMoney };
-            ws[`D${monthlyTotalRow}`] = { t: 'n', f: `B${monthlyTotalRow}-C${monthlyTotalRow}`, s: styles.totalMoney };
-            setStyle(`A${monthlyTotalRow}`, styles.totalLabel);
+            const buffer = await workbook.xlsx.writeBuffer();
+            const excelBlob = new Blob([buffer], {
+                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            });
 
-            const salesStart = 19;
-            salesRows.forEach((_, idx) => setStyle(`E${salesStart + idx}`, styles.money));
-            const salesTotalRow = salesStart + salesRows.length;
-            ws[`E${salesTotalRow}`] = { t: 'n', f: salesRows.length ? `SUM(E${salesStart}:E${salesTotalRow - 1})` : '0', s: styles.totalMoney };
-            setStyle(`A${salesTotalRow}`, styles.totalLabel);
-
-            const purchasesStart = 35;
-            purchaseRows.forEach((_, idx) => setStyle(`E${purchasesStart + idx}`, styles.money));
-            const purchasesTotalRow = purchasesStart + purchaseRows.length;
-            ws[`E${purchasesTotalRow}`] = { t: 'n', f: purchaseRows.length ? `SUM(E${purchasesStart}:E${purchasesTotalRow - 1})` : '0', s: styles.totalMoney };
-            setStyle(`A${purchasesTotalRow}`, styles.totalLabel);
-
-            XLSX.utils.book_append_sheet(wb, ws, 'Reporte');
-
-            const wsCat = XLSX.utils.json_to_sheet(
-                byCategory.map(x => ({
-                    Categoria: x.categoria || '',
-                    Total: Number(x.total || 0)
-                }))
-            );
-            wsCat['!cols'] = [{ wch: 26 }, { wch: 16 }];
-            XLSX.utils.book_append_sheet(wb, wsCat, 'Categorias');
-
-            const wsTop = XLSX.utils.json_to_sheet(
-                topProducts.map(x => ({
-                    Producto: x.nombre || '',
-                    Ingreso: Number(x.ingreso || 0)
-                }))
-            );
-            wsTop['!cols'] = [{ wch: 32 }, { wch: 16 }];
-            XLSX.utils.book_append_sheet(wb, wsTop, 'TopProductos');
-
-            XLSX.writeFile(wb, `AJA_Reportes_${filters.year}_${currentMonthNumber || 'ALL'}.xlsx`);
+            if (window.saveAs) {
+                window.saveAs(excelBlob, `${detail.title.replaceAll(' ', '_')}.xlsx`);
+            } else {
+                const url = window.URL.createObjectURL(excelBlob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${detail.title.replaceAll(' ', '_')}.xlsx`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            }
+            if (typeof window.showToast === 'function') {
+                window.showToast('success', `${detail.title} en Excel descargado correctamente.`);
+            }
         });
 
-        document.getElementById('btnExportPdf')?.addEventListener('click', () => {
+        document.getElementById('btnExportPdf')?.addEventListener('click', async () => {
             if (!window.jspdf) {
                 alert('No se pudo cargar la librería de PDF.');
                 return;
@@ -946,6 +1117,13 @@ $monthNames = [
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' });
             const pageWidth = doc.internal.pageSize.getWidth();
+            let logoImage = null;
+
+            try {
+                logoImage = await loadImageAsDataURL(REPORT_LOGO_URL);
+            } catch (e) {
+                console.warn('No se pudo cargar el logo para PDF', e);
+            }
 
             const colors = {
                 dark: [24, 53, 46],
@@ -956,17 +1134,30 @@ $monthNames = [
             };
 
             doc.setFillColor(...colors.soft);
-            doc.roundedRect(36, 30, pageWidth - 72, 72, 14, 14, 'F');
+            doc.roundedRect(36, 24, pageWidth - 72, 92, 16, 16, 'F');
+
+            if (logoImage?.dataUrl) {
+                doc.addImage(
+                    logoImage.dataUrl,
+                    logoImage.extension.toUpperCase(),
+                    50,
+                    38,
+                    52,
+                    52
+                );
+            }
 
             doc.setTextColor(...colors.dark);
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(18);
-            doc.text('AJA Trends · Reporte Ejecutivo', 52, 58);
+            doc.text('AJA Trends', 114, 54);
 
             doc.setFont('helvetica', 'normal');
             doc.setFontSize(10);
             doc.setTextColor(...colors.text);
-            doc.text(`Período: ${filters.year} · ${currentMonthLabel} · Módulo: ${currentModuleLabel}`, 52, 78);
+            doc.text('Sistema de inventario, ventas y análisis comercial', 114, 72);
+            doc.text(`Período: ${filters.year} · ${currentMonthLabel} · Módulo: ${currentModuleLabel}`, 114, 88);
+            doc.text(`Generado: ${new Date().toLocaleString()}`, 114, 102);
 
             doc.autoTable({
                 startY: 120,
@@ -996,7 +1187,17 @@ $monthNames = [
                     fillColor: [250, 252, 251]
                 }
             });
+            const pageCount = doc.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setDrawColor(...colors.line);
+                doc.line(40, 810, pageWidth - 40, 810);
 
+                doc.setFontSize(9);
+                doc.setTextColor(...colors.text);
+                doc.text('AJA Trends · Reporte ejecutivo', 40, 826);
+                doc.text(`Página ${i} de ${pageCount}`, pageWidth - 95, 826);
+            }
             doc.autoTable({
                 startY: doc.lastAutoTable.finalY + 18,
                 head: [['Mes', 'Ventas', 'Compras', 'Balance']],
@@ -1071,6 +1272,68 @@ $monthNames = [
             });
 
             doc.save(`AJA_Reportes_${filters.year}_${currentMonthNumber || 'ALL'}.pdf`);
+            if (typeof window.showToast === 'function') {
+                window.showToast('success', 'PDF general descargado correctamente.');
+            }
         });
+        document.getElementById('btnDetailPdf')?.addEventListener('click', async () => {
+            const detail = getActiveDetailData();
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+            const pageWidth = doc.internal.pageSize.getWidth();
+
+            let logoImage = null;
+            try {
+                logoImage = await loadImageAsDataURL(REPORT_LOGO_URL);
+            } catch (e) {
+                console.warn('No se pudo cargar el logo para PDF detalle', e);
+            }
+
+            const colors = {
+                dark: [24, 53, 46],
+                green: [31, 111, 92],
+                soft: [238, 246, 243],
+                text: [95, 107, 115],
+                line: [217, 229, 225]
+            };
+
+            doc.setFillColor(...colors.soft);
+            doc.roundedRect(36, 24, pageWidth - 72, 86, 16, 16, 'F');
+
+            if (logoImage?.dataUrl) {
+                doc.addImage(logoImage.dataUrl, logoImage.extension.toUpperCase(), 46, 36, 48, 48);
+            }
+
+            doc.setTextColor(...colors.dark);
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(17);
+            doc.text('AJA Trends', 106, 52);
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(10);
+            doc.setTextColor(...colors.text);
+            doc.text(detail.title, 106, 70);
+            doc.text(`Período: ${filters.year} · ${currentMonthLabel} · Módulo: ${currentModuleLabel}`, 106, 87);
+
+            doc.autoTable({
+                startY: 128,
+                head: [detail.headers],
+                body: detail.rows.length ? detail.rows : [['Sin registros']],
+                styles: {
+                    fontSize: 8,
+                    cellPadding: 6
+                },
+                headStyles: {
+                    fillColor: colors.green,
+                    textColor: [255, 255, 255]
+                }
+            });
+
+            doc.save(`${detail.title.replaceAll(' ', '_')}.pdf`);
+            if (typeof window.showToast === 'function') {
+                window.showToast('success', `${detail.title} en PDF descargado correctamente.`);
+            }
+        });
+
     })();
 </script>
