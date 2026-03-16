@@ -33,7 +33,7 @@ $max = $filters['max'] ?? '';
 $estado = $filters['estado'] ?? '';
 ?>
 <div class="products-page page-fade">
-  <div class="cardx mb-4">
+  <div class="cardx mb-4 module-hero">
     <div class="hd purchases-toolbar">
       <div class="toolbar-left">
         <div class="fw-bold title">Productos · Catálogo AJA ✨</div>

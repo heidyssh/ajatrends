@@ -86,7 +86,7 @@ $monthNames = [
     }
 </script>
 <div class="reports-page page-fade">
-    <div class="cardx mb-4 report-hero">
+    <div class="cardx mb-4 module-hero">
         <div class="hd reports-toolbar">
             <div>
                 <div class="fw-bold title">Centro de análisis comercial · AJA Trends</div>

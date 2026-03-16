@@ -12,7 +12,21 @@ require_once __DIR__ . '/../../models/Notification.php';
 $idNotifUser = (int) ($_SESSION['user']['id'] ?? 0);
 $notifCount = Notification::unreadCount($idNotifUser);
 $notifItems = Notification::latest($idNotifUser, 8);
+$pageMeta = [
+  'dashboard' => ['title' => 'Dashboard', 'subtitle' => 'Resumen visual del negocio, accesos rápidos y actividad general.'],
+  'products' => ['title' => 'Productos', 'subtitle' => 'Catálogo, stock, precios e imágenes con una vista más limpia.'],
+  'purchases' => ['title' => 'Compras', 'subtitle' => 'Control de pedidos, proveedores y entradas de inventario.'],
+  'sales' => ['title' => 'Ventas', 'subtitle' => 'Facturación, salidas y movimiento comercial del día a día.'],
+  'kardex' => ['title' => 'Kardex', 'subtitle' => 'Auditoría visual de movimientos y trazabilidad del inventario.'],
+  'reports' => ['title' => 'Reportes', 'subtitle' => 'Análisis ejecutivo con exportaciones, métricas y filtros.'],
+  'agenda' => ['title' => 'Agenda', 'subtitle' => 'Eventos, recordatorios y programación operativa.'],
+  'profile' => ['title' => 'Perfil', 'subtitle' => 'Configuración personal, avatar, datos y preferencias visuales.'],
+  'users' => ['title' => 'Usuarios', 'subtitle' => 'Gestión del personal con una presentación más clara y elegante.'],
+];
+
+$currentMeta = $pageMeta[$page] ?? ['title' => 'AJA Trends', 'subtitle' => 'Panel administrativo'];
 ?>
+
 <!doctype html>
 <html lang="es">
 
@@ -23,10 +37,13 @@ $notifItems = Notification::latest($idNotifUser, 8);
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="assets/css/app.css" rel="stylesheet">
 </head>
 
-<body>
+<body class="app-body page-<?= htmlspecialchars($page) ?>">
 
   <?php if ($isAuthPage || !$isLogged): ?>
     <nav class="auth-top glass">
@@ -102,18 +119,18 @@ $notifItems = Notification::latest($idNotifUser, 8);
             <?php endif; ?>
           </nav>
         </aside>
-
+        <div id="sidebarBackdrop" class="sidebar-backdrop"></div>
         <div class="content">
-          <header class="topbar topbar-pro">
-            <div class="left">
-              <button id="sidebarToggle" class="icon-btn" type="button" title="Colapsar sidebar">
+          <header class="topbar topbar-pro module-topbar">
+            <div class="left topbar-left-pro">
+              <button id="sidebarToggle" class="icon-btn" type="button" title="Menú">
                 <i class="bi bi-list"></i>
               </button>
 
-
-              <div class="search d-none d-md-flex">
-                <i class="bi bi-search"></i>
-                <input type="text" placeholder="Buscar (demo)" aria-label="Buscar">
+              <div class="page-intro">
+                <span class="page-kicker">AJA Trends</span>
+                <h1 class="page-title"><?= htmlspecialchars($currentMeta['title']) ?></h1>
+                <p class="page-subtitle mb-0"><?= htmlspecialchars($currentMeta['subtitle']) ?></p>
               </div>
             </div>
 
@@ -135,8 +152,7 @@ $notifItems = Notification::latest($idNotifUser, 8);
 
 
 
-                <div id="notifDropdown" class="dropdown-menu dropdown-menu-end shadow-sm p-2"
-                  style="width:360px; max-height:420px; overflow:auto;">
+                <div id="notifDropdown" class="dropdown-menu dropdown-menu-end shadow-sm p-2 notif-dropdown">
                   <div class="d-flex align-items-center justify-content-between px-2 py-1">
                     <div class="fw-bold">Notificaciones</div>
 
@@ -209,7 +225,7 @@ $notifItems = Notification::latest($idNotifUser, 8);
                       }
                       ?>
 
-                      <div class="notif-item d-flex justify-content-between align-items-start px-2 py-2 border-bottom">
+                      <div class="notif-item d-flex justify-content-between align-items-start">
                         <a href="<?= htmlspecialchars($link) ?>" class="text-decoration-none flex-grow-1">
                           <div class="fw-semibold" style="font-size:.92rem;">
                             <?= htmlspecialchars($n['titulo']) ?>

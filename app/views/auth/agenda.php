@@ -10,7 +10,7 @@ function h($v)
 ?>
 <div class="page-fade agenda-page">
 
-  <div class="cardx mb-4">
+  <div class="cardx mb-4 module-hero">
     <div class="hd d-flex align-items-start justify-content-between flex-wrap gap-3">
       <div>
         <div class="fw-bold" style="font-size:1.15rem;">Agenda · AJA 🗓️</div>

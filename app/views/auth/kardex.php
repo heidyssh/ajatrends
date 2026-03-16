@@ -53,7 +53,7 @@ function tipoPillClass(string $tipo): string
 
 <div class="products-page page-fade kardex-page">
 
-    <div class="cardx mb-4">
+    <div class="cardx mb-4 module-hero">
         <div class="hd purchases-toolbar">
             <div class="toolbar-left">
                 <div class="fw-bold title">Kardex · Movimientos de inventario</div>
@@ -216,7 +216,7 @@ function tipoPillClass(string $tipo): string
     $ps = min(100, ($sal / $mx) * 100);
     ?>
 
-    <div class="cardx mb-4">
+    <div class="cardx mb-4 module-hero">
         <div class="hd d-flex align-items-center justify-content-between">
             <div>
                 <div class="fw-bold">Resumen visual</div>

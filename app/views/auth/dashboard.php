@@ -6,18 +6,23 @@ require_once __DIR__ . '/../../models/Agenda.php'; // si tu dashboard.php está 
 $idUser = (int) ($_SESSION['user']['id'] ?? 0);
 $events = Agenda::upcoming($idUser, 8);
 ?>
-<div class="dash-layout">
+<div class="dash-layout page-fade dashboard-page">
   <div class="dash-main">
-    <div class="cardx mb-4">
+    <div class="cardx mb-4 dashboard-hero">
       <div class="hd d-flex align-items-center justify-content-between flex-wrap gap-3">
         <div>
           <div class="fw-bold" style="font-size:1.15rem;">Bienvenida, <?= htmlspecialchars($nombre) ?> ✨</div>
           <small>Dashboard administrativo · Inventario · Compras · Ventas · Reportes</small>
         </div>
 
-        <div class="d-flex align-items-center gap-2">
+        <div class="d-flex align-items-center gap-2 flex-wrap">
           <span class="badge badge-soft">Paleta AJA</span>
           <span class="badge badge-soft">Admin-only</span>
+
+          <button class="btn btn-brand btn-sm rounded-pill px-3" type="button" data-bs-toggle="offcanvas"
+            data-bs-target="#agendaDrawer" aria-controls="agendaDrawer">
+            <i class="bi bi-calendar3 me-1"></i> Agenda rápida
+          </button>
         </div>
       </div>
 
@@ -84,16 +89,16 @@ $events = Agenda::upcoming($idUser, 8);
           </div>
 
           <div class="col-md-6">
-  <a href="index.php?page=sales" class="quick-link">
-    <div class="quick-card">
-      <div class="ic"><i class="bi bi-receipt"></i></div>
-      <div>
-        <div class="fw-bold">Ventas</div>
-        <small>Facturación · salidas · estadísticas</small>
-      </div>
-    </div>
-  </a>
-</div>
+            <a href="index.php?page=sales" class="quick-link">
+              <div class="quick-card">
+                <div class="ic"><i class="bi bi-receipt"></i></div>
+                <div>
+                  <div class="fw-bold">Ventas</div>
+                  <small>Facturación · salidas · estadísticas</small>
+                </div>
+              </div>
+            </a>
+          </div>
 
           <div class="col-md-6">
             <div class="quick-card">
@@ -112,69 +117,68 @@ $events = Agenda::upcoming($idUser, 8);
       </div>
     </div>
   </div>
-
-  <!-- DERECHA: AGENDA -->
-  <aside class="dash-right">
-    <div class="cardx agenda-card">
-      <div class="hd d-flex align-items-center justify-content-between">
-        <div>
-          <div class="fw-bold">Agenda AJA</div>
-          <small class="text-muted">Calendario · recordatorios</small>
-        </div>
-        <span class="badge bg-success">HOY</span>
+  <div class="offcanvas offcanvas-end agenda-drawer" tabindex="-1" id="agendaDrawer"
+    aria-labelledby="agendaDrawerLabel">
+    <div class="offcanvas-header">
+      <div>
+        <h5 class="offcanvas-title mb-0" id="agendaDrawerLabel">Agenda AJA</h5>
+        <small class="text-muted">Calendario · recordatorios</small>
       </div>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
+    </div>
 
-      <div class="bd">
+    <div class="offcanvas-body">
 
-        <!-- Calendario -->
-        <div class="agenda-mini-cal mb-3">
-          <div class="d-flex align-items-center justify-content-between mb-2">
-            <div class="fw-semibold" id="calTitle"></div>
-            <div class="d-flex gap-2">
-              <button class="btn btn-light btn-sm" type="button" id="calPrev"><i
-                  class="bi bi-chevron-left"></i></button>
-              <button class="btn btn-light btn-sm" type="button" id="calNext"><i
-                  class="bi bi-chevron-right"></i></button>
-            </div>
+      <div class="agenda-mini-cal mb-3">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <div class="fw-semibold" id="calTitle"></div>
+          <div class="d-flex gap-2">
+            <button class="btn btn-light btn-sm" type="button" id="calPrev">
+              <i class="bi bi-chevron-left"></i>
+            </button>
+            <button class="btn btn-light btn-sm" type="button" id="calNext">
+              <i class="bi bi-chevron-right"></i>
+            </button>
           </div>
-          <div class="agenda-cal-grid" id="calGrid"></div>
         </div>
-
-        <!-- Próximos -->
-        <div class="fw-bold mb-2"><i class="bi bi-list-check me-2"></i> Próximos</div>
-
-        <div class="agenda-list">
-          <?php if (!$events): ?>
-            <div class="text-muted small">Sin eventos próximos.</div>
-          <?php else: ?>
-           <?php foreach ($events as $e): ?>
-  <a href="index.php?page=agenda&date=<?= urlencode((string)$e['fecha']) ?>#evento-<?= (int)$e['id_evento'] ?>" class="agenda-item-link">
-    <div class="agenda-item">
-      <div class="dot"></div>
-      <div class="content">
-        <div class="title"><?= htmlspecialchars($e['titulo']) ?></div>
-        <div class="meta">
-          <?= htmlspecialchars($e['fecha']) ?>
-          <?php if (!empty($e['hora'])): ?> ·
-            <?= htmlspecialchars(substr((string) $e['hora'], 0, 5)) ?>
-          <?php endif; ?>
-        </div>
+        <div class="agenda-cal-grid" id="calGrid"></div>
       </div>
-      <span class="pill"><?= htmlspecialchars($e['modulo']) ?></span>
-    </div>
-  </a>
-<?php endforeach; ?>
-          <?php endif; ?>
-        </div>
 
-        <div class="mt-3 d-grid gap-2">
-          <a class="btn btn-brand btn-sm" href="index.php?page=agenda">
-            <i class="bi bi-calendar-event me-1"></i> Ver agenda
-          </a>
-        </div>
+      <div class="fw-bold mb-2">
+        <i class="bi bi-list-check me-2"></i> Próximos
+      </div>
+
+      <div class="agenda-list">
+        <?php if (!$events): ?>
+          <div class="text-muted small">Sin eventos próximos.</div>
+        <?php else: ?>
+          <?php foreach ($events as $e): ?>
+            <a href="index.php?page=agenda&date=<?= urlencode((string) $e['fecha']) ?>#evento-<?= (int) $e['id_evento'] ?>"
+              class="agenda-item-link">
+              <div class="agenda-item">
+                <div class="dot"></div>
+                <div class="content">
+                  <div class="title"><?= htmlspecialchars($e['titulo']) ?></div>
+                  <div class="meta">
+                    <?= htmlspecialchars($e['fecha']) ?>
+                    <?php if (!empty($e['hora'])): ?> ·
+                      <?= htmlspecialchars(substr((string) $e['hora'], 0, 5)) ?>    <?php endif; ?>
+                  </div>
+                </div>
+                <span class="pill"><?= htmlspecialchars($e['modulo']) ?></span>
+              </div>
+            </a>
+          <?php endforeach; ?>
+        <?php endif; ?>
+      </div>
+
+      <div class="mt-3 d-grid">
+        <a class="btn btn-brand btn-sm" href="index.php?page=agenda">
+          <i class="bi bi-calendar-event me-1"></i> Ver agenda completa
+        </a>
       </div>
     </div>
-  </aside>
+  </div>
 </div>
 <script>
   (function () {

@@ -6,7 +6,7 @@ $activeUsers = count(array_filter($users, fn($u) => (int) $u['estado'] === 1));
 
 <div class="users-page">
 
-  <div class="users-panel cardx users-card">
+  <div class="users-panel cardx users-card module-hero">
     <div class="hd users-card-head">
       <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
         <div>

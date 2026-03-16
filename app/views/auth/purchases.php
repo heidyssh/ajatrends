@@ -16,7 +16,7 @@ $estado = $filters['estado'] ?? 'TODOS';
 ?>
 <div class="products-page page-fade purchases-page">
 
-  <div class="cardx mb-4">
+  <div class="cardx mb-4 module-hero">
     <div class="hd purchases-toolbar">
       <div class="toolbar-left">
         <div class="fw-bold title">Compras · Inventario AJA</div>

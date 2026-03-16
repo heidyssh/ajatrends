@@ -44,7 +44,7 @@ function money($n)
 <div class="products-page page-fade sales-page">
 
   <!-- Header + filtros -->
-  <div class="cardx mb-4">
+  <div class="cardx mb-4 module-hero">
     <div class="hd purchases-toolbar">
       <div class="toolbar-left">
         <div class="fw-bold title">Ventas · Inventario AJA</div>
@@ -116,9 +116,9 @@ function money($n)
 
   <!-- KPIs (estadística rápida) -->
   <div class="row g-3 mb-4">
-    <div class="col-12 col-md-6 col-xl-3">
-      <div class="cardx">
-        <div class="bd">
+  <div class="col-12 col-md-6 col-xl-3">
+    <div class="cardx sales-kpi report-kpi">
+      <div class="bd">
           <div class="small text-muted">Total vendido (neto)</div>
           <div class="fw-bold" style="font-size:1.35rem;"><?= money($k['total'] ?? 0) ?></div>
           <div class="small text-muted">Ventas: <?= (int) ($k['ventas'] ?? 0) ?> · Ticket prom:
@@ -129,7 +129,7 @@ function money($n)
     </div>
 
     <div class="col-12 col-md-6 col-xl-3">
-      <div class="cardx">
+      <div class="cardx sales-kpi report-kpi">
         <div class="bd">
           <div class="small text-muted">Unidades vendidas</div>
           <div class="fw-bold" style="font-size:1.35rem;"><?= (int) ($k['unidades'] ?? 0) ?></div>
@@ -139,7 +139,7 @@ function money($n)
     </div>
 
     <div class="col-12 col-md-6 col-xl-3">
-      <div class="cardx">
+      <div class="cardx sales-kpi report-kpi">
         <div class="bd">
           <div class="small text-muted">Descuento total</div>
           <div class="fw-bold" style="font-size:1.35rem;"><?= money($k['descuento'] ?? 0) ?></div>
@@ -149,7 +149,7 @@ function money($n)
     </div>
 
     <div class="col-12 col-md-6 col-xl-3">
-      <div class="cardx">
+      <div class="cardx sales-kpi report-kpi">
         <div class="bd">
           <div class="small text-muted">Utilidad estimada</div>
           <div class="fw-bold" style="font-size:1.35rem;"><?= money($k['util_est'] ?? 0) ?></div>

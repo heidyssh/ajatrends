@@ -13,7 +13,7 @@ $bio = $perfil['bio'] ?? '';
 $idAvatar = (int)($perfil['id_avatar'] ?? 0);
 ?>
 
-<div class="container">
+<div class="container profile-page page-fade">
   <div class="d-flex align-items-center justify-content-between mb-3">
     <div>
       <h3 class="mb-0 fw-bold text-white">Configuración</h3>
@@ -23,16 +23,10 @@ $idAvatar = (int)($perfil['id_avatar'] ?? 0);
     </a>
   </div>
 
-    <a href="index.php?page=dashboard" class="btn btn-soft-back btn-sm rounded-pill px-3">
-      <i class="bi bi-arrow-left me-1"></i> Volver
-    </a>
-  </div>
-  <br>
-
   <div class="row g-4">
     <!-- Preview -->
     <div class="col-lg-4">
-      <div class="cardx">
+      <div class="cardx mb-4 module-hero">
         <div class="hd">
           <div class="fw-bold">Vista previa</div>
           <small>Así te verás en el panel</small>
@@ -174,7 +168,7 @@ $idAvatar = (int)($perfil['id_avatar'] ?? 0);
             <label class="form-label">Nueva contraseña</label>
             <div class="input-group">
               <input class="form-control" type="password" id="pw_new" name="new_password" minlength="6" required>
-              <button class="btn btn-outline-dark" type="button" data-toggle-pw="#pw_new" aria-label="Mostrar contraseña" >
+              <button class="btn pw-eye" type="button" data-toggle-pass="#pw_new2" aria-label="Mostrar contraseña">
                 <i class="bi bi-eye"></i>
               </button>
             </div>

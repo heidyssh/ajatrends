@@ -1,20 +1,48 @@
 // AJA TRENDS Admin Pro (UI only)
-(function(){
+(function () {
   const sidebar = document.getElementById('sidebar');
   const toggle = document.getElementById('sidebarToggle');
+  const backdrop = document.getElementById('sidebarBackdrop');
+  if (!sidebar || !toggle) return;
 
-  if (toggle && sidebar){
-    toggle.addEventListener('click', () => {
-      sidebar.classList.toggle('collapsed');
-      localStorage.setItem(
-        'aja_sidebar_collapsed',
-        sidebar.classList.contains('collapsed') ? '1' : '0'
-      );
-    });
+  const isMobile = () => window.innerWidth < 992;
+
+  function applyDesktopState() {
+    if (isMobile()) {
+      sidebar.classList.remove('collapsed');
+      document.body.classList.remove('sidebar-open');
+      return;
+    }
 
     const saved = localStorage.getItem('aja_sidebar_collapsed');
-    if (saved === '1') sidebar.classList.add('collapsed');
+    if (saved === '1') {
+      sidebar.classList.add('collapsed');
+    } else {
+      sidebar.classList.remove('collapsed');
+    }
   }
+
+  toggle.addEventListener('click', () => {
+    if (isMobile()) {
+      document.body.classList.toggle('sidebar-open');
+      return;
+    }
+
+    sidebar.classList.toggle('collapsed');
+    localStorage.setItem(
+      'aja_sidebar_collapsed',
+      sidebar.classList.contains('collapsed') ? '1' : '0'
+    );
+  });
+
+  if (backdrop) {
+    backdrop.addEventListener('click', () => {
+      document.body.classList.remove('sidebar-open');
+    });
+  }
+
+  window.addEventListener('resize', applyDesktopState);
+  applyDesktopState();
 })();
 
 // Show/Hide password
@@ -44,3 +72,9 @@ document.addEventListener('click', (e) => {
   setInterval(tick, 1000 * 30);
 })();
 
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.cardx, .kpi, .quick-card, .report-kpi, .report-panel, .report-table-card').forEach((el, i) => {
+    el.style.animationDelay = `${i * 0.03}s`;
+    el.classList.add('ui-rise');
+  });
+});
