@@ -2038,7 +2038,7 @@ user-select:none;
 :root{
   --aja-green: var(--brand, #1f6f5c);
   --aja-green-soft: rgba(31,111,92,.55);
-  --muted: var(--text-muted, rgba(255,255,255,.72));
+  --muted: #6c7a86;
   --sales-surface: rgba(255,255,255,.92);
   --sales-border: rgba(255,255,255,.10);
 }
@@ -5075,4 +5075,552 @@ small,
 .user-dd-menu .text-danger:hover{
   color: #b02a37 !important;
   background: rgba(220,53,69,.08) !important;
+}
+/* ===== AGENDA TITULO ===== */
+
+.modal h5,
+.modal .modal-title{
+  font-weight:700;
+  color:#0c1420;
+}
+/* ===== EVENTOS PROXIMOS ===== */
+
+.modal .list-group-item{
+  border:1px solid rgba(12,20,32,.06);
+  border-radius:12px;
+}
+
+.modal .list-group-item strong{
+  color:#1f6f5c;
+}
+/* ===== ESTADO REPORTES ===== */
+
+.table .estado,
+.table .badge,
+.table td .badge{
+  color:#0c1420 !important;
+  font-weight:600;
+}
+/* ===== TABLA REPORTES ===== */
+
+.table tr{
+  border-bottom:1px solid rgba(12,20,32,.06);
+}
+
+.table tr:hover{
+  background:rgba(0,0,0,.02);
+}
+/* ===== FIX REAL AGENDA OFFCANVAS / MODAL ===== */
+
+/* titulo principal */
+.agenda-card h5,
+.agenda-card .modal-title,
+.offcanvas h5,
+.offcanvas .modal-title{
+  font-weight: 800 !important;
+  color: #0c1420 !important;
+}
+
+/* subtitulo calendario · recordatorios */
+.agenda-card .text-muted,
+.offcanvas .text-muted{
+  color: rgba(12,20,32,.58) !important;
+}
+
+/* titulo del bloque "Próximos" */
+.agenda-card .agenda-item .title,
+.offcanvas .agenda-item .title{
+  color: #1f6f5c !important;
+  font-weight: 800 !important;
+}
+
+/* por si el evento viene en link */
+.agenda-card .agenda-item .title a,
+.offcanvas .agenda-item .title a,
+.agenda-card .agenda-item a,
+.offcanvas .agenda-item a{
+  color: #1f6f5c !important;
+  font-weight: 800 !important;
+  text-decoration: none !important;
+}
+
+/* fecha/meta del evento */
+.agenda-card .agenda-item .meta,
+.offcanvas .agenda-item .meta{
+  color: rgba(12,20,32,.62) !important;
+}
+
+/* pill inventario */
+.agenda-card .agenda-item .pill,
+.offcanvas .agenda-item .pill{
+  background: rgba(31,111,92,.10) !important;
+  border: 1px solid rgba(31,111,92,.24) !important;
+  color: #1f6f5c !important;
+  font-weight: 800 !important;
+}
+
+/* punto decorativo del evento */
+.agenda-card .agenda-item .dot,
+.offcanvas .agenda-item .dot{
+  background: #1f6f5c !important;
+  box-shadow: 0 0 0 4px rgba(31,111,92,.14) !important;
+}
+/* =========================================================
+   FIX REAL: KARDEX CARDS + DROPDOWN COMPRAS
+   ========================================================= */
+
+/* =========================
+   1) KARDEX KPI CARDS
+   OJO: en kardex son .cardx, no .kpi
+   ========================= */
+.kardex-page > .row.g-3.mb-4 > div > .cardx{
+  border-radius: 22px !important;
+  overflow: hidden !important;
+  background: rgba(255,255,255,.84) !important;
+  border: 1px solid rgba(255,255,255,.35) !important;
+  box-shadow: 0 18px 50px rgba(0,0,0,.10) !important;
+  position: relative !important;
+}
+
+.kardex-page > .row.g-3.mb-4 > div > .cardx::before{
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 3px !important;
+  background: linear-gradient(90deg, var(--c2), var(--c3), var(--c4)) !important;
+  z-index: 2 !important;
+}
+
+.kardex-page > .row.g-3.mb-4 > div > .cardx::after{
+  content: none !important;
+}
+
+.kardex-page > .row.g-3.mb-4 > div > .cardx .bd{
+  padding: 16px 18px !important;
+  border-radius: 22px !important;
+  background: transparent !important;
+  position: relative !important;
+  z-index: 3 !important;
+}
+
+.kardex-page > .row.g-3.mb-4 > div > .cardx .small{
+  color: var(--muted) !important;
+}
+
+.kardex-page > .row.g-3.mb-4 > div > .cardx .fw-bold{
+  color: var(--text) !important;
+  font-size: 1.55rem !important;
+  font-weight: 900 !important;
+  line-height: 1.05 !important;
+}
+
+/* =========================
+   2) COMPRAS DROPDOWN
+   mismo fix que ventas, pero en purchases-page
+   ========================= */
+.purchases-page .sale-row{
+  position: relative !important;
+  overflow: visible !important;
+  z-index: 1 !important;
+}
+
+.purchases-page .sale-row .sale-actions,
+.purchases-page .sale-row .dropdown{
+  position: relative !important;
+  z-index: 60 !important;
+}
+
+.purchases-page .sales-list,
+.purchases-page .cardx,
+.purchases-page .bd{
+  overflow: visible !important;
+}
+
+.purchases-page .sale-row .dropdown-menu{
+  min-width: 180px !important;
+  padding: 8px !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(12,20,32,.08) !important;
+  background: rgba(255,255,255,.98) !important;
+  box-shadow: 0 22px 50px rgba(0,0,0,.16) !important;
+  overflow: hidden !important;
+  z-index: 5000 !important;
+}
+
+.purchases-page .sale-row .dropdown-item{
+  border-radius: 12px !important;
+  padding: 10px 12px !important;
+  font-weight: 700 !important;
+  color: rgba(12,20,32,.82) !important;
+}
+
+.purchases-page .sale-row .dropdown-item:hover{
+  background: rgba(70,129,137,.10) !important;
+  color: rgba(12,20,32,.92) !important;
+}
+/* =========================================================
+   FIX FINAL KARDEX + DROPDOWN COMPRAS
+   ========================================================= */
+
+/* ========= 1) KARDEX: cards del resumen igual dashboard ========= */
+.kardex-page > .row.g-3.mb-4 > div > .cardx{
+  position: relative !important;
+  overflow: hidden !important;
+  border-radius: 22px !important;
+  background: rgba(255,255,255,.84) !important;
+  border: 1px solid rgba(255,255,255,.35) !important;
+  box-shadow: 0 18px 50px rgba(0,0,0,.10) !important;
+}
+
+.kardex-page > .row.g-3.mb-4 > div > .cardx::before{
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 3px !important;
+  background: linear-gradient(90deg, var(--c2), var(--c3), var(--c4)) !important;
+  z-index: 2 !important;
+}
+
+.kardex-page > .row.g-3.mb-4 > div > .cardx .bd{
+  position: relative !important;
+  z-index: 3 !important;
+  padding: 16px 18px !important;
+  background: transparent !important;
+}
+
+/* texto oscuro y limpio */
+.kardex-page > .row.g-3.mb-4 > div > .cardx .small,
+.kardex-page > .row.g-3.mb-4 > div > .cardx small{
+  color: var(--muted) !important;
+  opacity: 1 !important;
+}
+
+.kardex-page > .row.g-3.mb-4 > div > .cardx .fw-bold{
+  color: var(--text) !important;
+  font-size: 1.55rem !important;
+  font-weight: 900 !important;
+  line-height: 1.05 !important;
+}
+
+/* por si alguna regla global te los aclara */
+.kardex-page > .row.g-3.mb-4 > div > .cardx,
+.kardex-page > .row.g-3.mb-4 > div > .cardx *{
+  text-shadow: none !important;
+}
+
+/* ========= 2) COMPRAS: dropdown igual estilo ventas ========= */
+.purchases-page .sale-row{
+  position: relative !important;
+  overflow: visible !important;
+}
+
+.purchases-page .sale-row .dropdown,
+.purchases-page .sale-row .btn-group,
+.purchases-page .sale-row .sale-actions{
+  position: relative !important;
+  z-index: 60 !important;
+}
+
+.purchases-page .sales-list,
+.purchases-page .cardx,
+.purchases-page .cardx .bd{
+  overflow: visible !important;
+}
+
+.purchases-page .sale-row .dropdown-menu{
+  z-index: 9999 !important;
+  min-width: 170px !important;
+  margin-top: 6px !important;
+  padding: 8px !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(12,20,32,.08) !important;
+  background: rgba(255,255,255,.98) !important;
+  box-shadow: 0 22px 50px rgba(0,0,0,.16) !important;
+  overflow: hidden !important;
+  transform: none !important;
+  transition: opacity .12s ease, visibility .12s ease !important;
+}
+
+.purchases-page .sale-row .dropdown-item{
+  border-radius: 0 !important;
+  padding: 10px 12px !important;
+  font-weight: 700 !important;
+  color: rgba(12,20,32,.82) !important;
+}
+
+.purchases-page .sale-row .dropdown-item:hover{
+  background: rgba(70,129,137,.10) !important;
+  color: rgba(12,20,32,.92) !important;
+}
+
+.purchases-page .sale-row .dropdown-toggle,
+.purchases-page .sale-row .btn-group > .btn{
+  border-radius: 14px !important;
+  border: 1px solid rgba(12,20,32,.08) !important;
+  background: rgba(255,255,255,.86) !important;
+  color: rgba(12,20,32,.74) !important;
+  box-shadow: none !important;
+}
+/* =========================================
+   KARDEX HOVER (igual estilo dashboard)
+   ========================================= */
+
+.kardex-page .cardx{
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+
+.kardex-page .cardx:hover{
+  transform: translateY(-6px);
+  box-shadow: 0 28px 60px rgba(0,0,0,.18);
+}
+/* =========================================================
+   FIX FINAL REAL
+   - Hover en cards KPI de Kardex
+   - Dropdown de Compras igual al de Ventas
+   ========================================================= */
+
+/* =========================
+   1) KARDEX: hover SOLO en las 4 cards resumen
+   ========================= */
+.kardex-page > .row.g-3.mb-4 > div > .cardx{
+  transition: transform .22s ease, box-shadow .22s ease !important;
+  will-change: transform, box-shadow;
+}
+
+.kardex-page > .row.g-3.mb-4 > div > .cardx:hover{
+  transform: translateY(-3px) !important;
+  box-shadow: 0 18px 50px rgba(0,0,0,.12) !important;
+}
+
+/* opcional: que no se vea tieso el contenido interno */
+.kardex-page > .row.g-3.mb-4 > div > .cardx .bd{
+  transition: inherit;
+}
+
+/* =========================
+   2) COMPRAS: dropdown con la misma estética de SALES
+   ========================= */
+
+/* la fila de compras no debe cortar el menú */
+.purchases-page .sale-row{
+  position: relative !important;
+  overflow: visible !important;
+}
+
+/* el contenedor de acciones por encima */
+.purchases-page .sale-row .sale-actions,
+.purchases-page .sale-row .dropdown,
+.purchases-page .sale-row .btn-group{
+  position: relative !important;
+  z-index: 80 !important;
+}
+
+/* que el panel/listado no lo corte */
+.purchases-page .sales-list,
+.purchases-page .cardx,
+.purchases-page .cardx .bd{
+  overflow: visible !important;
+}
+
+/* dropdown igual a ventas */
+.purchases-page .sale-row .dropdown-menu{
+  min-width: 180px !important;
+  padding: 8px !important;
+  margin-top: 6px !important;
+  border-radius: 18px !important;
+  border: 1px solid rgba(12,20,32,.08) !important;
+  background: rgba(255,255,255,.98) !important;
+  box-shadow: 0 22px 50px rgba(0,0,0,.16) !important;
+  overflow: hidden !important;
+  z-index: 9999 !important;
+}
+
+/* items igual a ventas */
+.purchases-page .sale-row .dropdown-item{
+  border-radius: 12px !important;
+  padding: 10px 12px !important;
+  font-weight: 700 !important;
+  color: rgba(12,20,32,.82) !important;
+}
+
+.purchases-page .sale-row .dropdown-item:hover{
+  background: rgba(70,129,137,.10) !important;
+  color: rgba(12,20,32,.92) !important;
+}
+
+/* botón del dropdown igual a ventas */
+.purchases-page .sale-row .dropdown-toggle,
+.purchases-page .sale-row .btn-group > .btn{
+  border-radius: 14px !important;
+  border: 1px solid rgba(12,20,32,.08) !important;
+  background: rgba(255,255,255,.86) !important;
+  color: rgba(12,20,32,.74) !important;
+  box-shadow: none !important;
+}
+/* ===== KARDEX texto oscuro ===== */
+.kardex-page .cardx .small,
+.kardex-page .cardx small{
+  color: var(--muted) !important;
+}
+
+.kardex-page .cardx .fw-bold{
+  color: var(--text) !important;
+  font-weight: 800 !important;
+}
+/* ====================================
+   DROPDOWN COMPRAS - COLORES ACCIONES
+   ==================================== */
+
+.purchases-page .dropdown-item{
+  font-weight: 600;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+/* VER */
+.purchases-page .dropdown-item .bi-eye{
+  color:#5b6470;
+}
+
+/* ELIMINAR */
+.purchases-page .dropdown-item .bi-trash{
+  color:#e54848;
+}
+
+.purchases-page .dropdown-item.text-danger{
+  color:#e54848 !important;
+}
+
+/* hover elegante */
+.purchases-page .dropdown-item:hover{
+  background: rgba(70,129,137,.12);
+}
+/* colores de acciones igual ventas */
+
+.dropdown-item.text-danger{
+  color:#e54848 !important;
+}
+
+.dropdown-item.text-success{
+  color:#1f9d63 !important;
+}
+
+.dropdown-item.text-warning{
+  color:#f59e0b !important;
+}
+/* =====================================
+   FIX KARDEX TEXTO GRIS/NEGRO
+   ===================================== */
+
+.kardex-page{
+  --muted: #6c7a86;
+}
+
+.kardex-page .cardx,
+.kardex-page .cardx .hd,
+.kardex-page .cardx .bd,
+.kardex-page .kdate,
+.kardex-page .knote,
+.kardex-page .kmeta,
+.kardex-page .kchip,
+.kardex-page .kx-mini-lbl,
+.kardex-page .kardex-topbar .form-label,
+.kardex-page .kardex-filterbar .form-label,
+.kardex-page .small,
+.kardex-page small{
+  color: var(--text) !important;
+}
+
+.kardex-page .kdate,
+.kardex-page .knote,
+.kardex-page .kardex-topbar .form-label,
+.kardex-page .kardex-filterbar .form-label,
+.kardex-page .small,
+.kardex-page small{
+  color: #6c7a86 !important;
+}
+/* =========================================
+   FIX REAL HOVER REPORTES
+   ========================================= */
+
+.reports-page .report-kpi,
+.reports-page .report-kpi.cardx{
+  transition: transform .22s ease,
+              box-shadow .22s ease,
+              border-color .22s ease,
+              filter .22s ease;
+  will-change: transform, box-shadow;
+}
+
+.reports-page .report-kpi:hover,
+.reports-page .report-kpi.cardx:hover{
+  transform: translateY(-4px);
+  box-shadow: 0 20px 44px rgba(17,24,39,.12);
+  border-color: rgba(31,111,92,.18);
+}
+
+.reports-page .report-kpi:hover::before,
+.reports-page .report-kpi:hover::after{
+  pointer-events: none;
+}
+/* =========================================================
+   FIX REAL HOVER REPORTES
+   El HTML está bien; el problema era la animación reportFloatIn
+   ========================================================= */
+
+.reports-page .report-kpi{
+  animation: none !important;
+  transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease !important;
+  will-change: transform, box-shadow;
+}
+
+.reports-page .report-kpi:hover{
+  transform: translateY(-6px) !important;
+  box-shadow: 0 20px 44px rgba(17,24,39,.12) !important;
+  border-color: rgba(31,111,92,.18) !important;
+}
+/* =========================================
+   FIX LINEAS USUARIOS
+   ========================================= */
+
+.users-page .users-table-wrap{
+  overflow: hidden !important;
+  border-radius: 14px !important;
+}
+
+.users-page .users-table{
+  border-collapse: collapse !important;
+  border-spacing: 0 !important;
+}
+
+.users-page .users-table thead th{
+  border-bottom: 1px solid rgba(12,20,32,.08) !important;
+}
+
+.users-page .users-table tbody tr{
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.users-page .users-table tbody td{
+  background: transparent !important;
+  border-top: 1px solid rgba(12,20,32,.06) !important;
+  border-bottom: 0 !important;
+  border-left: 0 !important;
+  border-right: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.users-page .users-table tbody tr:first-child td{
+  border-top: 0 !important;
+}
+
+.users-page .users-table tbody tr:hover td{
+  background: rgba(70,129,137,.04) !important;
 }
