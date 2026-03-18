@@ -3,8 +3,24 @@ if (session_status() === PHP_SESSION_NONE)
   session_start();
 $nombre = $_SESSION['user']['nombre'] ?? 'Admin';
 require_once __DIR__ . '/../../models/Agenda.php'; // si tu dashboard.php está en app/views/auth/
+require_once __DIR__ . '/../../models/Sale.php';
+require_once __DIR__ . '/../../models/Report.php';
 $idUser = (int) ($_SESSION['user']['id'] ?? 0);
 $events = Agenda::upcoming($idUser, 8);
+$today = date('Y-m-d');
+
+$todaySales = Sale::kpis([
+  'from' => $today,
+  'to' => $today,
+]);
+
+$reportKpis = Report::kpis([
+  'year' => (int) date('Y'),
+  'month' => (int) date('n'),
+  'module' => 'TODOS',
+]);
+
+$lowStock = Report::lowStockProducts();
 ?>
 <div class="dash-layout page-fade dashboard-page">
   <div class="dash-main">
@@ -31,7 +47,7 @@ $events = Agenda::upcoming($idUser, 8);
           <div class="col-md-4">
             <div class="kpi">
               <div class="t">Ventas del día</div>
-              <div class="v">L 0.00</div>
+              <div class="v">L <?= number_format((float) ($todaySales['total'] ?? 0), 2) ?></div>
               <small>Hoy</small>
             </div>
           </div>
@@ -39,7 +55,7 @@ $events = Agenda::upcoming($idUser, 8);
           <div class="col-md-4">
             <div class="kpi">
               <div class="t">Stock bajo</div>
-              <div class="v">0</div>
+              <div class="v"><?= count($lowStock) ?></div>
               <small>Productos por reponer</small>
             </div>
           </div>
@@ -47,7 +63,7 @@ $events = Agenda::upcoming($idUser, 8);
           <div class="col-md-4">
             <div class="kpi">
               <div class="t">Ganancia estimada</div>
-              <div class="v">L 0.00</div>
+              <div class="v">L <?= number_format((float) ($reportKpis['utilidad_estimada'] ?? 0), 2) ?></div>
               <small>Margen</small>
             </div>
           </div>
@@ -101,13 +117,15 @@ $events = Agenda::upcoming($idUser, 8);
           </div>
 
           <div class="col-md-6">
-            <div class="quick-card">
-              <div class="ic"><i class="bi bi-box-seam"></i></div>
-              <div>
-                <div class="fw-bold">Kardex</div>
-                <small>Movimientos inventario</small>
+            <a href="index.php?page=kardex" class="quick-link">
+              <div class="quick-card">
+                <div class="ic"><i class="bi bi-box-seam"></i></div>
+                <div>
+                  <div class="fw-bold">Kardex</div>
+                  <small>Movimientos inventario</small>
+                </div>
               </div>
-            </div>
+            </a>
           </div>
         </div>
 
@@ -162,7 +180,7 @@ $events = Agenda::upcoming($idUser, 8);
                   <div class="meta">
                     <?= htmlspecialchars($e['fecha']) ?>
                     <?php if (!empty($e['hora'])): ?> ·
-                      <?= htmlspecialchars(substr((string) $e['hora'], 0, 5)) ?>    <?php endif; ?>
+                      <?= htmlspecialchars(substr((string) $e['hora'], 0, 5)) ?>     <?php endif; ?>
                   </div>
                 </div>
                 <span class="pill"><?= htmlspecialchars($e['modulo']) ?></span>

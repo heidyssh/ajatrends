@@ -183,10 +183,11 @@ final class Report
 
     $sql = "
       SELECT
-        p.nombre,
-        p.sku,
-        SUM(vd.cantidad) AS unidades,
-        SUM(vd.subtotal) AS ingreso
+         p.id_producto,
+  p.nombre,
+  p.sku,
+  SUM(vd.cantidad) AS unidades,
+  SUM(vd.subtotal) AS ingreso
       FROM ventas v
       INNER JOIN ventas_detalle vd ON vd.id_venta = v.id_venta
       INNER JOIN productos p ON p.id_producto = vd.id_producto
@@ -337,7 +338,7 @@ final class Report
   }
 
   public static function reportPack(array $filters): array
-{
+  {
     return [
       'filters' => $filters,
       'years' => self::years(),
@@ -351,30 +352,34 @@ final class Report
       'inventoryRows' => self::inventoryTable($filters),
       'lowStockRows' => self::lowStockProducts(),
     ];
-}
+  }
   public static function lowStockProducts(): array
-{
-  $pdo = db();
+  {
+    $pdo = db();
 
-  $sql = "
-    SELECT
-      p.id_producto,
-      p.sku,
-      p.nombre,
-      c.nombre AS categoria,
-      COALESCE(SUM(imd.stock_despues), 0) AS stock_actual,
-      p.stock_min
-    FROM productos p
-    INNER JOIN categorias c ON c.id_categoria = p.id_categoria
-    LEFT JOIN inventario_mov_detalle imd ON imd.id_producto = p.id_producto
-    WHERE p.estado = 1
-    GROUP BY p.id_producto, p.sku, p.nombre, c.nombre, p.stock_min
-    HAVING stock_actual <= p.stock_min
-    ORDER BY stock_actual ASC, p.nombre ASC
-    LIMIT 20
-  ";
+    $sql = "
+  SELECT
+    p.id_producto,
+    p.sku,
+    p.nombre,
+    c.nombre AS categoria,
+    COALESCE((
+      SELECT imd2.stock_despues
+      FROM inventario_mov_detalle imd2
+      WHERE imd2.id_producto = p.id_producto
+      ORDER BY imd2.id_mov_det DESC
+      LIMIT 1
+    ), 0) AS stock_actual,
+    p.stock_min
+  FROM productos p
+  INNER JOIN categorias c ON c.id_categoria = p.id_categoria
+  WHERE p.estado = 1
+  HAVING stock_actual <= p.stock_min
+  ORDER BY stock_actual ASC, p.nombre ASC
+  LIMIT 20
+";
 
-  $st = $pdo->query($sql);
-  return $st->fetchAll() ?: [];
-}
+    $st = $pdo->query($sql);
+    return $st->fetchAll() ?: [];
+  }
 }
