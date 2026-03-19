@@ -57,7 +57,7 @@ final class ProductController
       'products' => [],
       'product' => null,
       'images' => [],
-      'isAdmin' => is_admin(),
+      'isAdmin' => is_admin_or_logistica(),
     ];
 
     // Acciones admin (CRUD)
@@ -67,7 +67,7 @@ final class ProductController
       // Acciones que modifican requieren admin
       $mutating = in_array($action, ['create', 'update', 'delete', 'delete_image', 'set_principal', 'adjust_stock'], true);
       if ($mutating)
-        require_admin();
+        require_admin_or_logistica('Productos');
 
       try {
         if ($action === 'create') {

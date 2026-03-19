@@ -24,7 +24,7 @@ final class SaleController
   public static function handle(array $post, array $get): array
   {
     require_auth();
-    require_admin(); // ventas solo admin en tu sistema
+    require_admin_or_logistica('Ventas');
 
     $filters = [
       'q' => trim((string) ($get['q'] ?? '')),

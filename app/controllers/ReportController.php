@@ -9,7 +9,6 @@ final class ReportController
   public static function handle(array $get): array
   {
     require_auth();
-    require_admin();
 
     $filters = Report::filters($get);
     return Report::reportPack($filters);

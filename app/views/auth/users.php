@@ -138,13 +138,25 @@ $activeUsers = count(array_filter($users, fn($u) => (int) $u['estado'] === 1));
                   </td>
 
                   <td class="text-end">
-                    <form method="post" action="index.php?page=users" class="d-inline-block">
-                      <input type="hidden" name="action" value="delete">
-                      <input type="hidden" name="id_usuario" value="<?= (int) $u['id_usuario'] ?>">
-                      <button class="btn users-btn-delete btn-sm rounded-pill px-3" type="submit">
-                        <i class="bi bi-person-x me-1"></i> Eliminar
-                      </button>
-                    </form>
+                    <?php if ($activo): ?>
+                      <form method="post" action="index.php?page=users" class="d-inline-block">
+                        <input type="hidden" name="action" value="toggle_status">
+                        <input type="hidden" name="id_usuario" value="<?= (int) $u['id_usuario'] ?>">
+                        <input type="hidden" name="estado" value="0">
+                        <button class="btn users-btn-delete btn-sm rounded-pill px-3" type="submit">
+                          <i class="bi bi-person-x me-1"></i> Desactivar
+                        </button>
+                      </form>
+                    <?php else: ?>
+                      <form method="post" action="index.php?page=users" class="d-inline-block">
+                        <input type="hidden" name="action" value="toggle_status">
+                        <input type="hidden" name="id_usuario" value="<?= (int) $u['id_usuario'] ?>">
+                        <input type="hidden" name="estado" value="1">
+                        <button class="btn btn-sm rounded-pill px-3 users-btn-activate" type="submit">
+                          <i class="bi bi-person-check me-1"></i> Activar
+                        </button>
+                      </form>
+                    <?php endif; ?>
                   </td>
                 </tr>
               <?php endforeach; ?>

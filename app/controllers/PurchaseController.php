@@ -19,7 +19,7 @@ final class PurchaseController {
 
   public static function handle(array $post, array $get): array {
     require_auth();
-    require_admin(); // compras/pedidos solo admin
+    require_admin_or_logistica('Compras');
 
     $data = [
       'filters' => [

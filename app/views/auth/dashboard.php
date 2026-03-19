@@ -5,14 +5,19 @@ $nombre = $_SESSION['user']['nombre'] ?? 'Admin';
 require_once __DIR__ . '/../../models/Agenda.php'; // si tu dashboard.php está en app/views/auth/
 require_once __DIR__ . '/../../models/Sale.php';
 require_once __DIR__ . '/../../models/Report.php';
+require_once __DIR__ . '/../../config/database.php';
 $idUser = (int) ($_SESSION['user']['id'] ?? 0);
 $events = Agenda::upcoming($idUser, 8);
 $today = date('Y-m-d');
 
-$todaySales = Sale::kpis([
-  'from' => $today,
-  'to' => $today,
-]);
+$st = db()->prepare("
+  SELECT COALESCE(SUM(total), 0) AS total
+  FROM ventas
+  WHERE DATE(fecha) = :today
+    AND estado = 'ENTREGADA'
+");
+$st->execute([':today' => $today]);
+$todaySales = $st->fetch() ?: ['total' => 0];
 
 $reportKpis = Report::kpis([
   'year' => (int) date('Y'),

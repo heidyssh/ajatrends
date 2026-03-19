@@ -5624,3 +5624,113 @@ small,
 .users-page .users-table tbody tr:hover td{
   background: rgba(70,129,137,.04) !important;
 }
+/* ==============================
+   MENSAJE DE CIERRE DE SESIÓN
+============================== */
+
+.logout-card{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px 16px;
+  margin-bottom:16px;
+
+  border-radius:12px;
+
+  background:linear-gradient(135deg,#77ACA2,#9DBEBB);
+  color:#031926;
+
+  font-weight:600;
+  font-size:.95rem;
+
+  box-shadow:0 6px 18px rgba(0,0,0,.12);
+
+  animation:fadeLogout .4s ease;
+}
+
+.logout-card i{
+  font-size:1.2rem;
+}
+
+@keyframes fadeLogout{
+  from{
+    opacity:0;
+    transform:translateY(-6px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+.password-hint{
+  display:block;
+  margin-top:8px;
+  padding:0 4px;
+  color: var(--muted);
+  font-size:.84rem;
+  line-height:1.35;
+  opacity:.95;
+}
+.users-btn-activate{
+  background: linear-gradient(135deg, var(--c3), var(--c2));
+  color: #fff;
+  border: none;
+  box-shadow: 0 8px 18px rgba(70,129,137,.18);
+}
+
+.users-btn-activate:hover{
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(70,129,137,.24);
+}
+/* ==============================
+   MENSAJES ELEGANTES LOGIN
+============================== */
+
+.login-status-card{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px 14px;
+  margin:0 0 16px 0;
+  border-radius:14px;
+  font-size:.95rem;
+  font-weight:600;
+  line-height:1.35;
+  box-shadow:0 10px 24px rgba(0,0,0,.10);
+  border:1px solid rgba(3,25,38,.08);
+  animation:fadeLoginStatus .35s ease;
+  transition:opacity .35s ease, transform .35s ease;
+}
+
+.login-status-card i{
+  font-size:1.1rem;
+  flex-shrink:0;
+}
+
+.login-status-card--warning{
+  background:linear-gradient(135deg, var(--c3), var(--c4));
+  color:var(--c1);
+}
+
+.login-status-card--error{
+  background:rgba(255, 228, 230, 0.92);
+  color:#7f1d1d;
+  border:1px solid rgba(190, 24, 93, 0.12);
+}
+
+.login-status-card.is-hiding{
+  opacity:0;
+  transform:translateY(-6px);
+}
+
+@keyframes fadeLoginStatus{
+  from{
+    opacity:0;
+    transform:translateY(-8px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}

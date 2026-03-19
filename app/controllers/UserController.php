@@ -8,7 +8,24 @@ final class UserController
 {
   public static function handle(array $post): array
   {
-    require_admin();
+    require_auth();
+    require_admin('Usuarios');
+
+    if (!empty($post['action']) && $post['action'] === 'toggle_status') {
+      $id = (int) ($post['id_usuario'] ?? 0);
+      $estado = (int) ($post['estado'] ?? -1);
+
+      if ($id > 0 && in_array($estado, [0, 1], true)) {
+        User::setStatus($id, $estado);
+
+        return [
+          'success' => $estado === 1
+            ? 'Usuario activado correctamente.'
+            : 'Usuario desactivado correctamente.',
+          'users' => User::all()
+        ];
+      }
+    }
 
     if (!empty($post['action']) && $post['action'] === 'delete') {
       $id = (int) ($post['id_usuario'] ?? 0);

@@ -39,14 +39,17 @@ if ($page === 'logout') {
 
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  if ($page === 'login')   $viewData = AuthController::login($_POST);
-  if ($page === 'register') $viewData = AuthController::register($_POST);
-  if ($page === 'profile')   $viewData = ProfileController::update($_POST, $_FILES);
+  if ($page === 'login')
+    $viewData = AuthController::login($_POST);
+  if ($page === 'register')
+    $viewData = AuthController::register($_POST);
+  if ($page === 'profile')
+    $viewData = ProfileController::update($_POST, $_FILES);
   if ($page === 'agenda') {
     require_auth();
     $viewData = AgendaController::handle($_GET, $_POST);
   }
-  }
+}
 if ($page === 'products' && isset($_GET['ajax']) && $_GET['ajax'] == '1') {
   require_auth();
   header('Content-Type: application/json; charset=utf-8');
@@ -57,10 +60,15 @@ if ($page === 'purchases') {
   require_auth();
   $viewData = PurchaseController::handle($_POST, $_GET);
 }
-$allowed = ['login','register','dashboard','profile','change_password','products','purchases','sales','kardex','agenda','delete_notification','clear_all_notifications','users','reports'];if (!in_array($page, $allowed, true)) $page = 'login';
-if ($page === 'agenda') require_auth();
-if ($page === 'dashboard') require_auth();
-if ($page === 'profile') require_auth();
+$allowed = ['login', 'register', 'dashboard', 'profile', 'change_password', 'products', 'purchases', 'sales', 'kardex', 'agenda', 'delete_notification', 'clear_all_notifications', 'users', 'reports'];
+if (!in_array($page, $allowed, true))
+  $page = 'login';
+if ($page === 'agenda')
+  require_auth();
+if ($page === 'dashboard')
+  require_auth();
+if ($page === 'profile')
+  require_auth();
 if ($page === 'reports') {
   require_auth();
   $viewData = ReportController::handle($_GET);
@@ -70,7 +78,7 @@ if ($page === 'products') {
   $viewData = ProductController::handle($_POST, $_FILES, $_GET);
 }
 if ($page === 'change_password') {
-    $viewData = ProfileController::changePassword($_POST);
+  $viewData = ProfileController::changePassword($_POST);
 }
 if ($page === 'sales') {
   require_auth();
@@ -98,12 +106,18 @@ require __DIR__ . '/../app/views/layout/header.php';
 require __DIR__ . "/../app/views/auth/$page.php";
 // ---- Puente global: viewData -> SESSION flash (para toasts)
 if (!empty($viewData['success'])) {
-  $_SESSION['flash_success'] = (string)$viewData['success'];
+  $_SESSION['flash_success'] = (string) $viewData['success'];
   unset($viewData['success']); // evita que te salga alert + toast al mismo tiempo
 }
+
 if (!empty($viewData['error'])) {
-  $_SESSION['flash_error'] = (string)$viewData['error'];
-  unset($viewData['error']);
+  $errorMsg = trim((string) $viewData['error']);
+
+  // Este mensaje se mostrará solo dentro del login, sin toast global
+  if ($errorMsg !== 'Tu cuenta aún no ha sido aprobada por el administrador.') {
+    $_SESSION['flash_error'] = $errorMsg;
+    unset($viewData['error']);
+  }
 }
 
 require __DIR__ . '/../app/views/layout/footer.php';

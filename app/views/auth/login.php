@@ -10,7 +10,26 @@
     </div>
 
     <?php if ($err): ?>
-      <div class="alert alert-danger mb-3"><?= htmlspecialchars($err) ?></div>
+      <?php $isPendingApproval = trim((string) $err) === 'Tu cuenta aún no ha sido aprobada por el administrador.'; ?>
+
+      <?php if ($isPendingApproval): ?>
+        <div class="login-status-card login-status-card--warning" id="loginStatusCard">
+          <i class="bi bi-hourglass-split"></i>
+          <span><?= htmlspecialchars($err) ?></span>
+        </div>
+      <?php else: ?>
+        <div class="login-status-card login-status-card--error" id="loginStatusCard">
+          <i class="bi bi-exclamation-circle"></i>
+          <span><?= htmlspecialchars($err) ?></span>
+        </div>
+      <?php endif; ?>
+    <?php endif; ?>
+
+    <?php if (isset($_GET['logout'])): ?>
+      <div class="logout-card">
+        <i class="bi bi-check-circle-fill"></i>
+        <span>Sesión cerrada correctamente. ¡Hasta pronto!</span>
+      </div>
     <?php endif; ?>
 
     <form method="post" action="index.php?page=login" class="auth-form2">
@@ -41,3 +60,23 @@
     </form>
   </div>
 </div>
+<script>
+  setTimeout(() => {
+    const msg = document.querySelector(".logout-card");
+    if (msg) {
+      msg.style.opacity = "0";
+      setTimeout(() => msg.remove(), 400);
+    }
+  }, 3500);
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const msg = document.getElementById('loginStatusCard');
+  if (!msg) return;
+
+  setTimeout(() => {
+    msg.classList.add('is-hiding');
+    setTimeout(() => msg.remove(), 400);
+  }, 3500);
+});
+</script>
