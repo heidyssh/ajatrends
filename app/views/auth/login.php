@@ -6,7 +6,7 @@
     
       <img class="auth-logo" src="assets/img/logo.jpeg" alt="Logo">
       <h2 class="auth-title">Iniciar sesión</h2>
-      <p class="auth-sub">Acceso administrativo</p>
+      <p class="auth-sub">Acceso al sistema</p>
     </div>
 
     <?php if ($err): ?>

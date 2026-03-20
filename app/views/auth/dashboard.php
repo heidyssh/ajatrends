@@ -133,7 +133,6 @@ $lowStock = Report::lowStockProducts();
         </div>
 
         <div class="mt-3">
-          <small class="text-muted">Tip: luego conectamos estos KPIs a tu BD (ventas, kardex, stock_min).</small>
         </div>
       </div>
     </div>

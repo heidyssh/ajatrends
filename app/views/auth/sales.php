@@ -441,7 +441,6 @@ function money($n)
               <label class="form-label small text-muted">Dirección (texto)</label>
               <input type="text" class="form-control" name="direccion_txt"
                 placeholder="Ej: Col. XYZ, La Ceiba · casa #12 · referencia..." />
-              <div class="small text-muted mt-1">Si se deja vacío, se guardará como “SIN DIRECCION”.</div>
             </div>
 
             <div class="col-12 col-lg-3">
