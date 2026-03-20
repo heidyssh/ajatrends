@@ -86,7 +86,7 @@ if ($page === 'sales') {
 }
 if ($page === 'kardex') {
   require_auth();
-  $viewData = KardexController::handle($_GET);
+  $viewData = KardexController::handle($_GET, $_POST);
 }
 if ($page === 'delete_notification') {
   NotificationController::delete($_POST);

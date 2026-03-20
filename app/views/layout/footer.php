@@ -208,6 +208,70 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error'], $_SESSION['flash_war
     }
   });
 </script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const modalEl = document.getElementById('appConfirmModal');
+    if (!modalEl) return;
+
+    const modal = new bootstrap.Modal(modalEl);
+    const titleEl = document.getElementById('appConfirmTitle');
+    const textEl = document.getElementById('appConfirmText');
+    const okBtn = document.getElementById('appConfirmOk');
+
+    let currentForm = null;
+
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('.js-open-confirm');
+      if (!btn) return;
+
+      currentForm = btn.closest('.js-confirm-form');
+      if (!currentForm) return;
+
+      titleEl.textContent = btn.dataset.confirmTitle || 'Confirmar acción';
+      textEl.textContent = btn.dataset.confirmText || '¿Deseás continuar?';
+      okBtn.textContent = btn.dataset.confirmBtn || 'Aceptar';
+
+      modal.show();
+    });
+
+    okBtn.addEventListener('click', () => {
+  if (!currentForm) return;
+
+  const submitBtn = currentForm.querySelector('button[type="submit"], input[type="submit"]');
+  if (submitBtn) {
+    submitBtn.click();
+  } else {
+    currentForm.submit();
+  }
+});
+
+    modalEl.addEventListener('hidden.bs.modal', () => {
+      currentForm = null;
+    });
+  });
+</script>
+<div class="modal fade" id="appConfirmModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content app-confirm-modal">
+      <div class="modal-header border-0 pb-2">
+        <h5 class="modal-title" id="appConfirmTitle">Confirmar acción</h5>
+        <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+
+      <div class="modal-body pt-0">
+        <div class="app-confirm-icon mb-3">
+          <i class="bi bi-exclamation-triangle"></i>
+        </div>
+        <p class="mb-0 text-light-emphasis" id="appConfirmText">¿Deseás continuar?</p>
+      </div>
+
+      <div class="modal-footer border-0 pt-2">
+        <button type="button" class="btn btn-light btn-sm px-3" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger btn-sm px-3" id="appConfirmOk">Aceptar</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 </body>
 

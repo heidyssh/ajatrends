@@ -58,12 +58,27 @@ function tipoPillClass(string $tipo): string
                 <div class="fw-bold title">Kardex · Movimientos de inventario</div>
                 <div class="subtitle">Auditoría por producto: compras, ventas, anulaciones y ajustes.</div>
             </div>
-            <div class="toolbar-right">
-                <a class="btn btn-light btn-sm" href="index.php?page=products">
-                    <i class="bi bi-box-seam me-1"></i> Ver productos
-                </a>
-            </div>
-        </div>
+            <div class="toolbar-right d-flex align-items-center gap-2 flex-wrap">
+    <a class="btn btn-light btn-sm" href="index.php?page=products">
+        <i class="bi bi-box-seam me-1"></i> Ver productos
+    </a>
+
+    <form method="post" action="index.php?page=kardex" class="js-confirm-form m-0">
+        <input type="hidden" name="action" value="clear_kardex_sales">
+
+        <button
+            class="btn btn-danger btn-sm js-open-confirm"
+            type="button"
+            data-confirm-title="Limpiar historial"
+            data-confirm-text="¿Seguro que querés limpiar todo el historial de ventas del Kardex?"
+            data-confirm-btn="Sí, limpiar"
+        >
+            <i class="bi bi-trash3 me-1"></i> Limpiar historial
+        </button>
+
+        <button type="submit" class="d-none">submit</button>
+    </form>
+</div>
 
         <div class="bd">
             <form class="kardex-topbar" method="get" action="index.php">
@@ -307,7 +322,31 @@ function tipoPillClass(string $tipo): string
                             <div id="<?= h($colId) ?>" class="accordion-collapse collapse" aria-labelledby="<?= h($hdrId) ?>"
                                 data-bs-parent="#kardexAcc">
                                 <div class="accordion-body">
-                                    <div class="small text-muted mb-2">Usuario: <b><?= h($m['usuario'] ?? '—') ?></b></div>
+                                   <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+    <div class="small text-muted">
+        Usuario: <b><?= h($m['usuario'] ?? '—') ?></b>
+    </div>
+
+    <?php if (($m['ref_tabla'] ?? '') === 'ventas' && (int)($m['ref_id'] ?? 0) > 0): ?>
+        <form method="post" action="index.php?page=kardex" class="js-confirm-form m-0">
+            <input type="hidden" name="action" value="delete_sale_from_kardex">
+            <input type="hidden" name="id_venta" value="<?= (int)$m['ref_id'] ?>">
+
+            <button
+                class="btn btn-outline-danger btn-sm js-open-confirm"
+                type="button"
+                data-confirm-title="Eliminar venta"
+                data-confirm-text="¿Seguro que querés eliminar esta venta desde Kardex?"
+                data-confirm-btn="Sí, eliminar"
+            >
+                <i class="bi bi-trash me-1"></i>
+                Eliminar venta #<?= (int)$m['ref_id'] ?>
+            </button>
+
+            <button type="submit" class="d-none">submit</button>
+        </form>
+    <?php endif; ?>
+</div>
 
                                     <div class="table-responsive">
                                         <table class="table table-sm align-middle kardex-table mb-0">

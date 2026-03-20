@@ -95,6 +95,47 @@ final class Kardex
 
     return $movs;
   }
+    public static function deleteAllSalesHistory(int $idUser = 0): void
+  {
+    $pdo = db();
+    $pdo->beginTransaction();
+
+    try {
+      $st = $pdo->query("
+        SELECT id_venta, estado
+        FROM ventas
+        ORDER BY id_venta ASC
+      ");
+      $ventas = $st->fetchAll();
+
+      if (!$ventas) {
+        $pdo->commit();
+        return;
+      }
+
+      require_once __DIR__ . '/Sale.php';
+
+      foreach ($ventas as $v) {
+        $idVenta = (int)($v['id_venta'] ?? 0);
+        $estado = (string)($v['estado'] ?? '');
+
+        if ($idVenta <= 0) {
+          continue;
+        }
+
+        if ($estado !== 'ANULADA') {
+          Sale::cancel($idVenta, $idUser, 'Venta anulada al limpiar historial desde Kardex');
+        }
+
+        Sale::deleteVenta($idVenta);
+      }
+
+      $pdo->commit();
+    } catch (Throwable $e) {
+      $pdo->rollBack();
+      throw $e;
+    }
+  }
 
   private static function buildWhere(array $filters): array
   {

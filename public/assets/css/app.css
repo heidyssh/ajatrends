@@ -5734,3 +5734,51 @@ small,
     transform:translateY(0);
   }
 }
+.app-confirm-modal{
+  background: linear-gradient(180deg, rgba(34,22,36,.98), rgba(29,18,33,.98));
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 22px;
+  box-shadow: 0 24px 70px rgba(0,0,0,.35);
+  color: #fff;
+}
+
+.app-confirm-modal .modal-title{
+  color: #fff;
+  font-weight: 700;
+}
+
+.app-confirm-modal .modal-body{
+  color: rgba(255,255,255,.84);
+}
+
+.app-confirm-icon{
+  width: 58px;
+  height: 58px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  background: rgba(214, 120, 255, .14);
+  border: 1px solid rgba(214, 120, 255, .28);
+  color: #efb6ff;
+  font-size: 1.35rem;
+}
+
+.app-confirm-modal .btn-light{
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.app-confirm-modal .btn-danger{
+  border-radius: 12px;
+  font-weight: 700;
+}
+
+.app-confirm-modal .modal-footer{
+  gap: .5rem;
+}
+
+#appConfirmText{
+  line-height: 1.55;
+  font-size: .98rem;
+}
