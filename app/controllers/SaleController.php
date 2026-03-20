@@ -47,8 +47,12 @@ final class SaleController
       ],
       'isAdmin' => is_admin(),
     ];
+    if (empty($_SESSION['sale_form_token'])) {
+  $_SESSION['sale_form_token'] = bin2hex(random_bytes(16));
+}
+$data['sale_form_token'] = $_SESSION['sale_form_token'];
 
-    // ===== AJAX: direcciones por cliente =====
+
     $actionGet = (string) ($get['action'] ?? '');
     if ($actionGet === 'direcciones_json') {
       $idCliente = (int) ($get['id_cliente'] ?? 0);
@@ -59,7 +63,7 @@ final class SaleController
       ], JSON_UNESCAPED_UNICODE);
       exit;
     }
-    // ===== AJAX: productos con stock (para refrescar modal) =====
+
     if ($actionGet === 'productos_json') {
       header('Content-Type: application/json; charset=utf-8');
 
@@ -81,7 +85,7 @@ final class SaleController
       exit;
     }
 
-    // ===== AJAX: ver detalle venta =====
+
     if ($actionGet === 'view_json') {
       $id = (int) ($get['id'] ?? 0);
       header('Content-Type: application/json; charset=utf-8');
@@ -126,12 +130,12 @@ final class SaleController
       exit;
     }
 
-    // ===== POST actions =====
+
     if (!empty($post)) {
       $action = (string) ($post['action'] ?? '');
 
       try {
-        // sacar id_usuario desde sesión (tu misma lógica)
+
         $idUser = (int) ($_SESSION['user']['id_usuario'] ?? 0);
         if ($idUser <= 0)
           $idUser = (int) ($_SESSION['usuario']['id_usuario'] ?? 0);
@@ -140,7 +144,6 @@ final class SaleController
         if ($idUser <= 0)
           $idUser = (int) ($_SESSION['user']['id'] ?? 0);
 
-        // ... dentro de handle(), en POST actions:
 
         $filtersBack = [
           'q' => trim((string) ($post['_q'] ?? $filters['q'] ?? '')),
@@ -148,56 +151,76 @@ final class SaleController
           'from' => (string) ($post['_from'] ?? $filters['from'] ?? ''),
           'to' => (string) ($post['_to'] ?? $filters['to'] ?? ''),
         ];
+if ($action === 'create') {
+  $tokenPost = (string) ($post['sale_form_token'] ?? '');
+  $tokenSession = (string) ($_SESSION['sale_form_token'] ?? '');
 
-        if ($action === 'create') {
-          $idCliente = 1; // CONSUMIDOR FINAL
-          $idDireccion = 1; // SIN DIRECCION
+  if ($tokenPost === '' || $tokenSession === '' || !hash_equals($tokenSession, $tokenPost)) {
+    throw new Exception('La solicitud de venta es inválida o ya fue procesada.');
+  }
 
-          $descuento = (float) ($post['descuento'] ?? 0);
+  unset($_SESSION['sale_form_token']);
+  $_SESSION['sale_form_token'] = bin2hex(random_bytes(16));
 
-          $clienteTxt = trim((string) ($post['cliente_txt'] ?? ''));
-          $direccionTxt = trim((string) ($post['direccion_txt'] ?? ''));
-          $nota = trim((string) ($post['nota'] ?? ''));
+  $descuento = (float) ($post['descuento'] ?? 0);
 
-          if ($clienteTxt === '') {
-            throw new Exception('Escribí el nombre del cliente en "Cliente (texto)".');
-          }
-          if ($direccionTxt === '')
-            $direccionTxt = 'SIN DIRECCION';
+  $clienteTxt = trim((string) ($post['cliente_txt'] ?? ''));
+  $direccionTxt = trim((string) ($post['direccion_txt'] ?? ''));
+  $nota = trim((string) ($post['nota'] ?? ''));
 
-          $ids = $post['id_producto'] ?? [];
-          $cants = $post['cantidad'] ?? [];
-          $pus = $post['precio_unit'] ?? [];
+  if ($clienteTxt === '') {
+    $clienteTxt = 'CONSUMIDOR FINAL';
+  }
+  if ($direccionTxt === '') {
+    $direccionTxt = 'SIN DIRECCION';
+  }
 
-          $items = [];
-          if (is_array($ids) && is_array($cants)) {
-            $n = min(count($ids), count($cants));
-            for ($i = 0; $i < $n; $i++) {
-              $items[] = [
-                'id_producto' => (int) $ids[$i],
-                'cantidad' => (int) $cants[$i],
-                'precio_unit' => isset($pus[$i]) ? (float) $pus[$i] : 0,
-              ];
-            }
-          }
+  [$idCliente, $idDireccion] = Sale::resolveClienteDireccion($clienteTxt, $direccionTxt);
 
-          $idVenta = Sale::createVenta($idUser, $idCliente, $idDireccion, $descuento, $nota, $clienteTxt, $direccionTxt, $items);
-          Notifier::notifyShared(
-  'sale_create',
-  'Ventas',
-  'Venta registrada',
-  'Se registró la venta #' . $idVenta . ' correctamente en el sistema.',
-  'ventas',
-  $idVenta,
-  [
-    'cliente' => $clienteTxt,
-    'direccion' => $direccionTxt,
-    'total' => $post['total'] ?? ''
-  ]
-);
-          $_SESSION['flash_success'] = "Venta #$idVenta registrada. Stock actualizado.";
-          self::redirectToSales($filtersBack);
-        }
+  $ids = $post['id_producto'] ?? [];
+  $cants = $post['cantidad'] ?? [];
+  $pus = $post['precio_unit'] ?? [];
+
+  $items = [];
+  if (is_array($ids) && is_array($cants)) {
+    $n = min(count($ids), count($cants));
+    for ($i = 0; $i < $n; $i++) {
+      $items[] = [
+        'id_producto' => (int) $ids[$i],
+        'cantidad' => (int) $cants[$i],
+        'precio_unit' => isset($pus[$i]) ? (float) $pus[$i] : 0,
+      ];
+    }
+  }
+
+  $idVenta = Sale::createVenta(
+    $idUser,
+    $idCliente,
+    $idDireccion,
+    $descuento,
+    $nota,
+    $clienteTxt,
+    $direccionTxt,
+    $items
+  );
+
+  Notifier::notifyShared(
+    'sale_create',
+    'Ventas',
+    'Venta registrada',
+    'Se registró la venta #' . $idVenta . ' correctamente en el sistema.',
+    'ventas',
+    $idVenta,
+    [
+      'cliente' => $clienteTxt,
+      'direccion' => $direccionTxt,
+      'total' => $post['total'] ?? ''
+    ]
+  );
+
+  $_SESSION['flash_success'] = "Venta #$idVenta registrada. Stock actualizado.";
+  self::redirectToSales($filtersBack);
+}
 
         if ($action === 'update') {
           $idVenta = (int) ($post['id_venta'] ?? 0);
@@ -282,7 +305,6 @@ final class SaleController
         self::redirectToSales($filters);
       }
     }
-    // ===== data list =====
     $data['sales'] = Sale::list($filters);
     return $data;
   }

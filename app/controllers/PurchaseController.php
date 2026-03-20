@@ -33,7 +33,7 @@ final class PurchaseController {
       'isAdmin' => is_admin(),
       'proveedores' => Purchase::proveedores(),
     ];
-     // ✅ AJAX: devolver detalle en JSON para modal "Ver"
+    
     $actionGet = (string)($get['action'] ?? '');
     if ($actionGet === 'view_json') {
       $id = (int)($get['id'] ?? 0);
@@ -72,7 +72,7 @@ final class PurchaseController {
         }, is_array($items) ? $items : []),
       ], JSON_UNESCAPED_UNICODE);
       exit;
-    } // ✅ AJAX: devolver detalle en JSON para modal "Ver"
+    } 
     $actionGet = (string)($get['action'] ?? '');
     if ($actionGet === 'view_json') {
       $id = (int)($get['id'] ?? 0);

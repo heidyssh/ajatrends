@@ -19,8 +19,7 @@ $estado = $filters['estado'] ?? 'TODOS';
   <div class="cardx mb-4 module-hero">
     <div class="hd purchases-toolbar">
       <div class="toolbar-left">
-        <div class="fw-bold title">Compras · Inventario AJA</div>
-        <div class="subtitle">Registrá compras ordenadas y actualizá el stock automáticamente.</div>
+        <div class="fw-bold title">Compras · Inventario</div>
       </div>
 
       <div class="toolbar-right">
@@ -70,7 +69,6 @@ $estado = $filters['estado'] ?? 'TODOS';
     <div class="hd d-flex align-items-center justify-content-between">
       <div>
         <div class="fw-bold">Compras</div>
-        <div class="small text-muted">Vista limpia tipo sistema pro.</div>
       </div>
     </div>
 
@@ -156,7 +154,7 @@ $estado = $filters['estado'] ?? 'TODOS';
   </div>
 </div>
 
-<!-- MODAL CREAR COMPRA -->
+
 <div class="modal fade" id="modalCreate" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
     <div class="modal-content product-modal sale-modal">
@@ -224,7 +222,7 @@ $estado = $filters['estado'] ?? 'TODOS';
               </thead>
               <tbody>
                 <tr class="text-muted" id="rowEmpty">
-                  <td colspan="5" class="text-center py-3">Agregá productos a la compra.</td>
+                  <td colspan="5" class="text-center py-3">Agregue productos a la compra.</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -239,7 +237,7 @@ $estado = $filters['estado'] ?? 'TODOS';
 
           <div class="small text-muted">
             <i class="bi bi-info-circle me-1"></i>
-            Si algo falla, revisá que los productos tengan precio y que la compra tenga items.
+            Si algo falla, revise que los productos tengan precio y que la compra tenga items.
           </div>
         </div>
 
@@ -254,7 +252,7 @@ $estado = $filters['estado'] ?? 'TODOS';
     </div>
   </div>
 </div>
-<!-- MODAL VER COMPRA -->
+
 <div class="modal fade" id="modalViewCompra" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
     <div class="modal-content product-modal sale-modal">
@@ -307,7 +305,7 @@ $estado = $filters['estado'] ?? 'TODOS';
     </div>
   </div>
 </div>
-<!-- MODAL ELIMINAR COMPRA -->
+
 <div class="modal fade" id="modalDeleteCompra" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content product-modal sale-modal">
@@ -444,7 +442,7 @@ $estado = $filters['estado'] ?? 'TODOS';
     const modalEl = document.getElementById('modalViewCompra');
     const modal = new bootstrap.Modal(modalEl);
 
-    // UI loading
+   
     document.getElementById('viewMeta').textContent = 'Cargando...';
     document.getElementById('viewNota').textContent = '-';
     document.getElementById('viewItems').innerHTML =
@@ -460,13 +458,13 @@ $estado = $filters['estado'] ?? 'TODOS';
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const data = await res.json();
 
-      // meta
+      
       document.getElementById('viewMeta').textContent =
         `Compra #${data.id_compra} · ${data.fecha} · Usuario: ${data.usuario} · Estado: ${data.estado}`;
 
       document.getElementById('viewNota').textContent = data.nota || '-';
       document.getElementById('viewProveedor').textContent = (data.proveedor || '-');
-      // items
+   
       let total = 0;
       const rows = (data.items || []).map(it => {
         total += parseFloat(it.subtotal || 0);

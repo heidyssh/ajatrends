@@ -96,7 +96,7 @@ final class AuthController
       return ['error' => 'Ese correo ya está registrado.'];
     }
 
-    $idRol = 2; // por defecto colaborador / logística
+    $idRol = 2; 
     $hash = password_hash($pass, PASSWORD_BCRYPT);
     User::create($idRol, $nombre, $email, $hash, 0);
     Notifier::notifyAdmins(

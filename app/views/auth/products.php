@@ -15,7 +15,7 @@
   }
 </style>
 <?php
-// $viewData viene de ProductController
+
 $filters = $viewData['filters'] ?? [];
 $categories = $viewData['categories'] ?? [];
 $products = $viewData['products'] ?? [];
@@ -36,8 +36,8 @@ $estado = $filters['estado'] ?? '';
   <div class="cardx mb-4 module-hero">
     <div class="hd purchases-toolbar">
       <div class="toolbar-left">
-        <div class="fw-bold title">Productos · Catálogo AJA ✨</div>
-        <div class="subtitle">Catálogo visual + filtros + CRUD admin.</div>
+        <div class="fw-bold title">Productos · Catálogo</div>
+        <br>
       </div>
       <div class="toolbar-right">
         <?php if ($isAdmin): ?>
@@ -49,8 +49,6 @@ $estado = $filters['estado'] ?? '';
     </div>
 
     <div class="bd">
-      <!-- Filtros desktop -->
-      <!-- Filtros desktop (PRO) -->
       <form class="purchases-filters filters-glass d-none d-md-flex" method="get" action="index.php">
         <input type="hidden" name="page" value="products">
 
@@ -91,7 +89,7 @@ $estado = $filters['estado'] ?? '';
           </div>
         </div>
 
-        <!-- Más filtros (colapsable, pro) -->
+
         <div class="collapse filters-more" id="prodMore">
           <div class="more-grid">
             <div>
@@ -114,7 +112,7 @@ $estado = $filters['estado'] ?? '';
         </div>
       </form>
 
-      <!-- Chips categorías (scroll tipo “slides”) -->
+   
       <div class="chips mt-3">
         <a class="chip <?= $cat === 0 ? 'active' : '' ?>"
           href="index.php?page=products<?= $q !== '' ? ('&q=' . urlencode($q)) : '' ?>">Todas</a>
@@ -136,14 +134,14 @@ $estado = $filters['estado'] ?? '';
 
       <div class="divider my-4"></div>
 
-      <!-- Grid productos -->
+ 
       <div class="row g-3">
         <?php if (!$products): ?>
           <div class="col-12">
             <div class="empty-state">
               <div class="ic"><i class="bi bi-bag-x"></i></div>
               <div class="fw-bold">No hay productos con esos filtros</div>
-              <small>Probá limpiar filtros o crear tu primer producto.</small>
+              <small>Pruebe limpiar filtros o crear tu primer producto.</small>
             </div>
           </div>
         <?php endif; ?>
@@ -200,7 +198,7 @@ $estado = $filters['estado'] ?? '';
       </div>
 
       <?php if ($isAdmin): ?>
-        <!-- FAB mobile -->
+      
         <button class="fab d-md-none" id="fabNew" type="button" title="Nuevo producto">
           <i class="bi bi-plus-lg"></i>
         </button>
@@ -209,7 +207,7 @@ $estado = $filters['estado'] ?? '';
     </div>
   </div>
 
-  <!-- Offcanvas filtros móvil -->
+
   <div class="offcanvas offcanvas-end" tabindex="-1" id="filtersCanvas" aria-labelledby="filtersCanvasLabel">
     <div class="offcanvas-header">
       <h5 class="offcanvas-title" id="filtersCanvasLabel"><i class="bi bi-funnel me-1"></i> Filtros</h5>
@@ -256,7 +254,7 @@ $estado = $filters['estado'] ?? '';
     </div>
   </div>
 
-  <!-- Modal detalle producto (dinámico con AJAX) -->
+
   <div class="modal fade" id="productModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
       <div class="modal-content product-modal">
@@ -273,7 +271,7 @@ $estado = $filters['estado'] ?? '';
             <div class="col-lg-6">
               <div id="pmCarousel" class="carousel slide" data-bs-ride="carousel">
                 <div class="carousel-inner" id="pmCarouselInner">
-                  <!-- JS inject -->
+               
                 </div>
                 <button class="carousel-control-prev" type="button" data-bs-target="#pmCarousel" data-bs-slide="prev">
                   <span class="carousel-control-prev-icon" aria-hidden="true"></span>
@@ -318,7 +316,7 @@ $estado = $filters['estado'] ?? '';
   </div>
 
   <?php if ($isAdmin): ?>
-    <!-- Modal crear/editar -->
+
     <div class="modal fade" id="productUpsertModal" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
@@ -329,7 +327,6 @@ $estado = $filters['estado'] ?? '';
             <div class="modal-header">
               <div>
                 <div class="modal-title fw-bold" id="pfTitle">Nuevo producto</div>
-                <small>Imágenes · precio · categoría · todo se guarda en tu BD</small>
               </div>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
@@ -409,7 +406,7 @@ $estado = $filters['estado'] ?? '';
             <div class="modal-footer">
               <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancelar</button>
 
-              <!-- SOLO cuando es editar -->
+             
               <button class="btn btn-outline-dark" type="button" id="btnAdjustStock" style="display:none;">
                 <i class="bi bi-sliders me-1"></i> Ajustar inventario
               </button>
@@ -422,26 +419,26 @@ $estado = $filters['estado'] ?? '';
     </div>
   </div>
 
-  <!-- Form oculto para borrar producto -->
+  
   <form method="post" id="deleteForm" style="display:none;">
     <input type="hidden" name="action" value="delete">
     <input type="hidden" name="id_producto" id="delId" value="">
   </form>
 
-  <!-- Form oculto borrar imagen -->
+  
   <form method="post" id="deleteImgForm" style="display:none;">
     <input type="hidden" name="action" value="delete_image">
     <input type="hidden" name="id_imagen" id="delImgId" value="">
   </form>
 
-  <!-- Form oculto set principal -->
+
   <form method="post" id="principalImgForm" style="display:none;">
     <input type="hidden" name="action" value="set_principal">
     <input type="hidden" name="id_producto" id="priProdId" value="">
     <input type="hidden" name="id_imagen" id="priImgId" value="">
   </form>
 <?php endif; ?>
-<!-- Modal confirmación (reemplaza confirm() del navegador) -->
+
 <div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -457,7 +454,7 @@ $estado = $filters['estado'] ?? '';
     </div>
   </div>
 </div>
-<!-- Modal Ajustar Inventario -->
+
 <div class="modal fade" id="adjustStockModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -513,20 +510,19 @@ $estado = $filters['estado'] ?? '';
     const isAdmin = <?= $isAdmin ? 'true' : 'false' ?>;
     let lastOpenedId = 0;
 
-    // Abrir modal detalle + cargar JSON
+   
     const productModal = document.getElementById('productModal');
-    // --- FIX stacking context: llevar overlays al <body> ---
+   
     const upsertEl = document.getElementById('productUpsertModal');
     const filtersEl = document.getElementById('filtersCanvas');
 
     if (productModal && productModal.parentElement !== document.body) document.body.appendChild(productModal);
     if (upsertEl && upsertEl.parentElement !== document.body) document.body.appendChild(upsertEl);
     if (filtersEl && filtersEl.parentElement !== document.body) document.body.appendChild(filtersEl);
-    // --- Ajuste de inventario ---
+
     const btnAdjust = document.getElementById('btnAdjustStock');
     const adjustEl = document.getElementById('adjustStockModal');
 
-    // por stacking igual que los otros
     if (adjustEl && adjustEl.parentElement !== document.body) document.body.appendChild(adjustEl);
     hookCleanup(adjustEl);
 
@@ -560,7 +556,7 @@ $estado = $filters['estado'] ?? '';
     document.addEventListener('click', async (e) => {
       const card = e.target.closest('.product-card');
       if (!card) return;
-      // Si el modal de crear/editar está abierto, cerrarlo antes de abrir el detalle
+    
       const upEl = document.getElementById('productUpsertModal');
       const up = bootstrap.Modal.getInstance(upEl);
       if (upEl && upEl.classList.contains('show') && up) {
@@ -569,14 +565,12 @@ $estado = $filters['estado'] ?? '';
         cleanupModals();
       }
 
-      // Evitar que botones mini abran el detalle
       if (e.target.closest('[data-edit-id]') || e.target.closest('[data-delete-id]')) return;
 
       const id = Number(card.getAttribute('data-product-id') || 0);
       if (!id) return;
       lastOpenedId = id;
 
-      // Cargar detalle
       titleEl.textContent = 'Cargando…';
       metaEl.textContent = '';
       carouselInner.innerHTML = '<div class="carousel-item active"><div class="pm-skel"></div></div>';
@@ -597,7 +591,7 @@ $estado = $filters['estado'] ?? '';
         stateEl.innerHTML = `<i class="bi bi-toggle-${Number(p.estado) === 1 ? 'on' : 'off'}"></i> ${Number(p.estado) === 1 ? 'Activo' : 'Inactivo'}`;
         descEl.textContent = p.descripcion || '—';
 
-        // Carousel
+        
         carouselInner.innerHTML = '';
         if (imgs.length === 0) imgs.push({ url: 'assets/img/logo.jpeg' });
 
@@ -608,7 +602,7 @@ $estado = $filters['estado'] ?? '';
           carouselInner.appendChild(div);
         });
 
-        // Admin buttons en modal
+      
         if (isAdmin) {
           const editBtn = document.getElementById('pmEditBtn');
           const delBtn = document.getElementById('pmDeleteBtn');
@@ -622,13 +616,13 @@ $estado = $filters['estado'] ?? '';
       }
     });
     function cleanupModals() {
-      // backdrops de modales
+      
       document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
-      // backdrops de offcanvas (filtros móvil)
+    
       document.querySelectorAll('.offcanvas-backdrop').forEach(b => b.remove());
 
       document.body.classList.remove('modal-open');
-      document.body.classList.remove('offcanvas-backdrop'); // por si quedó algo raro
+      document.body.classList.remove('offcanvas-backdrop'); 
       document.body.style.removeProperty('padding-right');
       document.body.style.removeProperty('overflow');
     }
@@ -647,13 +641,13 @@ $estado = $filters['estado'] ?? '';
         modalEl.addEventListener('hidden.bs.modal', () => resolve(), { once: true });
       });
     }
-    // Admin: nuevo
+
     async function openNew() {
 
       const upsertEl = document.getElementById('productUpsertModal');
       const detailEl = document.getElementById('productModal');
 
-      // Si el modal de detalle está abierto, cerrarlo primero
+      
       const detailModal = bootstrap.Modal.getInstance(detailEl);
       if (detailEl && detailEl.classList.contains('show') && detailModal) {
         detailModal.hide();
@@ -661,7 +655,7 @@ $estado = $filters['estado'] ?? '';
           detailEl.addEventListener('hidden.bs.modal', resolve, { once: true });
         });
 
-        // limpiar posibles backdrops pegados
+       
         document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
       }
       cleanupModals();
@@ -681,13 +675,13 @@ $estado = $filters['estado'] ?? '';
       m.show();
     }
 
-    // Admin: editar
+    
     async function openEdit(id) {
       const upsertEl = document.getElementById('productUpsertModal');
       cleanupModals();
       const m = bootstrap.Modal.getOrCreateInstance(upsertEl);
 
-      // cerrar modal detalle si está abierto
+      
       const pm = bootstrap.Modal.getInstance(productModal);
       if (pm) {
         pm.hide();
@@ -721,7 +715,7 @@ $estado = $filters['estado'] ?? '';
         document.getElementById('pfEstado').value = String(p.estado ?? 1);
         document.getElementById('pfDesc').value = p.descripcion || '';
 
-        // mini grid imágenes
+       
         if (imgs.length > 0) {
           document.getElementById('pfExistingImagesWrap').style.display = 'block';
           const wrap = document.getElementById('pfExistingImages');
@@ -764,7 +758,7 @@ $estado = $filters['estado'] ?? '';
 
       const m = bootstrap.Modal.getOrCreateInstance(modalEl);
 
-      // IMPORTANTE: evitar que se acumulen onclick
+    
       okBtn.onclick = null;
       okBtn.onclick = () => {
         document.getElementById('delId').value = String(id);
@@ -775,7 +769,7 @@ $estado = $filters['estado'] ?? '';
       m.show();
     }
 
-    // Botones mini en cards
+ 
     document.addEventListener('click', (e) => {
       const btnEdit = e.target.closest('[data-edit-id]');
       if (btnEdit) {
@@ -833,13 +827,13 @@ $estado = $filters['estado'] ?? '';
       }
     });
 
-    // botones nuevo
+    
     const btnNew = document.getElementById('btnNewProduct');
     if (btnNew) btnNew.addEventListener('click', openNew);
     const fab = document.getElementById('fabNew');
     if (fab) fab.addEventListener('click', openNew);
 
-    // Validación bootstrap
+  
     const form = document.getElementById('productForm');
     if (form) {
       form.addEventListener('submit', (event) => {

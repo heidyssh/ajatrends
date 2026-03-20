@@ -8,7 +8,7 @@ final class Agenda {
   public static function upcoming(int $idUsuario = 0, int $limit = 8): array {
     $pdo = db();
 
-    // hoy → próximos 30 días
+    
     $sql = "
       SELECT id_evento, id_usuario, titulo, descripcion, fecha, hora, modulo, estado
       FROM agenda_eventos
@@ -52,6 +52,19 @@ final class Agenda {
   $st->execute([':f' => $date, ':u' => $idUsuario]);
   return $st->fetchAll(PDO::FETCH_ASSOC) ?: [];
 }
+public static function allEvents(int $idUsuario): array {
+  $pdo = db();
+  $sql = "
+    SELECT id_evento, id_usuario, titulo, descripcion, fecha, hora, modulo, estado
+    FROM agenda_eventos
+    WHERE (id_usuario IS NULL OR id_usuario = :u)
+      AND estado <> 'CANCELADO'
+    ORDER BY fecha ASC, hora ASC, id_evento ASC
+  ";
+  $st = $pdo->prepare($sql);
+  $st->execute([':u' => $idUsuario]);
+  return $st->fetchAll(PDO::FETCH_ASSOC) ?: [];
+}
 public static function createEvent(int $idUsuario, array $data): int {
   $pdo = db();
   $titulo = trim((string)($data['titulo'] ?? ''));
@@ -63,7 +76,7 @@ public static function createEvent(int $idUsuario, array $data): int {
   if ($titulo === '') throw new RuntimeException('El título es obligatorio.');
   if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha)) throw new RuntimeException('Fecha inválida.');
 
-  // HH:MM -> HH:MM:00
+  
   $horaDb = ($hora === '') ? null : ($hora . ':00');
 
   $sql = "INSERT INTO agenda_eventos (id_usuario, titulo, descripcion, fecha, hora, modulo, estado)

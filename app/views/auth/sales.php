@@ -4,6 +4,7 @@ $sales = $viewData['sales'] ?? [];
 $products = $viewData['products'] ?? [];
 $clientes = $viewData['clientes'] ?? [];
 $stats = $viewData['stats'] ?? [];
+$sale_form_token = $viewData['sale_form_token'] ?? '';
 
 function h($v)
 {
@@ -43,12 +44,12 @@ function money($n)
 ?>
 <div class="products-page page-fade sales-page">
 
-  <!-- Header + filtros -->
+  
   <div class="cardx mb-4 module-hero">
     <div class="hd purchases-toolbar">
       <div class="toolbar-left">
-        <div class="fw-bold title">Ventas · Inventario AJA</div>
-        <div class="subtitle">Registrá ventas, bajá stock automático y mirá estadísticas del inventario.</div>
+        <div class="fw-bold title">Ventas · Inventario</div>
+        <br>
       </div>
 
       <div class="toolbar-right">
@@ -114,7 +115,7 @@ function money($n)
     </div>
   </div>
 
-  <!-- KPIs (estadística rápida) -->
+
   <div class="row g-3 mb-4">
   <div class="col-12 col-md-6 col-xl-3">
     <div class="cardx sales-kpi report-kpi">
@@ -161,12 +162,12 @@ function money($n)
 
   </div>
 
-  <!-- Analítica (compacta y elegante) -->
+  
   <div class="cardx mb-4 sales-analytics">
     <div class="hd d-flex align-items-center justify-content-between">
       <div>
         <div class="fw-bold">Analítica</div>
-        <div class="small text-muted">Top productos, categorías y serie diaria (sin tablas amontonadas).</div>
+        <div class="small text-muted">Top productos, categorías y serie diaria.</div>
       </div>
 
       <button class="btn btn-light btn-sm" type="button" data-bs-toggle="collapse"
@@ -178,7 +179,7 @@ function money($n)
     <div class="bd pt-2 collapse show" id="salesAnalyticsCollapse">
       <div class="row g-3">
 
-        <!-- TOP PRODUCTOS -->
+      
         <div class="col-12 col-xl-6">
           <div class="sales-panel">
             <div class="sales-panel-hd">
@@ -217,7 +218,7 @@ function money($n)
           </div>
         </div>
 
-        <!-- CATEGORIAS -->
+       
         <div class="col-12 col-xl-6">
           <div class="sales-panel">
             <div class="sales-panel-hd">
@@ -255,13 +256,13 @@ function money($n)
           </div>
         </div>
 
-        <!-- SERIE DIARIA -->
+       
         <div class="col-12">
           <div class="sales-panel">
             <div class="sales-panel-hd d-flex align-items-center justify-content-between">
               <div>
                 <div class="fw-semibold">Serie diaria</div>
-                <div class="small text-muted">Totales por día (según filtros o últimos 14 días).</div>
+                <div class="small text-muted">Totales por día.</div>
               </div>
               <span class="badge badge-soft">Resumen</span>
             </div>
@@ -295,12 +296,12 @@ function money($n)
     </div>
   </div>
 
-  <!-- Listado de ventas (moderno, sin tabla pesada) -->
+
   <div class="cardx">
     <div class="hd d-flex align-items-center justify-content-between">
       <div>
         <div class="fw-bold">Ventas</div>
-        <div class="small text-muted">Vista limpia tipo sistema pro.</div>
+        <div class="small text-muted">Totales por día.</div>
       </div>
     </div>
 
@@ -410,7 +411,7 @@ function money($n)
 </div>
 
 
-<!-- MODAL CREAR VENTA -->
+
 <div class="modal fade" id="modalCreateVenta" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-centered">
     <div class="modal-content product-modal">
@@ -419,12 +420,13 @@ function money($n)
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
 
-      <form method="post" action="index.php?page=sales" id="frmVenta">
-        <input type="hidden" name="action" value="create">
-        <input type="hidden" name="_q" value="<?= h($q) ?>">
-        <input type="hidden" name="_estado" value="<?= h($estado) ?>">
-        <input type="hidden" name="_from" value="<?= h($from) ?>">
-        <input type="hidden" name="_to" value="<?= h($to) ?>">
+<form method="post" action="index.php?page=sales" id="frmVenta">
+  <input type="hidden" name="action" value="create">
+  <input type="hidden" name="sale_form_token" value="<?= h($sale_form_token ?? '') ?>">
+  <input type="hidden" name="_q" value="<?= h($q) ?>">
+  <input type="hidden" name="_estado" value="<?= h($estado) ?>">
+  <input type="hidden" name="_from" value="<?= h($from) ?>">
+  <input type="hidden" name="_to" value="<?= h($to) ?>">
 
         <div class="modal-body">
           <div class="row g-3 mb-3">
@@ -433,7 +435,6 @@ function money($n)
               <label class="form-label small text-muted">Cliente (texto)</label>
               <input type="text" class="form-control" name="cliente_txt" required
                 placeholder="Ej: María López / Pedido IG / Cliente X" />
-              <div class="small text-muted mt-1">Si se deja vacío, se guardará como “CONSUMIDOR FINAL”.</div>
             </div>
 
             <div class="col-12 col-lg-5">
@@ -528,9 +529,9 @@ function money($n)
 
         <div class="modal-footer">
           <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancelar</button>
-          <button class="btn btn-brand" type="submit">
-            <i class="bi bi-check2-circle me-1"></i> Guardar venta
-          </button>
+          <button class="btn btn-brand" type="submit" id="btnSubmitVenta">
+  <i class="bi bi-check2-circle me-1"></i> Guardar venta
+</button>
         </div>
       </form>
 
@@ -538,7 +539,7 @@ function money($n)
   </div>
 </div>
 
-<!-- MODAL VER VENTA -->
+
 <div class="modal fade" id="modalViewVenta" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
     <div class="modal-content product-modal sale-modal">
@@ -630,7 +631,7 @@ function money($n)
   </div><!-- /modal-dialog -->
 </div><!-- /modal -->
 
-<!-- MODAL ANULAR -->
+
 <div class="modal fade" id="modalCancelVenta" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content product-modal">
@@ -658,7 +659,7 @@ function money($n)
     </div>
   </div>
 </div>
-<!-- MODAL COMPLETAR -->
+
 <div class="modal fade" id="modalCompleteVenta" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content product-modal">
@@ -684,7 +685,7 @@ function money($n)
   </div>
 </div>
 
-<!-- MODAL ELIMINAR -->
+
 <div class="modal fade" id="modalDeleteVenta" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content product-modal">
@@ -822,7 +823,7 @@ function money($n)
       recompute();
     });
 
-    // iniciar totales
+
     recompute();
   })();
 </script>
@@ -852,7 +853,7 @@ function money($n)
     if (prev) sel.value = prev;
   }
 
-  // cada vez que se abre el modal, refrescamos lista y stock
+
   document.getElementById('modalCreateVenta')?.addEventListener('shown.bs.modal', reloadProductsForSale);
 </script>
 
@@ -886,18 +887,17 @@ function money($n)
   }
 
   async function openViewVenta(id) {
-    // limpiar
+
     document.getElementById('editIdVenta').value = '';
     document.getElementById('editCliente').value = '';
     document.getElementById('editDir').value = '';
     document.getElementById('editNota').value = '';
     setEditEnabled(false);
 
-    // abrir modal
+
     const modal = new bootstrap.Modal(document.getElementById('modalViewVenta'));
     modal.show();
 
-    // pedir JSON al controller (YA EXISTE en tu SaleController.php)
     const res = await fetch(`index.php?page=sales&action=view_json&id=${encodeURIComponent(id)}`);
     const json = await res.json();
 
@@ -912,7 +912,7 @@ function money($n)
     document.getElementById('editDir').value = json.direccion || '';
     document.getElementById('editNota').value = json.nota || '';
 
-    // items
+
     const tbody = document.getElementById('viewItems');
     tbody.innerHTML = '';
     (json.items || []).forEach(it => {
@@ -957,4 +957,36 @@ document.addEventListener('DOMContentLoaded', () => {
     openViewVenta(viewId);
   }
 });
+</script>
+<script>
+  (function () {
+    const form = document.getElementById('frmVenta');
+    const btn = document.getElementById('btnSubmitVenta');
+
+    if (!form || !btn) return;
+
+    let sending = false;
+
+    form.addEventListener('submit', function (e) {
+      if (sending) {
+        e.preventDefault();
+        return false;
+      }
+
+      const items = form.querySelectorAll('input[name="id_producto[]"]');
+      if (!items.length) {
+        e.preventDefault();
+        if (typeof window.showToast === 'function') {
+          window.showToast('error', 'Agregá al menos un producto antes de guardar la venta.');
+        } else {
+          alert('Agregá al menos un producto antes de guardar la venta.');
+        }
+        return false;
+      }
+
+      sending = true;
+      btn.disabled = true;
+      btn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i> Guardando...';
+    });
+  })();
 </script>

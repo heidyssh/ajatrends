@@ -42,7 +42,6 @@ final class ProductController
   }
   public static function handle(array $post, array $files, array $get): array
   {
-    // Siempre devolvemos listas para pintar la pantalla
     $data = [
       'error' => '',
       'success' => '',
@@ -60,11 +59,9 @@ final class ProductController
       'isAdmin' => is_admin_or_logistica(),
     ];
 
-    // Acciones admin (CRUD)
     if (!empty($post)) {
       $action = (string) ($post['action'] ?? '');
 
-      // Acciones que modifican requieren admin
       $mutating = in_array($action, ['create', 'update', 'delete', 'delete_image', 'set_principal', 'adjust_stock'], true);
       if ($mutating)
         require_admin_or_logistica('Productos');
@@ -218,10 +215,9 @@ final class ProductController
       }
     }
 
-    // Data para UI
+    
     $data['products'] = Product::list($data['filters']);
 
-    // Si piden detalle (para modal/offcanvas via query)
     $idView = (int) ($get['view'] ?? 0);
     if ($idView > 0) {
       $data['product'] = Product::find($idView);
@@ -268,21 +264,21 @@ final class ProductController
       @mkdir($destDir, 0777, true);
     }
 
-    // Soporta input multiple (name="imagenes[]") o single (name="imagenes")
+  
     $imgs = $files['imagenes'];
 
     $names = $imgs['name'] ?? [];
     $tmp = $imgs['tmp_name'] ?? [];
     $err = $imgs['error'] ?? [];
 
-    // Normalizar a arreglo
+ 
     if (!is_array($names)) {
       $names = [$names];
       $tmp = [$tmp];
       $err = [$err];
     }
 
-    // ¿ya tiene imagen principal?
+   
     $existing = Product::images($idProducto);
     $hasPrincipal = false;
     foreach ($existing as $e) {
@@ -309,7 +305,7 @@ final class ProductController
         continue;
 
       $publicUrl = 'assets/img/products/' . $filename;
-      $makePrincipal = !$hasPrincipal && $i === 0; // primera subida, se vuelve principal
+      $makePrincipal = !$hasPrincipal && $i === 0; 
       Product::addImage($idProducto, $publicUrl, $makePrincipal);
       if ($makePrincipal)
         $hasPrincipal = true;
@@ -373,7 +369,7 @@ final class ProductController
       ]);
       $idMov = (int) $pdo->lastInsertId();
 
-      // costo_unit: usar costo actual del producto (sirve para tus stats)
+ 
       $stC = $pdo->prepare("SELECT costo FROM productos WHERE id_producto=:p LIMIT 1");
       $stC->execute([':p' => $idProducto]);
       $costoUnit = (float) ($stC->fetch()['costo'] ?? 0);
@@ -385,7 +381,7 @@ final class ProductController
       $stDet->execute([
         ':m' => $idMov,
         ':p' => $idProducto,
-        ':cant' => $diff,              // positivo sube, negativo baja
+        ':cant' => $diff,              
         ':cu' => $costoUnit,
         ':antes' => $stockAntes,
         ':despues' => $stockTarget,

@@ -33,7 +33,7 @@ final class ProfileController
       return ['error' => 'Sesión inválida.'];
     }
 
-    /* 1) Cambiar correo */
+
     if ($action === 'change_email') {
       $new = trim($post['new_email'] ?? '');
 
@@ -65,7 +65,7 @@ final class ProfileController
       ];
     }
 
-/* 2) Cambiar contraseña */
+
 if ($action === 'change_password') {
   Notifier::notifyUser(
   $idUsuario,
@@ -114,7 +114,7 @@ if ($action === 'change_password') {
   ];
 }
 
-    /* 3) Actualizar perfil / avatar / foto */
+
     $id = $idUsuario;
     $perfilActual = Profile::get($id);
 
@@ -126,7 +126,7 @@ if ($action === 'change_password') {
       $idAvatar = (int) ($perfilActual['id_avatar'] ?? 1);
     }
 
-    // Guardar datos básicos
+  
     Profile::updateBasic($id, $idAvatar, $telefono, $bio);
     Notifier::notifyUser(
   $idUsuario,
@@ -140,7 +140,7 @@ if ($action === 'change_password') {
 
     $subioFoto = false;
 
-    // Si sube una foto personalizada
+   
     if (isset($files['foto']) && isset($files['foto']['error']) && $files['foto']['error'] === UPLOAD_ERR_OK) {
       $tmp = $files['foto']['tmp_name'];
       $name = $files['foto']['name'];
@@ -168,12 +168,12 @@ if ($action === 'change_password') {
       $subioFoto = true;
     }
 
-    // Si NO subió foto, pero eligió avatar, entonces usar avatar y limpiar foto_archivo
+    
     if (!$subioFoto) {
       Profile::setAvatar($id, $idAvatar);
     }
 
-    // Refrescar sesión
+    
     $perfil = Profile::get($id);
     $_SESSION['user']['avatar'] = ($perfil['foto_archivo'] !== '')
       ? $perfil['foto_archivo']

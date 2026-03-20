@@ -8,13 +8,13 @@ final class Profile
 
   public static function get(int $idUsuario): array
   {
-    // 1) Asegurar que exista perfil (sin NULL)
+   
     $check = db()->prepare("SELECT 1 FROM usuarios_perfil WHERE id_usuario=?");
     $check->execute([$idUsuario]);
     $exists = (bool) $check->fetchColumn();
 
     if (!$exists) {
-      // avatar por defecto: el primero disponible
+    
       $idAv = (int) db()->query("SELECT id_avatar FROM avatars WHERE estado=1 ORDER BY id_avatar ASC LIMIT 1")->fetchColumn();
       if ($idAv <= 0)
         $idAv = 1;
@@ -24,7 +24,7 @@ final class Profile
       $ins->execute([$idUsuario, $idAv]);
     }
 
-    // 2) Traer perfil + archivo de avatar
+ 
     $sql = "SELECT p.id_usuario, p.id_avatar, p.foto_archivo, p.telefono, p.bio,
                  a.archivo AS avatar_archivo
           FROM usuarios_perfil p
@@ -45,7 +45,7 @@ final class Profile
   }
 
   public static function listAvatars(): array {
-  // 1) Intentar solo activos
+ 
   try {
     $sql = "SELECT id_avatar, codigo, archivo
             FROM avatars
@@ -54,10 +54,10 @@ final class Profile
     $rows = db()->query($sql)->fetchAll(PDO::FETCH_ASSOC) ?: [];
     if (!empty($rows)) return $rows;
   } catch (Throwable $e) {
-    // seguimos con fallback
+ 
   }
 
-  // 2) Fallback: traer todos (por si 'estado' está en 0 o no se usa)
+  
   try {
     $sql2 = "SELECT id_avatar, codigo, archivo
              FROM avatars
@@ -65,10 +65,10 @@ final class Profile
     $rows2 = db()->query($sql2)->fetchAll(PDO::FETCH_ASSOC) ?: [];
     if (!empty($rows2)) return $rows2;
   } catch (Throwable $e) {
-    // seguimos con fallback
+   
   }
 
-  // 3) Último fallback: leer la carpeta de avatares del proyecto
+ 
   $dir = __DIR__ . '/../../public/assets/img/avatars/';
   $out = [];
   if (is_dir($dir)) {
@@ -99,7 +99,7 @@ final class Profile
 
   public static function setAvatar(int $idUsuario, int $idAvatar): void {
   $pdo = db();
-  // importante: si selecciona avatar, quitamos foto_archivo para que se vea el avatar
+ 
   $sql = "UPDATE usuarios_perfil
           SET id_avatar = :a, foto_archivo = '', actualizado_en = NOW()
           WHERE id_usuario = :u";

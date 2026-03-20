@@ -24,12 +24,11 @@ $idAvatar = (int)($perfil['id_avatar'] ?? 0);
   </div>
 
   <div class="row g-4">
-    <!-- Preview -->
+ 
     <div class="col-lg-4">
       <div class="cardx mb-4 module-hero">
         <div class="hd">
           <div class="fw-bold">Vista previa</div>
-          <small>Así te verás en el panel</small>
         </div>
         <div class="bd text-center">
           <img src="<?= htmlspecialchars($img) ?>" class="profile-pic mb-3" alt="Perfil">
@@ -44,7 +43,7 @@ $idAvatar = (int)($perfil['id_avatar'] ?? 0);
       </div>
     </div>
 
-    <!-- Tabs -->
+
     <div class="col-lg-8">
       <div class="cardx">
         <div class="hd">
@@ -70,7 +69,6 @@ $idAvatar = (int)($perfil['id_avatar'] ?? 0);
         <div class="bd">
           <div class="tab-content">
 
-            <!-- CUENTA -->
             <div class="tab-pane fade show active" id="tab-cuenta" role="tabpanel">
               <form method="post" action="index.php?page=profile">
                 <div class="row g-3">
@@ -79,19 +77,19 @@ $idAvatar = (int)($perfil['id_avatar'] ?? 0);
                     <input class="form-control" name="telefono" value="<?= htmlspecialchars($telefono) ?>" placeholder="Opcional">
                   </div>
                   <div class="col-md-6">
-                    <label class="form-label">Bio</label>
+                    <label class="form-label">Biografía</label>
                     <input class="form-control" name="bio" maxlength="140" value="<?= htmlspecialchars($bio) ?>" placeholder="Opcional">
                   </div>
                 </div>
 
-                <!-- Mantener id_avatar actual (para no perderlo al guardar cuenta) -->
+         
                 <input type="hidden" name="id_avatar" value="<?= (int)$idAvatar ?>">
 
                 <button class="btn btn-brand w-100 mt-3">Guardar cambios</button>
               </form>
             </div>
 
-            <!-- AVATAR -->
+          
             <div class="tab-pane fade" id="tab-avatar" role="tabpanel">
               <form method="post" action="index.php?page=profile" enctype="multipart/form-data">
 
@@ -112,26 +110,25 @@ $idAvatar = (int)($perfil['id_avatar'] ?? 0);
                 </div>
 
                 <div class="mt-3">
-                  <label class="form-label">O subí tu foto (opcional)</label>
+                  <label class="form-label">Cargar imagen</label>
                   <input class="form-control" type="file" name="foto" accept=".jpg,.jpeg,.png,.webp">
-                  <small class="text-muted">Si subís foto, se usará esa en vez del avatar.</small>
                 </div>
 
                 <button class="btn btn-brand w-100 mt-3">Guardar avatar</button>
               </form>
             </div>
 
-            <!-- SEGURIDAD -->
+            
 <div class="tab-pane fade" id="tab-seguridad" role="tabpanel">
 
-  <!-- Cambiar correo -->
+
   <form method="post" action="index.php?page=profile" class="mb-3">
     <input type="hidden" name="action" value="change_email">
 
     <div class="cardx" style="border-radius:18px;">
       <div class="hd">
         <div class="fw-bold"><i class="bi bi-envelope me-1"></i> Cambiar correo</div>
-        <small>Mantené tu cuenta actualizada.</small>
+        <small>Mantenga su cuenta actualizada.</small>
       </div>
       <div class="bd">
         <div class="row g-3">
@@ -152,14 +149,14 @@ $idAvatar = (int)($perfil['id_avatar'] ?? 0);
     </div>
   </form>
 
-  <!-- Cambiar contraseña -->
+ 
   <form method="post" action="index.php?page=profile">
     <input type="hidden" name="action" value="change_password">
 
     <div class="cardx" style="border-radius:18px;">
       <div class="hd">
         <div class="fw-bold"><i class="bi bi-shield-lock me-1"></i> Cambiar contraseña</div>
-        <small>Ingresá una contraseña nueva.</small>
+        <small>Ingrese una contraseña nueva.</small>
       </div>
       <div class="bd">
 
@@ -168,7 +165,7 @@ $idAvatar = (int)($perfil['id_avatar'] ?? 0);
             <label class="form-label">Nueva contraseña</label>
             <div class="input-group">
               <input class="form-control" type="password" id="pw_new" name="new_password" minlength="6" required>
-              <button class="btn pw-eye" type="button" data-toggle-pass="#pw_new2" aria-label="Mostrar contraseña">
+              <button class="btn pw-eye" type="button" data-toggle-pass="#pw_new" aria-label="Mostrar contraseña">
                 <i class="bi bi-eye"></i>
               </button>
             </div>
@@ -178,7 +175,7 @@ $idAvatar = (int)($perfil['id_avatar'] ?? 0);
             <label class="form-label">Confirmar contraseña</label>
             <div class="input-group">
               <input class="form-control" type="password" id="pw_new2" name="new_password2" minlength="6" required>
-              <button class="btn btn-outline-dark" type="button" data-toggle-pw="#pw_new2" aria-label="Mostrar contraseña">
+              <button class="btn pw-eye" type="button" data-toggle-pass="#pw_new2" aria-label="Mostrar contraseña">
                 <i class="bi bi-eye"></i>
               </button>
             </div>
@@ -188,7 +185,7 @@ $idAvatar = (int)($perfil['id_avatar'] ?? 0);
         <div class="mt-3">
           <button class="btn btn-brand w-100">Guardar nueva contraseña</button>
           <small class="text-muted d-block mt-2">
-            Tip: usá al menos 6 caracteres (mejor si mezclás letras y números).
+            Use al menos 8 caracteres (letras y números).
           </small>
         </div>
 

@@ -12,11 +12,15 @@ final class AgendaController
   require_auth();
   $idUser = (int) ($_SESSION['user']['id'] ?? 0);
 
-  // Fecha seleccionada
-  $date = trim((string)($get['date'] ?? ($post['fecha'] ?? '')));
-  if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) $date = date('Y-m-d');
+ 
+  $viewMode = trim((string)($get['view'] ?? 'day'));
 
-  // ACCIONES (POST)
+$date = trim((string)($get['date'] ?? ($post['fecha'] ?? '')));
+if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+  $date = date('Y-m-d');
+}
+
+
   if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     $action = (string)($post['action'] ?? '');
 
@@ -88,7 +92,7 @@ Notifier::notifyShared(
       }
     } catch (\Throwable $e) {
       $_SESSION['flash_error'] = $e->getMessage();
-      // sigue para renderizar normal
+
     }
   }
 
@@ -96,12 +100,23 @@ Notifier::notifyShared(
   $year  = (int)$sel->format('Y');
   $month = (int)$sel->format('m');
 
-  return [
-    'selectedDate' => $date,
-    'monthTitle'   => $sel->format('F Y'),
-    'monthEvents'  => Agenda::monthEvents($idUser, $year, $month),
-    'dayEvents'    => Agenda::eventsByDate($idUser, $date),
-    'idUser'       => $idUser,
-  ];
+  $allEvents = [];
+$dayEvents = [];
+
+if ($viewMode === 'all') {
+  $allEvents = Agenda::allEvents($idUser);
+} else {
+  $dayEvents = Agenda::eventsByDate($idUser, $date);
+}
+
+return [
+  'selectedDate' => $date,
+  'viewMode'     => $viewMode,
+  'monthTitle'   => $sel->format('F Y'),
+  'monthEvents'  => Agenda::monthEvents($idUser, $year, $month),
+  'dayEvents'    => $dayEvents,
+  'allEvents'    => $allEvents,
+  'idUser'       => $idUser,
+];
 }
 }

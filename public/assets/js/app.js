@@ -1,4 +1,4 @@
-// AJA TRENDS Admin Pro (UI only)
+
 (function () {
   const sidebar = document.getElementById('sidebar');
   const toggle = document.getElementById('sidebarToggle');
@@ -45,7 +45,7 @@
   applyDesktopState();
 })();
 
-// Show/Hide password
+
 document.addEventListener('click', (e) => {
   const btn = e.target.closest('[data-toggle-pass]');
   if (!btn) return;
@@ -58,7 +58,7 @@ document.addEventListener('click', (e) => {
   const icon = btn.querySelector('i');
   if (icon) icon.className = (input.type === 'password') ? 'bi bi-eye' : 'bi bi-eye-slash';
 });
-// Clock pill (topbar)
+
 (function(){
   const el = document.getElementById('clock');
   if(!el) return;

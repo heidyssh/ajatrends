@@ -19,7 +19,7 @@ function tipoLabel(string $tipo): string
         'SALIDA_VENTA' => 'Salida (Venta)',
         'ENTRADA_ANULACION_VE' => 'Entrada (Anulación de venta)',
         'SALIDA_ANULA_COMPRA' => 'Salida (Anulación de compra)',
-        // por si después agregás más:
+    
         'AJUSTE_POSITIVO' => 'Ajuste (+)',
         'AJUSTE_NEGATIVO' => 'Ajuste (−)',
         'AJUSTE_STOCK' => 'Ajuste',
@@ -29,7 +29,6 @@ function tipoLabel(string $tipo): string
     if (isset($map[$k]))
         return $map[$k];
 
-    // fallback: "SALIDA_ALGO" -> "Salida algo"
     $t = strtolower(str_replace('_', ' ', $k));
     return ucfirst($t);
 }
@@ -70,7 +69,7 @@ function tipoPillClass(string $tipo): string
             <form class="kardex-topbar" method="get" action="index.php">
                 <input type="hidden" name="page" value="kardex">
 
-                <!-- Fila compacta (siempre visible) -->
+               
                 <div class="kx-row">
                     <div class="kx-search">
                         <div class="input-group input-group-sm">
@@ -107,7 +106,7 @@ function tipoPillClass(string $tipo): string
                     </div>
                 </div>
 
-                <!-- Links rápidos -->
+                
                 <div class="kx-quick">
                     <?php
                     $base = 'index.php?page=kardex';
@@ -115,7 +114,7 @@ function tipoPillClass(string $tipo): string
                     $d7 = date('Y-m-d', strtotime('-7 days'));
                     $d30 = date('Y-m-d', strtotime('-30 days'));
 
-                    // helper simple (sin función) para armar query rápido
+                    
                     $qp = $idp ? '&id_producto=' . (int) $idp : '';
                     $qq = $q !== '' ? '&q=' . urlencode($q) : '';
                     ?>
@@ -135,7 +134,7 @@ function tipoPillClass(string $tipo): string
                     <a class="kx-chip" href="index.php?page=sales"><i class="bi bi-receipt me-1"></i>Ventas</a>
                 </div>
 
-                <!-- Más filtros (colapsable) -->
+              
                 <div class="collapse kx-more" id="kxMore">
                     <div class="kx-more-grid">
                         <div>
@@ -220,7 +219,7 @@ function tipoPillClass(string $tipo): string
         <div class="hd d-flex align-items-center justify-content-between">
             <div>
                 <div class="fw-bold">Resumen visual</div>
-                <div class="small text-muted">Entradas vs salidas (según filtros).</div>
+                <div class="small text-muted">Entradas vs salidas.</div>
             </div>
             <span class="badge badge-soft">Mini chart</span>
         </div>
@@ -249,7 +248,6 @@ function tipoPillClass(string $tipo): string
         <div class="hd d-flex align-items-center justify-content-between">
             <div>
                 <div class="fw-bold">Historial</div>
-                <div class="small text-muted">Abrí un movimiento para ver el detalle por producto.</div>
             </div>
         </div>
 

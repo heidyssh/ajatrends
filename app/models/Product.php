@@ -41,7 +41,7 @@ final class Product
 
     $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
 
-    // Imagen principal: prioridad es_principal=1, sino la primera por id
+    
     $sql = "
       SELECT
         p.id_producto,
@@ -158,7 +158,7 @@ final class Product
     ]);
 
     $desc = trim((string) ($data['descripcion'] ?? ''));
-    // UPSERT de descripción
+   
     $st2 = db()->prepare("INSERT INTO producto_descripcion (id_producto, descripcion)
                           VALUES (:id,:d)
                           ON DUPLICATE KEY UPDATE descripcion=VALUES(descripcion)");
@@ -232,7 +232,7 @@ final class Product
 
       $tipoMov = ($diff > 0) ? 'AJUSTE_POSITIVO' : 'AJUSTE_NEGATIVO';
 
-      // 1) movimiento cabecera
+     
       $st = $pdo->prepare("
   INSERT INTO inventario_movimientos (fecha, tipo, ref_tabla, ref_id, id_usuario, nota)
   VALUES (NOW(), :tipo, 'productos', :rid, :u, :nota)
@@ -245,13 +245,13 @@ final class Product
       ]);
       $idMov = (int) $pdo->lastInsertId();
 
-      // 2) costo unit (tomamos costo del producto)
+      
       $stC = $pdo->prepare("SELECT costo FROM productos WHERE id_producto = :p LIMIT 1");
       $stC->execute([':p' => $idProducto]);
       $rowC = $stC->fetch();
       $costoUnit = $rowC ? (float) $rowC['costo'] : 0.0;
 
-      // 3) detalle: diff puede ser + o -
+  
       $stockDespues = $stockTarget;
       $stDet = $pdo->prepare("
       INSERT INTO inventario_mov_detalle (id_mov, id_producto, cantidad, costo_unit, stock_antes, stock_despues)

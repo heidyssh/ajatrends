@@ -21,10 +21,10 @@ if ($page === 'logout') {
   AuthController::logout();
 }
 
-/* GET: mostrar pantallas */
+
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
   if ($page === 'profile') {
-    $viewData = ProfileController::show();   // ✅ aquí carga avatars y perfil
+    $viewData = ProfileController::show();   
   }
   if ($page === 'agenda') {
     require_auth();
@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
   }
 }
 
-/* POST: acciones */
+
 if ($page === 'logout') {
   AuthController::logout();
 }
@@ -104,16 +104,16 @@ if ($page === 'users') {
 
 require __DIR__ . '/../app/views/layout/header.php';
 require __DIR__ . "/../app/views/auth/$page.php";
-// ---- Puente global: viewData -> SESSION flash (para toasts)
+
 if (!empty($viewData['success'])) {
   $_SESSION['flash_success'] = (string) $viewData['success'];
-  unset($viewData['success']); // evita que te salga alert + toast al mismo tiempo
+  unset($viewData['success']); 
 }
 
 if (!empty($viewData['error'])) {
   $errorMsg = trim((string) $viewData['error']);
 
-  // Este mensaje se mostrará solo dentro del login, sin toast global
+  
   if ($errorMsg !== 'Tu cuenta aún no ha sido aprobada por el administrador.') {
     $_SESSION['flash_error'] = $errorMsg;
     unset($viewData['error']);

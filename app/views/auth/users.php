@@ -11,7 +11,7 @@ $activeUsers = count(array_filter($users, fn($u) => (int) $u['estado'] === 1));
       <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
         <div>
           <div class="users-section-title">Usuarios registrados</div>
-          <small class="users-section-sub">Gestión de accesos del sistema AJA Trends.</small>
+          <small class="users-section-sub">Gestión de accesos del sistema.</small>
         </div>
 
         <div class="users-mini-stats">

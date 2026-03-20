@@ -89,9 +89,8 @@ $monthNames = [
     <div class="cardx mb-4 module-hero">
         <div class="hd reports-toolbar">
             <div>
-                <div class="fw-bold title">Centro de análisis comercial · AJA Trends</div>
-                <div class="subtitle">Visualiza el rendimiento del negocio, controla inventario y exporta reportes
-                    ejecutivos con una vista más clara, estética y profesional.</div>
+                <div class="fw-bold title">Centro de análisis comercial</div>
+
             </div>
             <div class="reports-actions">
                 <button type="button" class="btn btn-light btn-sm" id="btnExportPdf">
@@ -244,7 +243,7 @@ $monthNames = [
         <div class="hd d-flex align-items-center justify-content-between flex-wrap gap-2">
             <div>
                 <div class="fw-bold">Visualización analítica</div>
-                <small>Explora los indicadores clave del negocio sin saturar la vista</small>
+                <small>Explora los indicadores clave del negocio</small>
             </div>
 
             <div class="report-carousel-controls">
@@ -901,7 +900,7 @@ $monthNames = [
                     });
                 };
 
-                // HOJA 1 RESUMEN
+                
                 const ws1 = workbook.addWorksheet('Resumen Ejecutivo');
                 addHeader(ws1, 'Resumen Ejecutivo');
 
@@ -917,7 +916,7 @@ $monthNames = [
                 autoFit(ws1, { 1: 34, 2: 20 });
                 styleMoneyColumn(ws1, 'B', 8, 12);
 
-                // HOJA 2 VENTAS
+                
                 const ws2 = workbook.addWorksheet('Ventas');
                 addHeader(ws2, 'Detalle de Ventas');
 
@@ -938,7 +937,7 @@ $monthNames = [
 
                 autoFit(ws2, { 1: 10, 2: 16, 3: 28, 4: 18, 5: 16, 6: 40 });
 
-                // HOJA 3 COMPRAS
+              
                 const ws3 = workbook.addWorksheet('Compras');
                 addHeader(ws3, 'Detalle de Compras');
 
@@ -959,7 +958,7 @@ $monthNames = [
 
                 autoFit(ws3, { 1: 10, 2: 16, 3: 28, 4: 18, 5: 16, 6: 40 });
 
-                // HOJA 4 INVENTARIO
+            
                 const ws4 = workbook.addWorksheet('Inventario');
                 addHeader(ws4, 'Movimientos de Inventario');
 
@@ -981,7 +980,6 @@ $monthNames = [
 
                 autoFit(ws4, { 1: 10, 2: 16, 3: 24, 4: 28, 5: 12, 6: 12, 7: 12, 8: 34 });
 
-                // HOJA 5 STOCK CRÍTICO
                 const ws5 = workbook.addWorksheet('Stock Crítico');
                 addHeader(ws5, 'Productos con Stock Crítico');
 

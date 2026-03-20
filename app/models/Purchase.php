@@ -92,7 +92,7 @@ final class Purchase
     return $st->fetchAll();
   }
 
-  /** Stock actual por producto: último stock_despues en inventario_mov_detalle */
+ 
   public static function stockActual(int $idProducto): int
   {
     $st = db()->prepare("
@@ -107,7 +107,7 @@ final class Purchase
     return $r ? (int) $r['stock_despues'] : 0;
   }
 
-  /** precio del producto (para guardarlo como costo_unit en tu tabla compras_detalle) */
+ 
   public static function productoPrecio(int $idProducto): float
   {
     $st = db()->prepare("SELECT precio FROM productos WHERE id_producto=:p LIMIT 1");
@@ -127,10 +127,7 @@ final class Purchase
     return $st->fetchAll();
   }
 
-  /**
-   * Registra un pedido/compra y BAJA stock (SALIDA).
-   * Usa: compras, compras_detalle, inventario_movimientos, inventario_mov_detalle.
-   */
+ 
   public static function createCompra(int $idUsuario, int $idProveedor, string $nota, array $items): int
   {
 
@@ -144,9 +141,9 @@ final class Purchase
 
     try {
 
-      // ✅ Asegurar usuario válido (FK compras.id_usuario)
+  
       if ($idUsuario <= 0) {
-        // fallback: tomar el primer usuario (idealmente admin)
+    
         $st = $pdo->query("SELECT id_usuario FROM usuarios ORDER BY id_usuario ASC LIMIT 1");
         $r = $st->fetch();
         $idUsuario = $r ? (int) $r['id_usuario'] : 0;
@@ -162,7 +159,7 @@ final class Purchase
         throw new Exception("El usuario $idUsuario no existe en usuarios. Cerrá sesión y volvé a entrar.");
       }
 
-      // 1) Crear compra (✅ con id_usuario)
+
       $st = $pdo->prepare("
       INSERT INTO compras (id_oc, id_usuario, id_proveedor, fecha, estado, nota)
 VALUES (NULL, :u, :prov, NOW(), 'REGISTRADA', :nota)
@@ -170,7 +167,7 @@ VALUES (NULL, :u, :prov, NOW(), 'REGISTRADA', :nota)
       $st->execute([':u' => $idUsuario, ':prov' => ($idProveedor > 0 ? $idProveedor : null), ':nota' => $nota]);
       $idCompra = (int) $pdo->lastInsertId();
 
-      // 2) Movimiento inventario ENTRADA (compra suma stock)
+  
       $st = $pdo->prepare("
       INSERT INTO inventario_movimientos (fecha, tipo, ref_tabla, ref_id, id_usuario, nota)
       VALUES (NOW(), 'ENTRADA_COMPRA', 'compras', :rid, :u, :nota)
@@ -201,7 +198,7 @@ VALUES (NULL, :u, :prov, NOW(), 'REGISTRADA', :nota)
           $cu = self::productoPrecio($idProducto);
 
         $stockAntes = self::stockActual($idProducto);
-        $stockDespues = $stockAntes + $cantidad; // ✅ SUMA stock
+        $stockDespues = $stockAntes + $cantidad; 
 
         $stDet->execute([
           ':c' => $idCompra,
@@ -220,7 +217,7 @@ VALUES (NULL, :u, :prov, NOW(), 'REGISTRADA', :nota)
         ]);
       }
 
-      // validar al menos 1 item
+      
       $st = $pdo->prepare("SELECT COUNT(*) n FROM compras_detalle WHERE id_compra=:c");
       $st->execute([':c' => $idCompra]);
       if ((int) ($st->fetch()['n'] ?? 0) <= 0) {
@@ -237,7 +234,7 @@ VALUES (NULL, :u, :prov, NOW(), 'REGISTRADA', :nota)
   }
   private static function resolveUserId(PDO $pdo, int $preferred, int $fallbackFromCompra = 0): int
   {
-    // 1) preferido y existe
+   
     if ($preferred > 0) {
       $st = $pdo->prepare("SELECT id_usuario FROM usuarios WHERE id_usuario=:u LIMIT 1");
       $st->execute([':u' => $preferred]);
@@ -245,7 +242,7 @@ VALUES (NULL, :u, :prov, NOW(), 'REGISTRADA', :nota)
         return $preferred;
     }
 
-    // 2) fallback (ej: id_usuario guardado en la compra) y existe
+   
     if ($fallbackFromCompra > 0) {
       $st = $pdo->prepare("SELECT id_usuario FROM usuarios WHERE id_usuario=:u LIMIT 1");
       $st->execute([':u' => $fallbackFromCompra]);
@@ -253,7 +250,7 @@ VALUES (NULL, :u, :prov, NOW(), 'REGISTRADA', :nota)
         return $fallbackFromCompra;
     }
 
-    // 3) último recurso: primer usuario del sistema
+
     $st = $pdo->query("SELECT id_usuario FROM usuarios ORDER BY id_usuario ASC LIMIT 1");
     $r = $st->fetch();
     if ($r)
@@ -262,7 +259,7 @@ VALUES (NULL, :u, :prov, NOW(), 'REGISTRADA', :nota)
     throw new Exception("No existe ningún usuario en la tabla usuarios. Creá al menos 1 usuario admin.");
   }
 
-  /** Anula y devuelve stock creando movimiento espejo */
+ 
   public static function cancel(int $idCompra, int $idUsuario, string $nota = 'Compra eliminada'): void
   {
     $compra = self::find($idCompra);
@@ -279,14 +276,14 @@ VALUES (NULL, :u, :prov, NOW(), 'REGISTRADA', :nota)
     $pdo->beginTransaction();
 
     try {
-      // ✅ usuario válido para cumplir FK inventario_movimientos.id_usuario
+    
       $uid = self::resolveUserId($pdo, $idUsuario, (int) ($compra['id_usuario'] ?? 0));
 
-      // Marcar anulada (tu “eliminar” interno)
+    
       $st = $pdo->prepare("UPDATE compras SET estado='ANULADA' WHERE id_compra=:c");
       $st->execute([':c' => $idCompra]);
 
-      // Movimiento espejo: si la compra fue ENTRADA, al anular debe ser SALIDA (restar stock)
+      
       $st = $pdo->prepare("
       INSERT INTO inventario_movimientos (fecha, tipo, ref_tabla, ref_id, id_usuario, nota)
       VALUES (NOW(), 'SALIDA_ANULA_COMPRA', 'compras', :rid, :u, :nota)
@@ -336,14 +333,14 @@ VALUES (NULL, :u, :prov, NOW(), 'REGISTRADA', :nota)
     $pdo->beginTransaction();
 
     try {
-      // 1) verificar existencia
+    
       $st = $pdo->prepare("SELECT id_compra FROM compras WHERE id_compra = :id");
       $st->execute([':id' => $idCompra]);
       if (!$st->fetch()) {
         throw new Exception('La compra no existe.');
       }
 
-      // 2) obtener movimientos ligados
+    
       $st = $pdo->prepare("
       SELECT id_mov
       FROM inventario_movimientos
@@ -354,17 +351,16 @@ VALUES (NULL, :u, :prov, NOW(), 'REGISTRADA', :nota)
 
       if ($movs) {
 
-        // generar placeholders solo con ?
         $placeholders = implode(',', array_fill(0, count($movs), '?'));
 
-        // borrar detalle inventario
+     
         $st = $pdo->prepare("
         DELETE FROM inventario_mov_detalle
         WHERE id_mov IN ($placeholders)
       ");
         $st->execute($movs);
 
-        // borrar movimientos
+     
         $st = $pdo->prepare("
         DELETE FROM inventario_movimientos
         WHERE id_mov IN ($placeholders)
@@ -372,14 +368,14 @@ VALUES (NULL, :u, :prov, NOW(), 'REGISTRADA', :nota)
         $st->execute($movs);
       }
 
-      // borrar detalle compra
+      
       $st = $pdo->prepare("
       DELETE FROM compras_detalle
       WHERE id_compra = :id
     ");
       $st->execute([':id' => $idCompra]);
 
-      // borrar compra
+     
       $st = $pdo->prepare("
       DELETE FROM compras
       WHERE id_compra = :id

@@ -3,7 +3,7 @@
 <div class="auth-center">
   <div class="auth-panel">
     <div class="auth-head text-center">
-      <!-- Opcional: solo el logo (sin texto) -->
+    
       <img class="auth-logo" src="assets/img/logo.jpeg" alt="Logo">
       <h2 class="auth-title">Iniciar sesión</h2>
       <p class="auth-sub">Acceso administrativo</p>

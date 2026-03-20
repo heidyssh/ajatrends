@@ -2,7 +2,7 @@
 if (session_status() === PHP_SESSION_NONE)
   session_start();
 $nombre = $_SESSION['user']['nombre'] ?? 'Admin';
-require_once __DIR__ . '/../../models/Agenda.php'; // si tu dashboard.php está en app/views/auth/
+require_once __DIR__ . '/../../models/Agenda.php'; 
 require_once __DIR__ . '/../../models/Sale.php';
 require_once __DIR__ . '/../../models/Report.php';
 require_once __DIR__ . '/../../config/database.php';
@@ -33,12 +33,10 @@ $lowStock = Report::lowStockProducts();
       <div class="hd d-flex align-items-center justify-content-between flex-wrap gap-3">
         <div>
           <div class="fw-bold" style="font-size:1.15rem;">Bienvenida, <?= htmlspecialchars($nombre) ?> ✨</div>
-          <small>Dashboard administrativo · Inventario · Compras · Ventas · Reportes</small>
+          <small>Gestión administrativa</small>
         </div>
 
         <div class="d-flex align-items-center gap-2 flex-wrap">
-          <span class="badge badge-soft">Paleta AJA</span>
-          <span class="badge badge-soft">Admin-only</span>
 
           <button class="btn btn-brand btn-sm rounded-pill px-3" type="button" data-bs-toggle="offcanvas"
             data-bs-target="#agendaDrawer" aria-controls="agendaDrawer">
@@ -77,7 +75,7 @@ $lowStock = Report::lowStockProducts();
     </div>
 
 
-    <!-- IZQUIERDA -->
+   
     <div class="cardx">
       <div class="hd">
         <div class="fw-bold">Accesos rápidos</div>
@@ -144,7 +142,7 @@ $lowStock = Report::lowStockProducts();
     aria-labelledby="agendaDrawerLabel">
     <div class="offcanvas-header">
       <div>
-        <h5 class="offcanvas-title mb-0" id="agendaDrawerLabel">Agenda AJA</h5>
+        <h5 class="offcanvas-title mb-0" id="agendaDrawerLabel">Agenda</h5>
         <small class="text-muted">Calendario · recordatorios</small>
       </div>
       <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
@@ -196,9 +194,9 @@ $lowStock = Report::lowStockProducts();
       </div>
 
       <div class="mt-3 d-grid">
-        <a class="btn btn-brand btn-sm" href="index.php?page=agenda">
-          <i class="bi bi-calendar-event me-1"></i> Ver agenda completa
-        </a>
+        <a class="btn btn-brand btn-sm" href="index.php?page=agenda&view=all">
+  <i class="bi bi-calendar-event me-1"></i> Ver agenda completa
+</a>
       </div>
     </div>
   </div>

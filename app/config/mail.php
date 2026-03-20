@@ -4,12 +4,12 @@ declare(strict_types=1);
 return [
   'enabled' => true,
 
-  // Gmail o Google Workspace
+
   'host' => 'smtp.gmail.com',
   'port' => 587,
   'secure' => 'tls',
 
-  // correo que enviará
+
   'username' => 'ajatrends.notificaciones@gmail.com',
   'password' => 'ktohbmevesnqhowp',
 
