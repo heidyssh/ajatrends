@@ -48,9 +48,9 @@ final class SaleController
       'isAdmin' => is_admin(),
     ];
     if (empty($_SESSION['sale_form_token'])) {
-  $_SESSION['sale_form_token'] = bin2hex(random_bytes(16));
-}
-$data['sale_form_token'] = $_SESSION['sale_form_token'];
+      $_SESSION['sale_form_token'] = bin2hex(random_bytes(16));
+    }
+    $data['sale_form_token'] = $_SESSION['sale_form_token'];
 
 
     $actionGet = (string) ($get['action'] ?? '');
@@ -116,6 +116,7 @@ $data['sale_form_token'] = $_SESSION['sale_form_token'];
         'nota' => (string) ($venta['nota'] ?? ''),
         'subtotal' => (float) ($venta['subtotal'] ?? 0),
         'descuento' => (float) ($venta['descuento'] ?? 0),
+        'costo_envio' => (float) ($venta['costo_envio'] ?? 0),
         'total' => (float) ($venta['total'] ?? 0),
         'items' => array_map(static function ($it) {
           return [
@@ -151,76 +152,84 @@ $data['sale_form_token'] = $_SESSION['sale_form_token'];
           'from' => (string) ($post['_from'] ?? $filters['from'] ?? ''),
           'to' => (string) ($post['_to'] ?? $filters['to'] ?? ''),
         ];
-if ($action === 'create') {
-  $tokenPost = (string) ($post['sale_form_token'] ?? '');
-  $tokenSession = (string) ($_SESSION['sale_form_token'] ?? '');
+        if ($action === 'create') {
+          $tokenPost = (string) ($post['sale_form_token'] ?? '');
+          $tokenSession = (string) ($_SESSION['sale_form_token'] ?? '');
 
-  if ($tokenPost === '' || $tokenSession === '' || !hash_equals($tokenSession, $tokenPost)) {
-    throw new Exception('La solicitud de venta es inválida o ya fue procesada.');
-  }
+          if ($tokenPost === '' || $tokenSession === '' || !hash_equals($tokenSession, $tokenPost)) {
+            throw new Exception('La solicitud de venta es inválida o ya fue procesada.');
+          }
 
-  unset($_SESSION['sale_form_token']);
-  $_SESSION['sale_form_token'] = bin2hex(random_bytes(16));
+          unset($_SESSION['sale_form_token']);
+          $_SESSION['sale_form_token'] = bin2hex(random_bytes(16));
+          
+          $descuento = (float) ($post['descuento'] ?? 0);
+          if ($descuento < 0) {
+            $descuento = 0;
+          }
+          $costoEnvio = (float) ($post['costo_envio'] ?? 0);
+          if ($costoEnvio < 0) {
+            $costoEnvio = 0;
+          }
 
-  $descuento = (float) ($post['descuento'] ?? 0);
+          $clienteTxt = trim((string) ($post['cliente_txt'] ?? ''));
+          $direccionTxt = trim((string) ($post['direccion_txt'] ?? ''));
+          $nota = trim((string) ($post['nota'] ?? ''));
 
-  $clienteTxt = trim((string) ($post['cliente_txt'] ?? ''));
-  $direccionTxt = trim((string) ($post['direccion_txt'] ?? ''));
-  $nota = trim((string) ($post['nota'] ?? ''));
+          if ($clienteTxt === '') {
+            $clienteTxt = 'CONSUMIDOR FINAL';
+          }
+          if ($direccionTxt === '') {
+            $direccionTxt = 'SIN DIRECCION';
+          }
 
-  if ($clienteTxt === '') {
-    $clienteTxt = 'CONSUMIDOR FINAL';
-  }
-  if ($direccionTxt === '') {
-    $direccionTxt = 'SIN DIRECCION';
-  }
+          [$idCliente, $idDireccion] = Sale::resolveClienteDireccion($clienteTxt, $direccionTxt);
 
-  [$idCliente, $idDireccion] = Sale::resolveClienteDireccion($clienteTxt, $direccionTxt);
+          $ids = $post['id_producto'] ?? [];
+          $cants = $post['cantidad'] ?? [];
+          $pus = $post['precio_unit'] ?? [];
 
-  $ids = $post['id_producto'] ?? [];
-  $cants = $post['cantidad'] ?? [];
-  $pus = $post['precio_unit'] ?? [];
+          $items = [];
+          if (is_array($ids) && is_array($cants)) {
+            $n = min(count($ids), count($cants));
+            for ($i = 0; $i < $n; $i++) {
+              $items[] = [
+                'id_producto' => (int) $ids[$i],
+                'cantidad' => (int) $cants[$i],
+                'precio_unit' => isset($pus[$i]) ? (float) $pus[$i] : 0,
+              ];
+            }
+          }
 
-  $items = [];
-  if (is_array($ids) && is_array($cants)) {
-    $n = min(count($ids), count($cants));
-    for ($i = 0; $i < $n; $i++) {
-      $items[] = [
-        'id_producto' => (int) $ids[$i],
-        'cantidad' => (int) $cants[$i],
-        'precio_unit' => isset($pus[$i]) ? (float) $pus[$i] : 0,
-      ];
-    }
-  }
+          $idVenta = Sale::createVenta(
+            $idUser,
+            $idCliente,
+            $idDireccion,
+            $descuento,
+            $costoEnvio,
+            $nota,
+            $clienteTxt,
+            $direccionTxt,
+            $items
+          );
 
-  $idVenta = Sale::createVenta(
-    $idUser,
-    $idCliente,
-    $idDireccion,
-    $descuento,
-    $nota,
-    $clienteTxt,
-    $direccionTxt,
-    $items
-  );
+          Notifier::notifyShared(
+            'sale_create',
+            'Ventas',
+            'Venta registrada',
+            'Se registró la venta #' . $idVenta . ' correctamente en el sistema.',
+            'ventas',
+            $idVenta,
+            [
+              'cliente' => $clienteTxt,
+              'direccion' => $direccionTxt,
+              'total' => $post['total'] ?? ''
+            ]
+          );
 
-  Notifier::notifyShared(
-    'sale_create',
-    'Ventas',
-    'Venta registrada',
-    'Se registró la venta #' . $idVenta . ' correctamente en el sistema.',
-    'ventas',
-    $idVenta,
-    [
-      'cliente' => $clienteTxt,
-      'direccion' => $direccionTxt,
-      'total' => $post['total'] ?? ''
-    ]
-  );
-
-  $_SESSION['flash_success'] = "Venta #$idVenta registrada. Stock actualizado.";
-  self::redirectToSales($filtersBack);
-}
+          $_SESSION['flash_success'] = "Venta #$idVenta registrada. Stock actualizado.";
+          self::redirectToSales($filtersBack);
+        }
 
         if ($action === 'update') {
           $idVenta = (int) ($post['id_venta'] ?? 0);
@@ -239,13 +248,13 @@ if ($action === 'create') {
 
           Sale::updateLibre($idVenta, $clienteTxt, $direccionTxt, $nota);
           Notifier::notifyShared(
-  'sale_update',
-  'Ventas',
-  'Venta actualizada',
-  'Se actualizó la venta #' . $idVenta . '.',
-  'ventas',
-  $idVenta
-);
+            'sale_update',
+            'Ventas',
+            'Venta actualizada',
+            'Se actualizó la venta #' . $idVenta . '.',
+            'ventas',
+            $idVenta
+          );
           $_SESSION['flash_success'] = "Venta #$idVenta actualizada.";
           self::redirectToSales($filtersBack);
         }
@@ -256,13 +265,13 @@ if ($action === 'create') {
             throw new Exception('ID inválido.');
           Sale::cancel($idVenta, $idUser, 'Venta anulada y stock devuelto');
           Notifier::notifyShared(
-  'sale_cancel',
-  'Ventas',
-  'Venta anulada',
-  'Se anuló la venta #' . $idVenta . ' y se devolvió stock.',
-  'ventas',
-  $idVenta
-);
+            'sale_cancel',
+            'Ventas',
+            'Venta anulada',
+            'Se anuló la venta #' . $idVenta . ' y se devolvió stock.',
+            'ventas',
+            $idVenta
+          );
           $_SESSION['flash_success'] = "Venta #$idVenta anulada. Stock devuelto.";
           self::redirectToSales($filters);
         }
@@ -272,13 +281,13 @@ if ($action === 'create') {
             throw new Exception('ID inválido.');
           Sale::complete($idVenta);
           Notifier::notifyShared(
-  'sale_complete',
-  'Ventas',
-  'Venta entregada',
-  'La venta #' . $idVenta . ' fue marcada como ENTREGADA.',
-  'ventas',
-  $idVenta
-);
+            'sale_complete',
+            'Ventas',
+            'Venta entregada',
+            'La venta #' . $idVenta . ' fue marcada como ENTREGADA.',
+            'ventas',
+            $idVenta
+          );
           $_SESSION['flash_success'] = "Venta #$idVenta marcada como ENTREGADA.";
           self::redirectToSales($filters);
         }
@@ -289,13 +298,13 @@ if ($action === 'create') {
             throw new Exception('ID inválido.');
           Sale::deleteVenta($idVenta);
           Notifier::notifyShared(
-  'sale_delete',
-  'Ventas',
-  'Venta eliminada',
-  'La venta #' . $idVenta . ' fue eliminada del sistema.',
-  'ventas',
-  $idVenta
-);
+            'sale_delete',
+            'Ventas',
+            'Venta eliminada',
+            'La venta #' . $idVenta . ' fue eliminada del sistema.',
+            'ventas',
+            $idVenta
+          );
           $_SESSION['flash_success'] = "Venta #$idVenta eliminada.";
           self::redirectToSales($filters);
         }

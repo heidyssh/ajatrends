@@ -41,7 +41,7 @@ Notifier::notifyShared(
     'modulo' => $post['modulo'] ?? 'General'
   ]
 );
-        $_SESSION['flash_success'] = 'Evento guardado ✅';
+        $_SESSION['flash_success'] = 'Evento guardado';
         header('Location: index.php?page=agenda&date=' . urlencode($date));
         exit;
       }
@@ -56,7 +56,7 @@ Notifier::notifyShared(
   'agenda_eventos',
   (int)($post['id_evento'] ?? 0)
 );
-        $_SESSION['flash_success'] = 'Evento actualizado ✅';
+        $_SESSION['flash_success'] = 'Evento actualizado';
         header('Location: index.php?page=agenda&date=' . urlencode($date));
         exit;
       }
@@ -71,7 +71,7 @@ Notifier::notifyShared(
   'agenda_eventos',
   (int)($post['id_evento'] ?? 0)
 );
-        $_SESSION['flash_success'] = 'Marcado como HECHO ✅';
+        $_SESSION['flash_success'] = 'Marcado como HECHO';
         header('Location: index.php?page=agenda&date=' . urlencode($date));
         exit;
       }

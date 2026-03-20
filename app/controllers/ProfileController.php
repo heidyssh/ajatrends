@@ -108,7 +108,7 @@ if ($action === 'change_password') {
   User::updatePassword($idUsuario, $hash);
 
   return [
-    'success' => 'Contraseña actualizada ✅',
+    'success' => 'Contraseña actualizada',
     'perfil' => Profile::get($idUsuario),
     'avatars' => Profile::listAvatars()
   ];
@@ -179,6 +179,6 @@ if ($action === 'change_password') {
       ? $perfil['foto_archivo']
       : ($perfil['avatar_archivo'] ?? 'assets/img/avatars/avatar1.jpg');
 
-    return ['success' => 'Perfil actualizado ✅'] + self::show();
+    return ['success' => 'Perfil actualizado'] + self::show();
   }
 }

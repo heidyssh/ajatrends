@@ -44,7 +44,7 @@ function money($n)
 ?>
 <div class="products-page page-fade sales-page">
 
-  
+
   <div class="cardx mb-4 module-hero">
     <div class="hd purchases-toolbar">
       <div class="toolbar-left">
@@ -117,9 +117,9 @@ function money($n)
 
 
   <div class="row g-3 mb-4">
-  <div class="col-12 col-md-6 col-xl-3">
-    <div class="cardx sales-kpi report-kpi">
-      <div class="bd">
+    <div class="col-12 col-md-6 col-xl-3">
+      <div class="cardx sales-kpi report-kpi">
+        <div class="bd">
           <div class="small text-muted">Total vendido (neto)</div>
           <div class="fw-bold" style="font-size:1.35rem;"><?= money($k['total'] ?? 0) ?></div>
           <div class="small text-muted">Ventas: <?= (int) ($k['ventas'] ?? 0) ?> · Ticket prom:
@@ -162,7 +162,7 @@ function money($n)
 
   </div>
 
-  
+
   <div class="cardx mb-4 sales-analytics">
     <div class="hd d-flex align-items-center justify-content-between">
       <div>
@@ -179,7 +179,7 @@ function money($n)
     <div class="bd pt-2 collapse show" id="salesAnalyticsCollapse">
       <div class="row g-3">
 
-      
+
         <div class="col-12 col-xl-6">
           <div class="sales-panel">
             <div class="sales-panel-hd">
@@ -218,7 +218,7 @@ function money($n)
           </div>
         </div>
 
-       
+
         <div class="col-12 col-xl-6">
           <div class="sales-panel">
             <div class="sales-panel-hd">
@@ -256,7 +256,7 @@ function money($n)
           </div>
         </div>
 
-       
+
         <div class="col-12">
           <div class="sales-panel">
             <div class="sales-panel-hd d-flex align-items-center justify-content-between">
@@ -420,32 +420,38 @@ function money($n)
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
 
-<form method="post" action="index.php?page=sales" id="frmVenta">
-  <input type="hidden" name="action" value="create">
-  <input type="hidden" name="sale_form_token" value="<?= h($sale_form_token ?? '') ?>">
-  <input type="hidden" name="_q" value="<?= h($q) ?>">
-  <input type="hidden" name="_estado" value="<?= h($estado) ?>">
-  <input type="hidden" name="_from" value="<?= h($from) ?>">
-  <input type="hidden" name="_to" value="<?= h($to) ?>">
+      <form method="post" action="index.php?page=sales" id="frmVenta">
+        <input type="hidden" name="action" value="create">
+        <input type="hidden" name="sale_form_token" value="<?= h($sale_form_token ?? '') ?>">
+        <input type="hidden" name="_q" value="<?= h($q) ?>">
+        <input type="hidden" name="_estado" value="<?= h($estado) ?>">
+        <input type="hidden" name="_from" value="<?= h($from) ?>">
+        <input type="hidden" name="_to" value="<?= h($to) ?>">
 
         <div class="modal-body">
           <div class="row g-3 mb-3">
 
             <div class="col-12 col-lg-4">
-              <label class="form-label small text-muted">Cliente (texto)</label>
+              <label class="form-label small text-muted">Cliente</label>
               <input type="text" class="form-control" name="cliente_txt" required
                 placeholder="Ej: María López / Pedido IG / Cliente X" />
             </div>
 
             <div class="col-12 col-lg-5">
-              <label class="form-label small text-muted">Dirección (texto)</label>
+              <label class="form-label small text-muted">Dirección (si aplica)</label>
               <input type="text" class="form-control" name="direccion_txt"
                 placeholder="Ej: Col. XYZ, La Ceiba · casa #12 · referencia..." />
             </div>
 
-            <div class="col-12 col-lg-3">
+            <div class="col-12 col-lg-2">
               <label class="form-label small text-muted">Descuento</label>
               <input type="number" step="0.01" min="0" class="form-control" name="descuento" id="inpDescuento"
+                value="0.00">
+            </div>
+
+            <div class="col-12 col-lg-2">
+              <label class="form-label small text-muted">Costo de envío</label>
+              <input type="number" step="0.01" min="0" class="form-control" name="costo_envio" id="inpEnvio"
                 value="0.00">
             </div>
 
@@ -512,6 +518,11 @@ function money($n)
                   <th></th>
                 </tr>
                 <tr>
+                  <th colspan="3" class="text-end">ENVÍO</th>
+                  <th class="text-end" id="lblEnvio">L. 0.00</th>
+                  <th></th>
+                </tr>
+                <tr>
                   <th colspan="3" class="text-end">TOTAL</th>
                   <th class="text-end" id="lblTotal">L. 0.00</th>
                   <th></th>
@@ -529,8 +540,8 @@ function money($n)
         <div class="modal-footer">
           <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancelar</button>
           <button class="btn btn-brand" type="submit" id="btnSubmitVenta">
-  <i class="bi bi-check2-circle me-1"></i> Guardar venta
-</button>
+            <i class="bi bi-check2-circle me-1"></i> Guardar venta
+          </button>
         </div>
       </form>
 
@@ -611,6 +622,10 @@ function money($n)
               <tr>
                 <th colspan="4" class="text-end">DESCUENTO</th>
                 <th class="text-end" id="viewDesc">L. 0.00</th>
+              </tr>
+              <tr>
+                <th colspan="4" class="text-end">ENVÍO</th>
+                <th class="text-end" id="viewEnvio">L. 0.00</th>
               </tr>
               <tr>
                 <th colspan="4" class="text-end">TOTAL</th>
@@ -719,8 +734,10 @@ function money($n)
     const tbody = document.querySelector('#tblItems tbody');
     const lblSub = document.getElementById('lblSub');
     const lblDesc = document.getElementById('lblDesc');
+    const lblEnvio = document.getElementById('lblEnvio');
     const lblTotal = document.getElementById('lblTotal');
     const inpDesc = document.getElementById('inpDescuento');
+    const inpEnvio = document.getElementById('inpEnvio');
 
     function money(n) { return 'L. ' + (Math.round((n + Number.EPSILON) * 100) / 100).toFixed(2); }
 
@@ -729,14 +746,19 @@ function money($n)
       tbody.querySelectorAll('tr[data-subtotal]').forEach(tr => {
         sub += parseFloat(tr.getAttribute('data-subtotal') || '0');
       });
+
       const desc = Math.max(0, parseFloat(inpDesc?.value || '0') || 0);
-      const tot = Math.max(0, sub - desc);
+      const envio = Math.max(0, parseFloat(inpEnvio?.value || '0') || 0);
+      const tot = Math.max(0, sub - desc + envio);
+
       lblSub.textContent = money(sub);
       lblDesc.textContent = money(desc);
+      if (lblEnvio) lblEnvio.textContent = money(envio);
       lblTotal.textContent = money(tot);
     }
 
     inpDesc?.addEventListener('input', recompute);
+    inpEnvio?.addEventListener('input', recompute);
 
     btn?.addEventListener('click', () => {
       const id = parseInt(sel.value || '0', 10);
@@ -928,6 +950,7 @@ function money($n)
 
     document.getElementById('viewSub').textContent = `L. ${Number(json.subtotal || 0).toFixed(2)}`;
     document.getElementById('viewDesc').textContent = `L. ${Number(json.descuento || 0).toFixed(2)}`;
+    document.getElementById('viewEnvio').textContent = `L. ${Number(json.costo_envio || 0).toFixed(2)}`;
     document.getElementById('viewTotal').textContent = `L. ${Number(json.total || 0).toFixed(2)}`;
 
     const meta = document.getElementById('viewMeta');
@@ -948,14 +971,14 @@ function money($n)
   }
 </script>
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-  const params = new URLSearchParams(window.location.search);
-  const viewId = params.get('view');
+  document.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    const viewId = params.get('view');
 
-  if (viewId) {
-    openViewVenta(viewId);
-  }
-});
+    if (viewId) {
+      openViewVenta(viewId);
+    }
+  });
 </script>
 <script>
   (function () {

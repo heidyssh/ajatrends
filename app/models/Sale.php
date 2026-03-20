@@ -45,6 +45,7 @@ final class Sale
     v.estado,
     v.subtotal,
     v.descuento,
+    v.costo_envio,
     v.total,
     v.nota,
     u.nombre AS usuario,
@@ -201,85 +202,86 @@ END AS referencia
     throw new Exception("No existe ningún usuario en la tabla usuarios. Creá al menos 1 usuario admin.");
   }
   public static function resolveClienteDireccion(string $clienteTxt, string $direccionTxt): array
-{
-  $clienteTxt = trim($clienteTxt);
-  $direccionTxt = trim($direccionTxt);
+  {
+    $clienteTxt = trim($clienteTxt);
+    $direccionTxt = trim($direccionTxt);
 
-  if ($clienteTxt === '') {
-    $clienteTxt = 'CONSUMIDOR FINAL';
-  }
-  if ($direccionTxt === '') {
-    $direccionTxt = 'SIN DIRECCION';
-  }
+    if ($clienteTxt === '') {
+      $clienteTxt = 'CONSUMIDOR FINAL';
+    }
+    if ($direccionTxt === '') {
+      $direccionTxt = 'SIN DIRECCION';
+    }
 
-  $pdo = db();
-  $pdo->beginTransaction();
+    $pdo = db();
+    $pdo->beginTransaction();
 
-  try {
-    // Buscar cliente por nombre exacto
-    $st = $pdo->prepare("
+    try {
+      // Buscar cliente por nombre exacto
+      $st = $pdo->prepare("
       SELECT id_cliente
       FROM clientes
       WHERE nombre = :nombre
       LIMIT 1
     ");
-    $st->execute([':nombre' => $clienteTxt]);
-    $row = $st->fetch();
+      $st->execute([':nombre' => $clienteTxt]);
+      $row = $st->fetch();
 
-    if ($row) {
-      $idCliente = (int) $row['id_cliente'];
-    } else {
-      $st = $pdo->prepare("
+      if ($row) {
+        $idCliente = (int) $row['id_cliente'];
+      } else {
+        $st = $pdo->prepare("
         INSERT INTO clientes (nombre, telefono, email)
         VALUES (:nombre, '', '')
       ");
-      $st->execute([':nombre' => $clienteTxt]);
-      $idCliente = (int) $pdo->lastInsertId();
-    }
+        $st->execute([':nombre' => $clienteTxt]);
+        $idCliente = (int) $pdo->lastInsertId();
+      }
 
-    // Buscar dirección de ese cliente
-    $st = $pdo->prepare("
+      // Buscar dirección de ese cliente
+      $st = $pdo->prepare("
       SELECT id_direccion
       FROM cliente_direcciones
       WHERE id_cliente = :id_cliente
         AND direccion_linea = :direccion
       LIMIT 1
     ");
-    $st->execute([
-      ':id_cliente' => $idCliente,
-      ':direccion' => $direccionTxt
-    ]);
-    $dir = $st->fetch();
+      $st->execute([
+        ':id_cliente' => $idCliente,
+        ':direccion' => $direccionTxt
+      ]);
+      $dir = $st->fetch();
 
-    if ($dir) {
-      $idDireccion = (int) $dir['id_direccion'];
-    } else {
-      $st = $pdo->prepare("
+      if ($dir) {
+        $idDireccion = (int) $dir['id_direccion'];
+      } else {
+        $st = $pdo->prepare("
         INSERT INTO cliente_direcciones
           (id_cliente, direccion_linea, ciudad, referencia, es_principal)
         VALUES
           (:id_cliente, :direccion, '', '', 1)
       ");
-      $st->execute([
-        ':id_cliente' => $idCliente,
-        ':direccion' => $direccionTxt
-      ]);
-      $idDireccion = (int) $pdo->lastInsertId();
-    }
+        $st->execute([
+          ':id_cliente' => $idCliente,
+          ':direccion' => $direccionTxt
+        ]);
+        $idDireccion = (int) $pdo->lastInsertId();
+      }
 
-    $pdo->commit();
-    return [$idCliente, $idDireccion];
-  } catch (Throwable $e) {
-    $pdo->rollBack();
-    throw $e;
+      $pdo->commit();
+      return [$idCliente, $idDireccion];
+    } catch (Throwable $e) {
+      $pdo->rollBack();
+      throw $e;
+    }
   }
-}
 
   public static function createVenta(
     int $idUsuario,
     int $idCliente,
     int $idDireccion,
     float $descuento,
+    float $costoEnvio,
     string $nota,
     string $clienteTxt,
     string $direccionTxt,
@@ -293,8 +295,12 @@ END AS referencia
       throw new Exception('Elegí una dirección del cliente.');
     if (!$items)
       throw new Exception('Agregá al menos 1 producto.');
-    if ($descuento < 0)
+    if ($descuento < 0) {
       $descuento = 0;
+    }
+    if ($costoEnvio < 0) {
+      $costoEnvio = 0;
+    }
 
     $pdo = db();
     $pdo->beginTransaction();
@@ -302,7 +308,7 @@ END AS referencia
     try {
       $uid = self::resolveUserId($pdo, $idUsuario);
 
-    
+
       $st = $pdo->prepare("SELECT id_cliente FROM clientes WHERE id_cliente=:c LIMIT 1");
       $st->execute([':c' => $idCliente]);
       if (!$st->fetch())
@@ -321,16 +327,16 @@ END AS referencia
           $subtotal += ($cant * $pu);
       }
 
-      $total = max(0, $subtotal - $descuento);
+      $total = max(0, $subtotal - $descuento + $costoEnvio);
       if (trim($nota) === '')
         $nota = 'Venta registrada';
 
-   
+
       $st = $pdo->prepare("
   INSERT INTO ventas
-    (id_usuario, id_cliente, id_direccion, fecha, estado, subtotal, descuento, total, nota, cliente_txt, direccion_txt)
+    (id_usuario, id_cliente, id_direccion, fecha, estado, subtotal, descuento, costo_envio, total, nota, cliente_txt, direccion_txt)
   VALUES
-    (:u, :c, :d, NOW(), 'PENDIENTE', :sub, :des, :tot, :nota, :ct, :dt)
+    (:u, :c, :d, NOW(), 'PENDIENTE', :sub, :des, :env, :tot, :nota, :ct, :dt)
 ");
       $st->execute([
         ':u' => $uid,
@@ -338,6 +344,7 @@ END AS referencia
         ':d' => $idDireccion,
         ':sub' => $subtotal,
         ':des' => $descuento,
+        ':env' => $costoEnvio,
         ':tot' => $total,
         ':nota' => $nota,
         ':ct' => $clienteTxt,
@@ -393,11 +400,11 @@ END AS referencia
           ':sub' => $sub,
         ]);
 
-    
+
         $cantMov = -abs($cantidad);
         $stockDespues = $stockAntes - $cantidad;
 
-        $cu = self::costoEstimado($idProducto); 
+        $cu = self::costoEstimado($idProducto);
 
         $stMovDet->execute([
           ':m' => $idMov,
@@ -409,7 +416,7 @@ END AS referencia
         ]);
       }
 
-     
+
       $st = $pdo->prepare("SELECT COUNT(*) n FROM ventas_detalle WHERE id_venta=:v");
       $st->execute([':v' => $idVenta]);
       if ((int) ($st->fetch()['n'] ?? 0) <= 0) {
@@ -455,11 +462,11 @@ END AS referencia
     try {
       $uid = self::resolveUserId($pdo, $idUsuario);
 
-      
+
       $st = $pdo->prepare("UPDATE ventas SET estado='ANULADA' WHERE id_venta=:v");
       $st->execute([':v' => $idVenta]);
 
-   
+
       $st = $pdo->prepare("
         INSERT INTO inventario_movimientos (fecha, tipo, ref_tabla, ref_id, id_usuario, nota)
         VALUES (NOW(), 'ENTRADA_ANULACION_VENTA', 'ventas', :rid, :u, :nota)
@@ -479,7 +486,7 @@ END AS referencia
         $cantidad = (int) $it['cantidad'];
 
         $stockAntes = self::stockActual($idProducto);
-        $stockDespues = $stockAntes + $cantidad; 
+        $stockDespues = $stockAntes + $cantidad;
 
         $cu = self::costoEstimado($idProducto);
 
@@ -500,62 +507,68 @@ END AS referencia
     }
   }
   public static function complete(int $idVenta): void
-{
-  if ($idVenta <= 0) throw new Exception('ID inválido.');
+  {
+    if ($idVenta <= 0)
+      throw new Exception('ID inválido.');
 
-  $venta = self::find($idVenta);
-  if (!$venta) throw new Exception('La venta no existe.');
-  if ((string)$venta['estado'] === 'ANULADA') throw new Exception('No podés completar una venta ANULADA.');
-  if ((string)$venta['estado'] === 'ENTREGADA') throw new Exception('Esta venta ya está ENTREGADA.');
+    $venta = self::find($idVenta);
+    if (!$venta)
+      throw new Exception('La venta no existe.');
+    if ((string) $venta['estado'] === 'ANULADA')
+      throw new Exception('No podés completar una venta ANULADA.');
+    if ((string) $venta['estado'] === 'ENTREGADA')
+      throw new Exception('Esta venta ya está ENTREGADA.');
 
-  $st = db()->prepare("UPDATE ventas SET estado='ENTREGADA' WHERE id_venta=:v LIMIT 1");
-  $st->execute([':v' => $idVenta]);
-}
-
-public static function deleteVenta(int $idVenta): void
-{
-  if ($idVenta <= 0) throw new Exception('ID inválido.');
-
-  $venta = self::find($idVenta);
-  if (!$venta) throw new Exception('La venta no existe.');
-
- 
-  if ((string)$venta['estado'] !== 'ANULADA') {
-    throw new Exception('Solo podés eliminar ventas ANULADAS.');
+    $st = db()->prepare("UPDATE ventas SET estado='ENTREGADA' WHERE id_venta=:v LIMIT 1");
+    $st->execute([':v' => $idVenta]);
   }
 
-  $pdo = db();
-  $pdo->beginTransaction();
-  try {
-   
-    $st = $pdo->prepare("SELECT id_mov FROM inventario_movimientos WHERE ref_tabla='ventas' AND ref_id=:v");
-    $st->execute([':v' => $idVenta]);
-    $movs = $st->fetchAll(PDO::FETCH_COLUMN);
+  public static function deleteVenta(int $idVenta): void
+  {
+    if ($idVenta <= 0)
+      throw new Exception('ID inválido.');
 
-    if ($movs) {
- 
-      $in = implode(',', array_fill(0, count($movs), '?'));
-      $stD = $pdo->prepare("DELETE FROM inventario_mov_detalle WHERE id_mov IN ($in)");
-      $stD->execute(array_map('intval', $movs));
+    $venta = self::find($idVenta);
+    if (!$venta)
+      throw new Exception('La venta no existe.');
 
-      $stM = $pdo->prepare("DELETE FROM inventario_movimientos WHERE id_mov IN ($in)");
-      $stM->execute(array_map('intval', $movs));
+
+    if ((string) $venta['estado'] !== 'ANULADA') {
+      throw new Exception('Solo podés eliminar ventas ANULADAS.');
     }
 
-   
-    $st = $pdo->prepare("DELETE FROM ventas_detalle WHERE id_venta=:v");
-    $st->execute([':v' => $idVenta]);
+    $pdo = db();
+    $pdo->beginTransaction();
+    try {
 
-   
-    $st = $pdo->prepare("DELETE FROM ventas WHERE id_venta=:v LIMIT 1");
-    $st->execute([':v' => $idVenta]);
+      $st = $pdo->prepare("SELECT id_mov FROM inventario_movimientos WHERE ref_tabla='ventas' AND ref_id=:v");
+      $st->execute([':v' => $idVenta]);
+      $movs = $st->fetchAll(PDO::FETCH_COLUMN);
 
-    $pdo->commit();
-  } catch (Throwable $e) {
-    $pdo->rollBack();
-    throw $e;
+      if ($movs) {
+
+        $in = implode(',', array_fill(0, count($movs), '?'));
+        $stD = $pdo->prepare("DELETE FROM inventario_mov_detalle WHERE id_mov IN ($in)");
+        $stD->execute(array_map('intval', $movs));
+
+        $stM = $pdo->prepare("DELETE FROM inventario_movimientos WHERE id_mov IN ($in)");
+        $stM->execute(array_map('intval', $movs));
+      }
+
+
+      $st = $pdo->prepare("DELETE FROM ventas_detalle WHERE id_venta=:v");
+      $st->execute([':v' => $idVenta]);
+
+
+      $st = $pdo->prepare("DELETE FROM ventas WHERE id_venta=:v LIMIT 1");
+      $st->execute([':v' => $idVenta]);
+
+      $pdo->commit();
+    } catch (Throwable $e) {
+      $pdo->rollBack();
+      throw $e;
+    }
   }
-}
 
 
 
@@ -637,7 +650,7 @@ public static function deleteVenta(int $idVenta): void
 
   public static function seriesDiaria(array $filters = [], int $days = 14): array
   {
-    
+
     $params = [];
     $from = trim((string) ($filters['from'] ?? ''));
     $to = trim((string) ($filters['to'] ?? ''));
@@ -697,7 +710,7 @@ public static function deleteVenta(int $idVenta): void
     $st->execute($params);
     $rows = $st->fetchAll();
 
-    
+
     foreach ($rows as &$r) {
       $ing = (float) $r['ingreso'];
       $cos = (float) $r['costo_est'];
