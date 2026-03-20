@@ -51,11 +51,12 @@ $currentMeta = $pageMeta[$page] ?? ['title' => 'AJA Trends', 'subtitle' => 'Pane
         <a class="auth-top-logo" href="index.php?page=login" title="Inicio">
           <img src="assets/img/logo.jpeg" alt="Logo">
           <span style="
-              font-weight:700;
-              font-size:1.15rem;
-              color:#ffffff;
-              letter-spacing:1px;
-              margin-left:8px;
+              font-weight:800;
+              font-size:1.2rem;
+              color:#fff;
+              letter-spacing:1.5px;
+              margin-left:10px;
+              text-shadow:0 1px 2px rgba(0,0,0,.2);
             ">
             AJA TRENDS
           </span>
